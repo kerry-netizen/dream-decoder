@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dream Decoder – Local</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 20px auto; }
+    textarea { width: 100%; min-height: 200px; }
+    label { display: block; margin-top: 12px; font-weight: 600; }
+    select, input[type="text"] { width: 100%; padding: 6px; box-sizing: border-box; }
+    button { margin-top: 16px; padding: 10px 18px; font-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Dream Decoder</h1>
+  <p>Paste your dream below and get a reflective analysis. (Local test build.)</p>
+
+  <form method="post">
+    <label>Dream title (optional)</label>
+    <input type="text" name="dream_title" />
+
+    <label>Your dream</label>
+    <textarea name="dream_text" maxlength="4000" required></textarea>
+
+    <label>How did you feel during the dream?</label>
+    <select name="felt_during">
+      <option value="">Select one (optional)</option>
+      <option>anxious</option>
+      <option>afraid</option>
+      <option>confused</option>
+      <option>curious</option>
+      <option>excited</option>
+      <option>peaceful</option>
+    </select>
+
+    <label>How did you feel after waking?</label>
+    <select name="felt_after">
+      <option value="">Select one (optional)</option>
+      <option>relieved</option>
+      <option>still anxious</option>
+      <option>sad</option>
+      <option>curious</option>
+      <option>refreshed</option>
+    </select>
+
+    <label>Anything in your life you think might be connected? (optional)</label>
+    <textarea name="life_context" maxlength="1000"></textarea>
+
+    <button type="submit">Decode my dream</button>
+  </form>
+</body>
+</html>

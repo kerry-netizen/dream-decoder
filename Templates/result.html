@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dream Decoder – Results</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 20px auto; line-height: 1.6; }
+    h1, h2, h3 { margin-top: 24px; }
+    .symbol {
+      margin-bottom: 14px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+    .meta {
+      color: #555;
+      font-size: 0.9em;
+    }
+    .banner {
+      padding: 8px 12px;
+      background: #eef6ff;
+      border-left: 4px solid #3c82f6;
+      margin: 18px 0;
+    }
+    a { text-decoration: none; color: #0366d6; }
+    a:hover { text-decoration: underline; }
+    .footer-links { margin-top: 30px; font-size: 0.9em; }
+    details { margin-top: 16px; }
+    details summary { cursor: pointer; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <h1>Dream Analysis</h1>
+
+  {% if title %}
+    <h2>{{ title }}</h2>
+  {% endif %}
+
+  {% if analysis.detected_keywords %}
+    <div class="banner">
+      <strong>Detected motifs:</strong>
+      {{ analysis.detected_keywords | join(", ") }}
+    </div>
+  {% endif %}
+
+  <!-- Interpretive Narrative first: main "hit" -->
+  {% if analysis.interpretive_narrative %}
+    <h3>Interpretive Narrative</h3>
+    <p>{{ analysis.interpretive_narrative }}</p>
+  {% endif %}
+
+  <!-- Everything else is drill-down -->
+
+  <details open>
+    <summary>Summary</summary>
+    <p>{{ analysis.summary }}</p>
+  </details>
+
+  <details>
+    <summary>Key Symbols &amp; Motifs</summary>
+    {% for s in analysis.key_symbols %}
+      <div class="symbol" title="Occurrences in this dream: {{ s.local_count }} | Across all dreams: {{ s.global_count }}">
+        <strong>{{ s.symbol }}</strong><br>
+        <span class="meta">{{ s.description }}</span><br>
+        <ul>
+          {% for m in s.possible_meanings %}
+            <li>{{ m }}</li>
+          {% endfor %}
+        </ul>
+        <small class="meta">
+          Confidence: {{ "%.0f"|format(s.confidence * 100) }}% &nbsp;|&nbsp;
+          Local count: {{ s.local_count }} &nbsp;|&nbsp;
+          Global count: {{ s.global_count }}
+        </small>
+      </div>
+    {% endfor %}
+  </details>
+
+  <details>
+    <summary>Emotional Landscape</summary>
+    <p><strong>Overall tone:</strong> {{ analysis.emotional_profile_tone }}</p>
+    <ul>
+      {% for e in analysis.emotional_profile_primary %}
+        <li>{{ e.name }} – {{ "%.0f"|format(e.intensity * 100) }}%</li>
+      {% endfor %}
+    </ul>
+  </details>
+
+  <details>
+    <summary>Narrative Pattern</summary>
+    <p><strong>{{ analysis.narrative_pattern.pattern_name }}</strong></p>
+    <p>{{ analysis.narrative_pattern.description }}</p>
+    <ul>
+      {% for t in analysis.narrative_pattern.related_themes %}
+        <li>{{ t }}</li>
+      {% endfor %}
+    </ul>
+  </details>
+
+  <details>
+    <summary>Reflection Prompts</summary>
+    <ul>
+      {% for q in analysis.reflection_prompts %}
+        <li>{{ q }}</li>
+      {% endfor %}
+    </ul>
+  </details>
+
+  <details>
+    <summary>Cautions</summary>
+    <ul>
+      {% for c in analysis.cautions %}
+        <li>{{ c }}</li>
+      {% endfor %}
+    </ul>
+  </details>
+
+  <div class="footer-links">
+    <a href="/">← Decode another dream</a> &nbsp;|&nbsp;
+    <a href="/history">Dream history</a>
+  </div>
+
+</body>
+</html>
