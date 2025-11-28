@@ -365,7 +365,14 @@ def analyze_dream(
     felt_during: str = "",
     felt_after: str = "",
     life_context: str = "",
+    mode: str = "standard",
 ) -> DreamAnalysis:
+    """
+    Core dream analysis call into the OpenAI model.
+
+    `mode` is kept for future use (different interpretive lenses), and is
+    included in the payload so the model can adapt once we expand the prompt.
+    """
     detected = detect_keywords(dream_text)
     candidate_symbols = extract_candidate_symbols(dream_text)
     global_symbol_stats = compute_symbol_stats_from_logs()
@@ -378,6 +385,7 @@ def analyze_dream(
         "life_context": life_context,
         "detected_keywords": detected,
         "candidate_symbols": candidate_symbols,
+        "mode": mode,
     }
 
     completion = client.chat.completions.create(
@@ -468,6 +476,7 @@ def index():
         felt_during = request.form.get("felt_during", "")
         felt_after = request.form.get("felt_after", "")
         life_context = request.form.get("life_context", "").strip()
+        mode = request.form.get("mode", "standard")
 
         analysis = analyze_dream(
             dream_text=dream_text,
@@ -475,6 +484,7 @@ def index():
             felt_during=felt_during,
             felt_after=felt_after,
             life_context=life_context,
+            mode=mode,
         )
 
         analysis_dict = {
@@ -504,6 +514,7 @@ def index():
             "reflection_prompts": analysis.reflection_prompts,
             "cautions": analysis.cautions,
             "detected_keywords": analysis.detected_keywords,
+            "mode": mode,
         }
 
         input_payload = {
@@ -512,6 +523,7 @@ def index():
             "felt_during": felt_during,
             "felt_after": felt_after,
             "life_context": life_context,
+            "mode": mode,
         }
         log_dream(input_payload, analysis_dict)
 
@@ -520,6 +532,7 @@ def index():
             title=title,
             dream_text=dream_text,
             analysis=analysis_dict,
+            mode=mode,
         )
 
     return render_template("index.html")
@@ -543,6 +556,7 @@ def history():
                 "title": inp.get("title", "(untitled)"),
                 "felt_during": inp.get("felt_during", ""),
                 "felt_after": inp.get("felt_after", ""),
+                "mode": inp.get("mode", "standard"),
             }
         )
 
@@ -566,12 +580,14 @@ def history_detail(idx: int):
 
     title = inp.get("title", "(untitled)")
     dream_text = inp.get("dream_text", "")
+    mode = inp.get("mode", analysis.get("mode", "standard"))
 
     return render_template(
         "result.html",
         title=title,
         dream_text=dream_text,
         analysis=analysis,
+        mode=mode,
     )
 
 

@@ -1,0 +1,216 @@
+/* Reset-ish */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.dd-body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+}
+
+/* Dark theme base */
+.dd-dark {
+  background: #0d0f12;
+  color: #e7eaf0;
+}
+
+/* App layout */
+.dd-app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+/* Header */
+.dd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.dd-logo {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: #c8d0db;
+}
+
+.dd-icon-button {
+  border: none;
+  background: transparent;
+  color: #c8d0db;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* Notice */
+.dd-notice {
+  font-size: 0.8rem;
+  color: #a5acb8;
+  background: #16191e;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 0.9rem;
+}
+
+/* Main */
+.dd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Cards */
+.dd-input-card,
+.dd-result-card {
+  background: #16191e;
+  border-radius: 18px;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Typography */
+.dd-title {
+  font-size: 1.2rem;
+  margin: 0 0 0.75rem;
+  color: #e7eaf0;
+}
+
+.dd-label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  color: #a5acb8;
+}
+
+/* Textarea */
+#dream-text {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #262a33;
+  background: #0f1216;
+  color: #e7eaf0;
+  padding: 0.75rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 150px;
+}
+
+#dream-text::placeholder {
+  color: #5a6270;
+}
+
+/* Mode bar */
+.dd-mode-bar {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.25rem;
+  margin: 0.25rem 0 0.75rem;
+  scrollbar-width: thin;
+}
+
+.dd-mode-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.dd-mode-bar::-webkit-scrollbar-thumb {
+  background: #262a33;
+  border-radius: 999px;
+}
+
+.dd-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #262a33;
+  background: #1c2027;
+  font-size: 0.8rem;
+  color: #c8d0db;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-height: 44px; /* thumb-friendly */
+}
+
+.dd-mode-chip--active {
+  border: none;
+  background: linear-gradient(135deg, #4d3f8a, #705bba);
+  color: #f5f7fb;
+}
+
+.dd-chip-icon {
+  font-size: 0.9rem;
+}
+
+/* Primary button */
+.dd-primary-button {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #4d3f8a, #705bba);
+  color: #f5f7fb;
+  cursor: pointer;
+}
+
+/* Result */
+.dd-result-header {
+  margin-bottom: 0.5rem;
+}
+
+.dd-result-title {
+  font-size: 0.95rem;
+  color: #c8d0db;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dd-dream-details {
+  margin: 0.35rem 0 0.75rem;
+  background: #12151a;
+  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+}
+
+.dd-dream-details > summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #c8d0db;
+}
+
+.dd-dream-details p {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: #a5acb8;
+}
+
+.dd-result-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #e7eaf0;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .dd-input-card,
+  .dd-result-card {
+    padding: 1.5rem 1.5rem;
+  }
+
+  .dd-title {
+    font-size: 1.35rem;
+  }
+}
