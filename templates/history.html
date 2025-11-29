@@ -15,9 +15,14 @@
     <!-- Top bar -->
     <header class="dd-header">
       <div class="dd-logo">Dream Decoder</div>
-      <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="Back to Dream Input">
-        ⬅
-      </a>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="Back to Dream Input">
+          ⬅
+        </a>
+        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
+          🌙
+        </button>
+      </div>
     </header>
 
     <main class="dd-main">
@@ -58,6 +63,8 @@
       </section>
     </main>
   </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
 </html>
