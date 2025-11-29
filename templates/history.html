@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dream History – Dream Decoder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body class="dd-body dd-dark">
+
+  <div class="dd-app">
+
+    <!-- Top bar -->
+    <header class="dd-header">
+      <div class="dd-logo">Dream Decoder</div>
+      <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="Back to Dream Input">
+        ⬅
+      </a>
+    </header>
+
+    <main class="dd-main">
+      <section class="dd-input-card">
+        <h1 class="dd-title">Dream History</h1>
+
+        {% if records and records|length > 0 %}
+          <p class="dd-label" style="margin-bottom: 0.75rem;">
+            These are dreams that have been logged on this server.
+          </p>
+
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for rec in records %}
+              <li style="margin-bottom: 0.75rem;">
+                <a href="{{ url_for('history_detail', idx=rec.idx) }}"
+                   style="text-decoration: none; color: #e7eaf0;">
+                  <div style="font-size: 0.95rem; font-weight: 500;">
+                    {{ rec.title }}
+                  </div>
+                  <div style="font-size: 0.8rem; color: #a5acb8;">
+                    {{ rec.timestamp }}
+                  </div>
+                  {% if rec.felt_during or rec.felt_after %}
+                    <div style="font-size: 0.8rem; color: #a5acb8; margin-top: 0.15rem;">
+                      During: {{ rec.felt_during or "—" }} |
+                      After: {{ rec.felt_after or "—" }}
+                    </div>
+                  {% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="dd-label">
+            No dreams have been logged yet.
+          </p>
+        {% endif %}
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>
