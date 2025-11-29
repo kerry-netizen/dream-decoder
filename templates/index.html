@@ -33,9 +33,7 @@
       <section class="dd-input-card">
         <h1 class="dd-title">Tell me what you remember.</h1>
 
-        <!-- *************** IMPORTANT: THIS IS THE FIX *************** -->
         <form id="dream-form" method="POST" action="{{ url_for('index') }}">
-        <!-- ********************************************************* -->
 
           <!-- Dream Text -->
           <label for="dream-text" class="dd-label">Your Dream</label>
@@ -47,7 +45,6 @@
 
           <!-- Mode Chips -->
           <div class="dd-mode-bar">
-
             <div class="dd-mode-chip dd-mode-chip--active" data-mode="standard">
               <span class="dd-chip-icon">🧭</span>
               <span>Standard</span>
@@ -82,13 +79,18 @@
               <span class="dd-chip-icon">🪶</span>
               <span>Poetic</span>
             </div>
-
           </div>
 
           <!-- Submit -->
           <button type="submit" class="dd-primary-button">
             Decode Dream →
           </button>
+
+          <!-- Loading indicator -->
+          <div id="loading-indicator">
+            <div class="dd-spinner"></div>
+            <span>Decoding your dream…</span>
+          </div>
 
         </form>
       </section>

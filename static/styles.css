@@ -203,6 +203,31 @@ body.dd-body {
   color: #e7eaf0;
 }
 
+/* Loading indicator */
+#loading-indicator {
+  display: none; /* shown by JS on submit */
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #c8d0db;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.dd-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(245, 247, 251, 0.2);
+  border-top-color: #f5f7fb;
+  animation: dd-spin 0.7s linear infinite;
+}
+
+@keyframes dd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Responsive */
 @media (min-width: 768px) {
   .dd-input-card,
