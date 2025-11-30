@@ -3,7 +3,7 @@ import os
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from flask import Flask, render_template, request, abort
 from openai import OpenAI
@@ -86,6 +86,75 @@ def compute_symbol_stats_from_logs() -> Dict[str, int]:
         for key in seen_in_this_dream:
             stats[key] = stats.get(key, 0) + 1
     return stats
+
+
+# ---------------------------
+# Load symbol lexicon
+# ---------------------------
+
+def load_symbol_lexicon() -> Dict[str, Dict[str, Any]]:
+    """
+    Load symbol_lexicon.json from the project directory.
+    Keys are lowercased.
+    """
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, "symbol_lexicon.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+        lex = {}
+        for k, v in raw.items():
+            lex[k.lower()] = v
+        return lex
+    except Exception:
+        return {}
+
+
+LEXICON = load_symbol_lexicon()
+
+
+def normalize_symbol_key(symbol: str) -> str:
+    """
+    Normalize a symbol for lexicon lookup:
+    - lowercase
+    - strip whitespace
+    - very naive singularization (strip trailing 's' if needed)
+    """
+    key = (symbol or "").strip().lower()
+    if not key:
+        return key
+    # Try full phrase first
+    return key
+
+
+def lookup_symbol_in_lexicon(symbol: str) -> Dict[str, Any]:
+    """
+    Try to find symbol in lexicon, with fallbacks:
+    - Exact phrase
+    - If phrase has adjectives (like 'black cat'), also try last word ('cat')
+    """
+    key = normalize_symbol_key(symbol)
+    if not key:
+        return {}
+    if key in LEXICON:
+        return LEXICON[key]
+
+    # Try last word for multi-word phrases
+    parts = key.split()
+    if len(parts) > 1:
+        last = parts[-1]
+        if last in LEXICON:
+            return LEXICON[last]
+
+    # Try stripping a plural 's' on last word
+    if len(parts) > 0 and parts[-1].endswith("s"):
+        singular = parts[-1][:-1]
+        if singular in LEXICON:
+            return LEXICON[singular]
+
+    return {}
 
 
 # ---------------------------
@@ -292,6 +361,8 @@ Important rules:
 - You will receive:
   - "detected_keywords": common dream motifs automatically found in the text.
   - "candidate_symbols": a list of phrases with counts that appear important.
+  - "lexicon_entries": structured notes from a dream symbol lexicon, including
+    themes and notes for some symbols.
   You MUST consider these when deciding which key symbols and narrative patterns
   to emphasize. Either include them as symbols or clearly take them into account
   in the narrative (internally).
@@ -316,7 +387,8 @@ You must produce TWO different layers:
 2) An INTERPRETIVE NARRATIVE (field: "interpretive_narrative")
    - 1–3 paragraphs.
    - Weave together the symbols, emotions, narrative pattern, detected_keywords,
-     candidate_symbols, and life_context into a coherent psychological story.
+     candidate_symbols, lexicon_entries, and life_context into a coherent
+     psychological story.
    - Use plain, accessible language.
    - Speak in the second person ("you") and use soft, tentative phrasing
      ("this may suggest...", "it could be that...", "one way to see this is...").
@@ -365,17 +437,26 @@ def analyze_dream(
     felt_during: str = "",
     felt_after: str = "",
     life_context: str = "",
-    mode: str = "standard",
 ) -> DreamAnalysis:
-    """
-    Core dream analysis call into the OpenAI model.
-
-    `mode` is kept for future use (different interpretive lenses), and is
-    included in the payload so the model can adapt once we expand the prompt.
-    """
     detected = detect_keywords(dream_text)
     candidate_symbols = extract_candidate_symbols(dream_text)
     global_symbol_stats = compute_symbol_stats_from_logs()
+
+    # Build lexicon context for candidate symbols
+    lex_entries = []
+    for cs in candidate_symbols:
+        phrase = cs.get("phrase", "")
+        info = lookup_symbol_in_lexicon(phrase)
+        if info:
+            lex_entries.append(
+                {
+                    "symbol": phrase,
+                    "themes": info.get("themes", []),
+                    "notes": info.get("notes", "")
+                }
+            )
+    # Keep it small to avoid bloating the prompt
+    lex_entries = lex_entries[:10]
 
     payload = {
         "dream_title": title,
@@ -385,7 +466,7 @@ def analyze_dream(
         "life_context": life_context,
         "detected_keywords": detected,
         "candidate_symbols": candidate_symbols,
-        "mode": mode,
+        "lexicon_entries": lex_entries,
     }
 
     completion = client.chat.completions.create(
@@ -476,7 +557,6 @@ def index():
         felt_during = request.form.get("felt_during", "")
         felt_after = request.form.get("felt_after", "")
         life_context = request.form.get("life_context", "").strip()
-        mode = request.form.get("mode", "standard")
 
         analysis = analyze_dream(
             dream_text=dream_text,
@@ -484,7 +564,6 @@ def index():
             felt_during=felt_during,
             felt_after=felt_after,
             life_context=life_context,
-            mode=mode,
         )
 
         analysis_dict = {
@@ -514,7 +593,6 @@ def index():
             "reflection_prompts": analysis.reflection_prompts,
             "cautions": analysis.cautions,
             "detected_keywords": analysis.detected_keywords,
-            "mode": mode,
         }
 
         input_payload = {
@@ -523,7 +601,6 @@ def index():
             "felt_during": felt_during,
             "felt_after": felt_after,
             "life_context": life_context,
-            "mode": mode,
         }
         log_dream(input_payload, analysis_dict)
 
@@ -532,7 +609,6 @@ def index():
             title=title,
             dream_text=dream_text,
             analysis=analysis_dict,
-            mode=mode,
         )
 
     return render_template("index.html")
@@ -556,7 +632,6 @@ def history():
                 "title": inp.get("title", "(untitled)"),
                 "felt_during": inp.get("felt_during", ""),
                 "felt_after": inp.get("felt_after", ""),
-                "mode": inp.get("mode", "standard"),
             }
         )
 
@@ -580,14 +655,12 @@ def history_detail(idx: int):
 
     title = inp.get("title", "(untitled)")
     dream_text = inp.get("dream_text", "")
-    mode = inp.get("mode", analysis.get("mode", "standard"))
 
     return render_template(
         "result.html",
         title=title,
         dream_text=dream_text,
         analysis=analysis,
-        mode=mode,
     )
 
 
