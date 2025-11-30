@@ -1,104 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8">
   <title>Dream Decoder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 20px auto; line-height: 1.6; }
+    h1 { margin-bottom: 8px; }
+    p { margin-top: 4px; }
+    label { display: block; margin-top: 14px; font-weight: 600; }
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    textarea { min-height: 160px; }
+    button {
+      margin-top: 18px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    a { text-decoration: none; color: #0366d6; }
+    a:hover { text-decoration: underline; }
+    .top-links { margin-bottom: 10px; font-size: 0.9em; }
+  </style>
 </head>
+<body>
 
-<body class="dd-body dd-dark">
-
-  <div class="dd-app">
-
-    <!-- Top bar -->
-    <header class="dd-header">
-      <div class="dd-logo">Dream Decoder</div>
-      <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
-        🌙
-      </button>
-    </header>
-
-    <!-- Device history notice -->
-    <section class="dd-notice">
-      <p>
-        <strong>Dream history is stored on this device only.</strong>
-        Clearing your browser data or switching devices will reset your saved dreams.
-      </p>
-    </section>
-
-    <!-- Main Input Card -->
-    <main class="dd-main">
-      <section class="dd-input-card">
-        <h1 class="dd-title">Tell me what you remember.</h1>
-
-        <form id="dream-form" method="POST" action="{{ url_for('index') }}">
-
-          <!-- Dream Text -->
-          <label for="dream-text" class="dd-label">Your Dream</label>
-          <textarea id="dream-text" name="dream_text" rows="6" required
-            placeholder="Type or paste your dream here…"></textarea>
-
-          <!-- Hidden mode input -->
-          <input type="hidden" id="mode-input" name="mode" value="standard" />
-
-          <!-- Mode Chips -->
-          <div class="dd-mode-bar">
-            <div class="dd-mode-chip dd-mode-chip--active" data-mode="standard">
-              <span class="dd-chip-icon">🧭</span>
-              <span>Standard</span>
-            </div>
-
-            <div class="dd-mode-chip" data-mode="symbolic">
-              <span class="dd-chip-icon">🜁</span>
-              <span>Symbolic</span>
-            </div>
-
-            <div class="dd-mode-chip" data-mode="psychological">
-              <span class="dd-chip-icon">🧠</span>
-              <span>Psychological</span>
-            </div>
-
-            <div class="dd-mode-chip" data-mode="narrative">
-              <span class="dd-chip-icon">📖</span>
-              <span>Narrative</span>
-            </div>
-
-            <div class="dd-mode-chip" data-mode="scientific">
-              <span class="dd-chip-icon">🔬</span>
-              <span>Scientific</span>
-            </div>
-
-            <div class="dd-mode-chip" data-mode="light">
-              <span class="dd-chip-icon">✨</span>
-              <span>Light</span>
-            </div>
-
-            <div class="dd-mode-chip" data-mode="poetic">
-              <span class="dd-chip-icon">🪶</span>
-              <span>Poetic</span>
-            </div>
-          </div>
-
-          <!-- Submit -->
-          <button type="submit" class="dd-primary-button">
-            Decode Dream →
-          </button>
-
-          <!-- Loading indicator -->
-          <div id="loading-indicator">
-            <div class="dd-spinner"></div>
-            <span>Decoding your dream…</span>
-          </div>
-
-        </form>
-      </section>
-    </main>
-
+  <h1>Dream Decoder</h1>
+  <div class="top-links">
+    <a href="/history">View dream history</a>
   </div>
+  <p>Paste a recent dream and get a reflective, narrative interpretation. Avoid real names or highly identifying details.</p>
 
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <form method="post">
+    <label for="dream_title">Dream title (optional)</label>
+    <input type="text" id="dream_title" name="dream_title" />
+
+    <label for="dream_text">Your dream</label>
+    <textarea id="dream_text" name="dream_text" maxlength="5000" required></textarea>
+
+    <label for="felt_during">How did you feel during the dream? (optional)</label>
+    <select id="felt_during" name="felt_during">
+      <option value="">Select one</option>
+      <option value="anxious">Anxious</option>
+      <option value="afraid">Afraid</option>
+      <option value="confused">Confused</option>
+      <option value="curious">Curious</option>
+      <option value="excited">Excited</option>
+      <option value="peaceful">Peaceful</option>
+      <option value="angry">Angry</option>
+      <option value="sad">Sad</option>
+    </select>
+
+    <label for="felt_after">How did you feel after waking? (optional)</label>
+    <select id="felt_after" name="felt_after">
+      <option value="">Select one</option>
+      <option value="relieved">Relieved</option>
+      <option value="still anxious">Still anxious</option>
+      <option value="tired">Tired</option>
+      <option value="refreshed">Refreshed</option>
+      <option value="thoughtful">Thoughtful</option>
+      <option value="unsettled">Unsettled</option>
+    </select>
+
+    <label for="life_context">Anything in your life you think might be connected? (optional)</label>
+    <textarea id="life_context" name="life_context" maxlength="1000"></textarea>
+
+    <button type="submit">Decode my dream</button>
+  </form>
 
 </body>
 </html>
