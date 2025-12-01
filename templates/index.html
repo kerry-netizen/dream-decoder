@@ -1,76 +1,86 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>Dream Decoder</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 20px auto; line-height: 1.6; }
-    h1 { margin-bottom: 8px; }
-    p { margin-top: 4px; }
-    label { display: block; margin-top: 14px; font-weight: 600; }
-    input[type="text"], select, textarea {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      font-family: inherit;
-      font-size: 14px;
-    }
-    textarea { min-height: 160px; }
-    button {
-      margin-top: 18px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    a { text-decoration: none; color: #0366d6; }
-    a:hover { text-decoration: underline; }
-    .top-links { margin-bottom: 10px; font-size: 0.9em; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
+<body class="dd-body dd-dark">
 
-  <h1>Dream Decoder</h1>
-  <div class="top-links">
-    <a href="/history">View dream history</a>
+  <div class="dd-app">
+
+    <!-- Top bar -->
+    <header class="dd-header">
+      <div class="dd-logo">Dream Decoder</div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('history') }}" class="dd-icon-button" aria-label="View Dream History">
+          🕒
+        </a>
+        <a href="{{ url_for('search') }}" class="dd-icon-button" aria-label="Search Dreams">
+          🔍
+        </a>
+        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
+          🌙
+        </button>
+      </div>
+    </header>
+
+    <main class="dd-main">
+      <section class="dd-input-card">
+        <h1 class="dd-title">Decode a Dream</h1>
+        <p class="dd-label" style="margin-bottom: 0.75rem;">
+          Paste a recent dream and get a reflective, narrative interpretation.
+          Avoid real names or highly identifying details.
+        </p>
+
+        <!-- FIXED: added action="{{ url_for('decode') }}" -->
+        <form method="post" action="{{ url_for('decode') }}">
+          <label for="dream_title" class="dd-label">Dream title (optional)</label>
+          <input type="text" id="dream_title" name="dream_title" class="dd-input" />
+
+          <label for="dream_text" class="dd-label">Your dream</label>
+          <textarea id="dream_text" name="dream_text" maxlength="5000" required class="dd-input dd-textarea"></textarea>
+
+          <label for="felt_during" class="dd-label">How did you feel during the dream? (optional)</label>
+          <select id="felt_during" name="felt_during" class="dd-input">
+            <option value="">Select one</option>
+            <option value="anxious">Anxious</option>
+            <option value="afraid">Afraid</option>
+            <option value="confused">Confused</option>
+            <option value="curious">Curious</option>
+            <option value="excited">Excited</option>
+            <option value="peaceful">Peaceful</option>
+            <option value="angry">Angry</option>
+            <option value="sad">Sad</option>
+          </select>
+
+          <label for="felt_after" class="dd-label">How did you feel after waking? (optional)</label>
+          <select id="felt_after" name="felt_after" class="dd-input">
+            <option value="">Select one</option>
+            <option value="relieved">Relieved</option>
+            <option value="still anxious">Still anxious</option>
+            <option value="tired">Tired</option>
+            <option value="refreshed">Refreshed</option>
+            <option value="thoughtful">Thoughtful</option>
+            <option value="unsettled">Unsettled</option>
+          </select>
+
+          <label for="life_context" class="dd-label">
+            Anything in your life you think might be connected? (optional)
+          </label>
+          <textarea id="life_context" name="life_context" maxlength="1000"
+                    class="dd-input dd-textarea"></textarea>
+
+          <button type="submit" class="dd-primary-button" style="margin-top: 1rem;">
+            Decode my dream
+          </button>
+        </form>
+      </section>
+    </main>
   </div>
-  <p>Paste a recent dream and get a reflective, narrative interpretation. Avoid real names or highly identifying details.</p>
 
-  <form method="post">
-    <label for="dream_title">Dream title (optional)</label>
-    <input type="text" id="dream_title" name="dream_title" />
-
-    <label for="dream_text">Your dream</label>
-    <textarea id="dream_text" name="dream_text" maxlength="5000" required></textarea>
-
-    <label for="felt_during">How did you feel during the dream? (optional)</label>
-    <select id="felt_during" name="felt_during">
-      <option value="">Select one</option>
-      <option value="anxious">Anxious</option>
-      <option value="afraid">Afraid</option>
-      <option value="confused">Confused</option>
-      <option value="curious">Curious</option>
-      <option value="excited">Excited</option>
-      <option value="peaceful">Peaceful</option>
-      <option value="angry">Angry</option>
-      <option value="sad">Sad</option>
-    </select>
-
-    <label for="felt_after">How did you feel after waking? (optional)</label>
-    <select id="felt_after" name="felt_after">
-      <option value="">Select one</option>
-      <option value="relieved">Relieved</option>
-      <option value="still anxious">Still anxious</option>
-      <option value="tired">Tired</option>
-      <option value="refreshed">Refreshed</option>
-      <option value="thoughtful">Thoughtful</option>
-      <option value="unsettled">Unsettled</option>
-    </select>
-
-    <label for="life_context">Anything in your life you think might be connected? (optional)</label>
-    <textarea id="life_context" name="life_context" maxlength="1000"></textarea>
-
-    <button type="submit">Decode my dream</button>
-  </form>
-
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>

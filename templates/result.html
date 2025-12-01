@@ -1,137 +1,350 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Dream Decoder – Results</title>
+  <title>Dream Decoder – Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 20px auto; line-height: 1.6; }
-    h1, h2, h3 { margin-top: 24px; }
-    .symbol {
-      margin-bottom: 14px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: #fafafa;
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 1.5rem;
+      background: #0b1020;
+      color: #f4f4f7;
+      line-height: 1.5;
     }
+
+    a {
+      color: #8ab4ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+    }
+
     .meta {
-      color: #555;
-      font-size: 0.9em;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 1rem;
     }
-    .banner {
-      padding: 8px 12px;
-      background: #eef6ff;
-      border-left: 4px solid #3c82f6;
-      margin: 18px 0;
+
+    .pill-row {
+      margin: 0.25rem 0 1rem;
     }
-    a { text-decoration: none; color: #0366d6; }
-    a:hover { text-decoration: underline; }
-    .footer-links { margin-top: 30px; font-size: 0.9em; }
-    details { margin-top: 16px; }
-    details summary { cursor: pointer; font-weight: 600; }
+
+    .pill {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      margin: 0.15rem 0.25rem 0.15rem 0;
+      border-radius: 999px;
+      background: #1b253b;
+      font-size: 0.8rem;
+      border: 1px solid #283552;
+    }
+
+    .card {
+      margin: 0.75rem 0;
+      padding: 0.85rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid #283552;
+      background: #111729;
+    }
+
+    details.card > summary {
+      cursor: pointer;
+      outline: none;
+      list-style: none;
+    }
+
+    details.card > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.card > summary::before {
+      content: "▶";
+      display: inline-block;
+      margin-right: 0.4rem;
+      font-size: 0.8rem;
+      transform-origin: center;
+      transition: transform 0.15s ease-out;
+      opacity: 0.8;
+    }
+
+    details[open].card > summary::before {
+      transform: rotate(90deg);
+    }
+
+    details.card > summary strong {
+      font-size: 0.95rem;
+    }
+
+    .card .body {
+      margin-top: 0.6rem;
+      font-size: 0.92rem;
+    }
+
+    .symbol-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .symbol-name {
+      font-weight: 600;
+    }
+
+    .symbol-meta {
+      font-size: 0.8rem;
+      opacity: 0.75;
+      white-space: nowrap;
+    }
+
+    .muted {
+      opacity: 0.8;
+      font-size: 0.9rem;
+    }
+
+    ul {
+      margin: 0.3rem 0 0.6rem 1.1rem;
+      padding: 0;
+    }
+
+    .footer-links {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid #283552;
+      background: #141d33;
+      margin-left: 0.3rem;
+      opacity: 0.9;
+    }
+
+    .inline-label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .arc-item {
+      font-size: 0.9rem;
+      margin: 0.1rem 0;
+    }
+
+    .arc-label {
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
 
   <h1>Dream Analysis</h1>
 
-  {% if title %}
-    <h2>{{ title }}</h2>
+  <div class="meta">
+    <span class="inline-label">Detected motifs:</span>
+    {% if analysis.detected_keywords and analysis.detected_keywords|length > 0 %}
+      {{ analysis.detected_keywords | join(', ') }}
+    {% else %}
+      none detected
+    {% endif %}
+  </div>
+
+  {% if analysis.micronarrative %}
+    <details class="card" open>
+      <summary><strong>Micronarrative</strong></summary>
+      <div class="body">
+        <p>{{ analysis.micronarrative }}</p>
+      </div>
+    </details>
   {% endif %}
 
-  {% if analysis.detected_keywords %}
-    <div class="banner">
-      <strong>Detected motifs:</strong>
-      {{ analysis.detected_keywords | join(", ") }}
+  {% if analysis.summary %}
+    <h2>Summary</h2>
+    <div class="card">
+      <div class="body">
+        <p>{{ analysis.summary }}</p>
+      </div>
     </div>
   {% endif %}
 
-  <!-- Interpretive Narrative first: main "hit" -->
+  {# ★ NEW: Interpretive Analysis section – this is the “big analysis” you were missing #}
   {% if analysis.interpretive_narrative %}
-    <h3>Interpretive Narrative</h3>
-    <p>{{ analysis.interpretive_narrative }}</p>
+    <details class="card" open>
+      <summary><strong>Interpretive Analysis</strong><span class="badge">Core insight</span></summary>
+      <div class="body">
+        {% for paragraph in analysis.interpretive_narrative.split('\n\n') %}
+          {% if paragraph.strip() %}
+            <p>{{ paragraph }}</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </details>
   {% endif %}
 
-  <!-- Everything else is drill-down -->
+  {# Key Symbols & Motifs #}
+  {% if analysis.key_symbols and analysis.key_symbols|length > 0 %}
+    <h2>Key Symbols &amp; Motifs</h2>
 
-  <details open>
-    <summary>Summary</summary>
-    <p>{{ analysis.summary }}</p>
-  </details>
+    {% for sym in analysis.key_symbols %}
+      <div class="card">
+        <div class="symbol-header">
+          <div class="symbol-name">{{ sym.symbol }}</div>
+          <div class="symbol-meta">
+            Confidence: {{ (sym.confidence * 100) | round(0) | int }}%
+            &nbsp;|&nbsp; Local: {{ sym.local_count }} &nbsp;|&nbsp; Global: {{ sym.global_count }}
+          </div>
+        </div>
+        {% if sym.description %}
+          <p class="muted">{{ sym.description }}</p>
+        {% endif %}
 
-  <details>
-    <summary>Key Symbols &amp; Motifs</summary>
-    {% for s in analysis.key_symbols %}
-      <div class="symbol" title="Occurrences in this dream: {{ s.local_count }} | Across all dreams: {{ s.global_count }}">
-        <strong>{{ s.symbol }}</strong><br>
-        <span class="meta">{{ s.description }}</span><br>
-        <ul>
-          {% for m in s.possible_meanings %}
-            <li>{{ m }}</li>
-          {% endfor %}
-        </ul>
-        <small class="meta">
-          Confidence: {{ "%.0f"|format(s.confidence * 100) }}% &nbsp;|&nbsp;
-          Local count: {{ s.local_count }} &nbsp;|&nbsp;
-          Global count: {{ s.global_count }}
-        </small>
+        {% if sym.possible_meanings and sym.possible_meanings|length > 0 %}
+          <ul>
+            {% for meaning in sym.possible_meanings %}
+              <li>{{ meaning }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     {% endfor %}
-  </details>
+  {% endif %}
 
-  <details>
-    <summary>Emotional Landscape</summary>
-    <p><strong>Overall tone:</strong> {{ analysis.emotional_profile_tone }}</p>
-    <ul>
-      {% for e in analysis.emotional_profile_primary %}
-        <li>{{ e.name }} – {{ "%.0f"|format(e.intensity * 100) }}%</li>
-      {% endfor %}
-    </ul>
+  {# Emotional Landscape #}
+  <h2>Emotional Landscape</h2>
+  <div class="card">
+    <div class="body">
+      <p>
+        <span class="inline-label">Overall tone:</span>
+        {{ analysis.emotional_profile_tone or 'unknown' }}
+      </p>
 
-    {% if analysis.emotional_arc %}
-      <h4>Emotional Arc</h4>
-      <ul>
+      {% if analysis.emotional_profile_primary and analysis.emotional_profile_primary|length > 0 %}
+        <div class="pill-row">
+          {% for emo in analysis.emotional_profile_primary %}
+            <span class="pill">
+              {{ emo.name }} – {{ (emo.intensity * 100) | round(0) | int }}%
+            </span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No primary emotional profile detected.</p>
+      {% endif %}
+
+      {% if analysis.emotional_arc and analysis.emotional_arc|length > 0 %}
+        <h3>Emotional Arc</h3>
         {% for st in analysis.emotional_arc %}
-          <li>
-            <strong>{{ st.stage|capitalize }}:</strong>
-            {{ st.emotion }} – {{ "%.0f"|format(st.intensity * 100) }}%
-          </li>
+          <div class="arc-item">
+            <span class="arc-label">
+              {{ st.stage | capitalize }}:
+            </span>
+            {{ st.emotion }} – {{ (st.intensity * 100) | round(0) | int }}%
+          </div>
         {% endfor %}
-      </ul>
-    {% endif %}
-  </details>
+      {% endif %}
+    </div>
+  </div>
 
-  <details>
-    <summary>Narrative Pattern</summary>
-    <p><strong>{{ analysis.narrative_pattern.pattern_name }}</strong></p>
-    <p>{{ analysis.narrative_pattern.description }}</p>
-    <ul>
-      {% for t in analysis.narrative_pattern.related_themes %}
-        <li>{{ t }}</li>
-      {% endfor %}
-    </ul>
-  </details>
+  {# Narrative Pattern #}
+  <h2>Narrative Pattern</h2>
+  <div class="card">
+    <div class="body">
+      {% if analysis.narrative_pattern.pattern_name %}
+        <p>
+          <strong>{{ analysis.narrative_pattern.pattern_name }}</strong>
+        </p>
+      {% endif %}
 
-  <details>
-    <summary>Reflection Prompts</summary>
-    <ul>
-      {% for q in analysis.reflection_prompts %}
-        <li>{{ q }}</li>
-      {% endfor %}
-    </ul>
-  </details>
+      {% if analysis.narrative_pattern.description %}
+        <p class="muted">{{ analysis.narrative_pattern.description }}</p>
+      {% endif %}
 
-  <details>
-    <summary>Cautions</summary>
-    <ul>
-      {% for c in analysis.cautions %}
-        <li>{{ c }}</li>
-      {% endfor %}
-    </ul>
-  </details>
+      {% if analysis.narrative_pattern.related_themes and analysis.narrative_pattern.related_themes|length > 0 %}
+        <div class="pill-row">
+          {% for theme in analysis.narrative_pattern.related_themes %}
+            <span class="pill">{{ theme }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Symbol Relationships (optional, but nice when present) #}
+  {% if analysis.symbol_relations and analysis.symbol_relations|length > 0 %}
+    <h2>Symbol Relationships</h2>
+    <div class="card">
+      <div class="body">
+        <ul>
+          {% for rel in analysis.symbol_relations %}
+            <li>
+              <strong>{{ rel.source }}</strong> → <strong>{{ rel.target }}</strong>:
+              {{ rel.relation }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Reflection Prompts #}
+  {% if analysis.reflection_prompts and analysis.reflection_prompts|length > 0 %}
+    <h2>Reflection Prompts</h2>
+    <div class="card">
+      <div class="body">
+        <ul>
+          {% for prompt in analysis.reflection_prompts %}
+            <li>{{ prompt }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Cautions #}
+  {% if analysis.cautions and analysis.cautions|length > 0 %}
+    <h2>Cautions</h2>
+    <div class="card">
+      <div class="body">
+        <ul>
+          {% for line in analysis.cautions %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
 
   <div class="footer-links">
-    <a href="/">← Decode another dream</a> &nbsp;|&nbsp;
-    <a href="/history">Dream history</a>
+    <a href="{{ url_for('index') }}">Decode another dream</a>
+    &nbsp;·&nbsp;
+    <a href="{{ url_for('history') }}">View dream history</a>
   </div>
 
 </body>
