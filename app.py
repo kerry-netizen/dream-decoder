@@ -120,13 +120,8 @@ def normalize_symbol_key(symbol: str) -> str:
     Normalize a symbol for lexicon lookup:
     - lowercase
     - strip whitespace
-    - very naive singularization (strip trailing 's' if needed)
     """
-    key = (symbol or "").strip().lower()
-    if not key:
-        return key
-    # Try full phrase first
-    return key
+    return (symbol or "").strip().lower()
 
 
 def lookup_symbol_in_lexicon(symbol: str) -> Dict[str, Any]:
@@ -134,6 +129,7 @@ def lookup_symbol_in_lexicon(symbol: str) -> Dict[str, Any]:
     Try to find symbol in lexicon, with fallbacks:
     - Exact phrase
     - If phrase has adjectives (like 'black cat'), also try last word ('cat')
+    - Simple singular form for plurals
     """
     key = normalize_symbol_key(symbol)
     if not key:
@@ -141,16 +137,21 @@ def lookup_symbol_in_lexicon(symbol: str) -> Dict[str, Any]:
     if key in LEXICON:
         return LEXICON[key]
 
-    # Try last word for multi-word phrases
     parts = key.split()
+    # Try last word for multi-word phrases
     if len(parts) > 1:
         last = parts[-1]
         if last in LEXICON:
             return LEXICON[last]
+        # singularize last word
+        if last.endswith("s"):
+            singular = last[:-1]
+            if singular in LEXICON:
+                return LEXICON[singular]
 
-    # Try stripping a plural 's' on last word
-    if len(parts) > 0 and parts[-1].endswith("s"):
-        singular = parts[-1][:-1]
+    # Single-word plural
+    if len(parts) == 1 and key.endswith("s"):
+        singular = key[:-1]
         if singular in LEXICON:
             return LEXICON[singular]
 
@@ -197,19 +198,28 @@ DREAM_KEYWORDS = [
 
 
 def detect_keywords(text: str) -> List[str]:
+    """
+    Detect keywords with proper word boundaries:
+    - Multi-word phrases: strict phrase boundaries
+    - Single words: strict word boundaries, with optional 's' plural
+    """
     lowered = text.lower()
     found: List[str] = []
+
     for kw in DREAM_KEYWORDS:
-        if kw in lowered:
+        if " " in kw:
+            # Multi-word phrase: exact phrase with non-word boundaries
+            pattern = r'(?<!\w)' + re.escape(kw) + r'(?!\w)'
+        else:
+            # Single word: match the word with optional plural 's'
+            # e.g., 'rat' should match 'rat' and 'rats' but not 'congratulations'
+            pattern = r'\b' + re.escape(kw) + r's?\b'
+
+        if re.search(pattern, lowered):
             found.append(kw)
-    # Deduplicate in order found
-    seen = set()
-    result: List[str] = []
-    for kw in found:
-        if kw not in seen:
-            seen.add(kw)
-            result.append(kw)
-    return result
+
+    # Deduplicate while preserving order
+    return list(dict.fromkeys(found))
 
 
 # ---------------------------
@@ -260,7 +270,13 @@ def extract_candidate_symbols(text: str) -> List[dict]:
     # Add keywords as phrases with counts
     lowered_text = text.lower()
     for kw in DREAM_KEYWORDS:
-        count = lowered_text.count(kw)
+        # Only count full phrase occurrences to avoid junk
+        if " " in kw:
+            pattern = r'(?<!\w)' + re.escape(kw) + r'(?!\w)'
+        else:
+            pattern = r'\b' + re.escape(kw) + r's?\b'
+        matches = re.findall(pattern, lowered_text)
+        count = len(matches)
         if count > 0:
             candidates[kw] = candidates.get(kw, 0) + count
 
