@@ -89,6 +89,99 @@ def compute_symbol_stats_from_logs() -> Dict[str, int]:
 
 
 # ---------------------------
+# Phase 5 helpers
+# ---------------------------
+
+def compute_motif_frequencies_from_logs(max_items: int = 12) -> List[Dict[str, Any]]:
+    """
+    Aggregate how often each detected keyword appears across all logged dreams.
+    Used for the motif frequency chart.
+    """
+    records = read_logs()
+    counts: Dict[str, int] = {}
+
+    for rec in records:
+        analysis = rec.get("analysis", {}) or {}
+        kws = analysis.get("detected_keywords") or []
+        for kw in kws:
+            label = (kw or "").strip()
+            if not label:
+                continue
+            counts[label] = counts.get(label, 0) + 1
+
+    items = [{"label": k, "count": v} for k, v in counts.items()]
+    items.sort(key=lambda x: x["count"], reverse=True)
+    return items[:max_items]
+
+
+def build_visual_context_for_analysis(analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Prepare front-end-friendly visual structures from the existing analysis dict.
+    - emotional_arc: list of {index, stage, emotion, intensity}
+    - symbol_graph: {nodes, edges}
+    """
+    # Emotional arc → simple sequence
+    raw_arc = analysis.get("emotional_arc") or []
+    emotional_arc = []
+    for idx, stage in enumerate(raw_arc):
+        emotional_arc.append(
+            {
+                "index": idx,
+                "stage": stage.get("stage") or f"Stage {idx + 1}",
+                "emotion": stage.get("emotion") or "",
+                "intensity": float(stage.get("intensity") or 0.0),
+            }
+        )
+
+    # Symbol graph nodes from key_symbols
+    key_symbols = analysis.get("key_symbols") or []
+    max_nodes = 10
+    nodes = []
+    for s in key_symbols[:max_nodes]:
+        sym_name = (s.get("symbol") or "").strip()
+        if not sym_name:
+            continue
+        # Use confidence as an "importance" proxy; you could also
+        # derive importance from local/global counts later.
+        importance = float(s.get("confidence", 0.0) or 0.0)
+        nodes.append(
+            {
+                "id": sym_name,
+                "label": sym_name,
+                "importance": importance,
+            }
+        )
+
+    node_ids = {n["id"] for n in nodes}
+
+    # Edges from symbol_relations
+    relations = analysis.get("symbol_relations") or []
+    edges = []
+    for rel in relations:
+        src = (rel.get("source") or "").strip()
+        tgt = (rel.get("target") or "").strip()
+        if not src or not tgt:
+            continue
+        if src not in node_ids or tgt not in node_ids:
+            continue
+        edges.append(
+            {
+                "source": src,
+                "target": tgt,
+                "relation": rel.get("relation") or "",
+            }
+        )
+
+    return {
+        "emotional_arc": emotional_arc,
+        "symbol_graph": {
+            "nodes": nodes,
+            "edges": edges,
+        },
+    }
+
+
+# ---------------------------
 # Load symbol lexicon
 # ---------------------------
 
@@ -779,11 +872,18 @@ def index():
         }
         log_dream(input_payload, analysis_dict)
 
+        # Phase 5: build visual context + motif stats
+        visual = build_visual_context_for_analysis(analysis_dict)
+        motif_stats = compute_motif_frequencies_from_logs()
+
         return render_template(
             "result.html",
             title=title,
             dream_text=dream_text,
             analysis=analysis_dict,
+            visual=visual,
+            motif_stats=motif_stats,
+            from_history=False,
         )
 
     return render_template("index.html")
@@ -826,16 +926,23 @@ def history_detail(idx: int):
 
     rec = records[idx]
     inp = rec.get("input", {})
-    analysis = rec.get("analysis", {})
+    analysis = rec.get("analysis", {}) or {}
 
     title = inp.get("title", "(untitled)")
     dream_text = inp.get("dream_text", "")
+
+    # Phase 5: build visual context + motif stats for historical view
+    visual = build_visual_context_for_analysis(analysis)
+    motif_stats = compute_motif_frequencies_from_logs()
 
     return render_template(
         "result.html",
         title=title,
         dream_text=dream_text,
         analysis=analysis,
+        visual=visual,
+        motif_stats=motif_stats,
+        from_history=True,
     )
 
 
