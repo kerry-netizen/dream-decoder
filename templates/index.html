@@ -35,8 +35,14 @@
           Avoid real names or highly identifying details.
         </p>
 
-        <!-- FIXED: added action="{{ url_for('decode') }}" -->
-        <form method="post" action="{{ url_for('decode') }}">
+        {% if error %}
+          <p class="dd-error" style="color:#ff8080; margin-bottom:0.75rem;">
+            {{ error }}
+          </p>
+        {% endif %}
+
+        <!-- Post directly to "/" which your app.py handles with methods=["GET", "POST"] -->
+        <form method="post" action="{{ url_for('index') }}">
           <label for="dream_title" class="dd-label">Dream title (optional)</label>
           <input type="text" id="dream_title" name="dream_title" class="dd-input" />
 

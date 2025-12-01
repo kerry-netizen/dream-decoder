@@ -195,7 +195,6 @@
     </div>
   {% endif %}
 
-  {# ★ NEW: Interpretive Analysis section – this is the “big analysis” you were missing #}
   {% if analysis.interpretive_narrative %}
     <details class="card" open>
       <summary><strong>Interpretive Analysis</strong><span class="badge">Core insight</span></summary>
@@ -209,7 +208,6 @@
     </details>
   {% endif %}
 
-  {# Key Symbols & Motifs #}
   {% if analysis.key_symbols and analysis.key_symbols|length > 0 %}
     <h2>Key Symbols &amp; Motifs</h2>
 
@@ -237,7 +235,6 @@
     {% endfor %}
   {% endif %}
 
-  {# Emotional Landscape #}
   <h2>Emotional Landscape</h2>
   <div class="card">
     <div class="body">
@@ -272,14 +269,11 @@
     </div>
   </div>
 
-  {# Narrative Pattern #}
   <h2>Narrative Pattern</h2>
   <div class="card">
     <div class="body">
       {% if analysis.narrative_pattern.pattern_name %}
-        <p>
-          <strong>{{ analysis.narrative_pattern.pattern_name }}</strong>
-        </p>
+        <p><strong>{{ analysis.narrative_pattern.pattern_name }}</strong></p>
       {% endif %}
 
       {% if analysis.narrative_pattern.description %}
@@ -296,7 +290,6 @@
     </div>
   </div>
 
-  {# Symbol Relationships (optional, but nice when present) #}
   {% if analysis.symbol_relations and analysis.symbol_relations|length > 0 %}
     <h2>Symbol Relationships</h2>
     <div class="card">
@@ -313,7 +306,6 @@
     </div>
   {% endif %}
 
-  {# Reflection Prompts #}
   {% if analysis.reflection_prompts and analysis.reflection_prompts|length > 0 %}
     <h2>Reflection Prompts</h2>
     <div class="card">
@@ -327,7 +319,6 @@
     </div>
   {% endif %}
 
-  {# Cautions #}
   {% if analysis.cautions and analysis.cautions|length > 0 %}
     <h2>Cautions</h2>
     <div class="card">
