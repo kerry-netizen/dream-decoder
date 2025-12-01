@@ -15,493 +15,189 @@ from openai import OpenAI
 app = Flask(__name__)
 client = OpenAI()  # Uses OPENAI_API_KEY from environment
 
+# ---------------------------
+# Dream keyword lexicon
+# ---------------------------
+
+# Simple symbol lexicon for now. In the future, this can be expanded or moved to JSON.
+DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
+    "cat": {
+        "themes": ["independence", "intuition", "feminine energy"],
+        "notes": "Cats can reflect autonomy, emotional distance, or a need for comfort on your own terms.",
+    },
+    "snake": {
+        "themes": ["threat", "transformation", "hidden fear"],
+        "notes": "Snakes often represent sources of anxiety, betrayal, or powerful but unsettling change.",
+    },
+    "water": {
+        "themes": ["emotion", "unconscious", "change"],
+        "notes": "Water usually points to emotional states, shifts, or things 'beneath the surface.'",
+    },
+    "river": {
+        "themes": ["life path", "flow", "transition"],
+        "notes": "Rivers often symbolize the direction and momentum of one’s life or a specific transition.",
+    },
+    "house": {
+        "themes": ["self", "identity", "boundaries"],
+        "notes": "Houses can mirror parts of the self, personal history, or different 'rooms' of your life.",
+    },
+    "door": {
+        "themes": ["opportunity", "barrier", "choice"],
+        "notes": "Doors often represent thresholds, decisions, or access to new phases of life.",
+    },
+    "car": {
+        "themes": ["agency", "direction", "control"],
+        "notes": "Cars can symbolize how in control you feel about where your life is heading.",
+    },
+    "falling": {
+        "themes": ["loss of control", "vulnerability"],
+        "notes": "Falling often appears when people feel overwhelmed or afraid of failure.",
+    },
+    "teeth": {
+        "themes": ["appearance", "communication", "power"],
+        "notes": "Teeth dreams can relate to self-image, aging, or fear about how you come across.",
+    },
+    "flight": {
+        "themes": ["freedom", "escape", "perspective"],
+        "notes": "Flying can express relief, new perspective, or desire to escape constraints.",
+    },
+    "school": {
+        "themes": ["evaluation", "learning", "performance anxiety"],
+        "notes": "School dreams often arise around feeling tested, judged, or unprepared.",
+    },
+    "baby": {
+        "themes": ["new beginnings", "vulnerability", "responsibility"],
+        "notes": "Babies can symbolize fragile new projects, relationships, or parts of yourself.",
+    },
+    "forest": {
+        "themes": ["unknown", "exploration", "overwhelm"],
+        "notes": "Forests may represent confusion or the need to explore something unclear in your life.",
+    },
+    "road": {
+        "themes": ["direction", "progress", "choices"],
+        "notes": "Roads often mirror the path you feel you’re on and how straightforward or confusing it seems.",
+    },
+    "bridge": {
+        "themes": ["transition", "connection", "risk"],
+        "notes": "Bridges show up when people are in-between stages or trying to connect parts of life.",
+    },
+    "storm": {
+        "themes": ["intense emotion", "conflict", "release"],
+        "notes": "Storms often track with emotional upheaval or brewing conflict.",
+    },
+    "animal": {
+        "themes": ["instinct", "drives", "natural self"],
+        "notes": "Animals can reflect instinctive reactions or unpolished feelings.",
+    },
+    "shadow": {
+        "themes": ["hidden self", "denied feelings"],
+        "notes": "Shadows point toward parts of yourself you’re not fully looking at yet.",
+    },
+    "mirror": {
+        "themes": ["self-reflection", "identity"],
+        "notes": "Mirrors tend to show up when you’re asking who you are or how you’re changing.",
+    },
+    "boat": {
+        "themes": ["navigation", "emotional journey"],
+        "notes": "Boats can mirror how you’re moving across emotional terrain or life changes.",
+    },
+    "milk": {
+        "themes": ["nurturing", "comfort", "need for care"],
+        "notes": "Milk often touches themes of nourishment, dependency, or needing support.",
+    },
+    "knight": {
+        "themes": ["authority", "judgment", "duty"],
+        "notes": "Knights can represent external or internal critics, rules, or expectations.",
+    },
+    "armor": {
+        "themes": ["defense", "protection", "emotional guard"],
+        "notes": "Armor often mirrors how defended or guarded you feel in waking life.",
+    },
+}
+
+# A simple list of keywords we might want to detect in dream text.
+DREAM_KEYWORDS: List[str] = sorted(
+    {
+        "cat",
+        "snake",
+        "water",
+        "river",
+        "ocean",
+        "lake",
+        "house",
+        "door",
+        "window",
+        "car",
+        "train",
+        "bus",
+        "falling",
+        "teeth",
+        "flight",
+        "flying",
+        "school",
+        "exam",
+        "baby",
+        "forest",
+        "road",
+        "bridge",
+        "storm",
+        "animal",
+        "shadow",
+        "mirror",
+        "boat",
+        "milk",
+        "knight",
+        "armor",
+    }
+)
+
 
 # ---------------------------
-# Logging config
+# Utility + data classes
 # ---------------------------
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# For production (Render), set DD_LOG_DIR in env, e.g. /var/data/logs
-# For local dev, it defaults to "<project>/logs"
-LOG_DIR = os.environ.get("DD_LOG_DIR", os.path.join(BASE_DIR, "logs"))
-LOG_FILE = os.path.join(LOG_DIR, "dreams.jsonl")
-
-
-def log_dream(input_payload: dict, analysis_payload: dict) -> None:
-    """Append a single dream record to logs/dreams.jsonl."""
-    try:
-        os.makedirs(LOG_DIR, exist_ok=True)
-        record = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "input": input_payload,
-            "analysis": analysis_payload,
-        }
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
-    except Exception:
-        # Logging should never break the app
-        pass
-
-
-def read_logs(max_entries: int = 1000) -> List[dict]:
+def load_logs_path() -> str:
     """
-    Read dream records from the JSONL log file.
-    Returns up to max_entries, oldest to newest.
+    Path to the local JSONL log file.
     """
-    records: List[dict] = []
-    if not os.path.exists(LOG_FILE):
-        return records
+    return os.environ.get("DREAM_LOG_PATH", "dream_logs.jsonl")
 
-    try:
-        with open(LOG_FILE, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    data = json.loads(line)
-                    records.append(data)
-                except json.JSONDecodeError:
-                    continue
-    except Exception:
+
+def read_logs() -> List[Dict[str, Any]]:
+    path = load_logs_path()
+    if not os.path.exists(path):
         return []
-
-    if len(records) > max_entries:
-        records = records[-max_entries:]
+    records = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+                records.append(obj)
+            except Exception:
+                continue
     return records
 
 
-def compute_symbol_stats_from_logs() -> Dict[str, int]:
-    """
-    Build a simple global frequency table for symbols across all logged dreams.
-    Key: symbol text (lowercased)
-    Value: number of dreams that included that symbol.
-    """
-    stats: Dict[str, int] = {}
-    records = read_logs()
-    for rec in records:
-        analysis = rec.get("analysis", {})
-        key_syms = analysis.get("key_symbols", [])
-        seen_in_this_dream = set()
-        for s in key_syms:
-            sym = (s.get("symbol") or "").strip()
-            if not sym:
-                continue
-            key = sym.lower()
-            if key not in seen_in_this_dream:
-                seen_in_this_dream.add(key)
-        for key in seen_in_this_dream:
-            stats[key] = stats.get(key, 0) + 1
-    return stats
-
-
-# ---------------------------
-# Phase 5 helpers (visuals)
-# ---------------------------
-
-def compute_motif_frequencies_from_logs(max_items: int = 12) -> List[Dict[str, Any]]:
-    """
-    Aggregate how often each detected keyword appears across all logged dreams.
-    Used for the motif frequency chart.
-    """
-    records = read_logs()
-    counts: Dict[str, int] = {}
-
-    for rec in records:
-        analysis = rec.get("analysis", {}) or {}
-        kws = analysis.get("detected_keywords") or []
-        for kw in kws:
-            label = (kw or "").strip()
-            if not label:
-                continue
-            counts[label] = counts.get(label, 0) + 1
-
-    items = [{"label": k, "count": v} for k, v in counts.items()]
-    items.sort(key=lambda x: x["count"], reverse=True)
-    return items[:max_items]
-
-
-def build_visual_context_for_analysis(analysis: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Prepare front-end-friendly visual structures from the existing analysis dict.
-    - emotional_arc: list of {index, stage, emotion, intensity}
-    - symbol_graph: {nodes, edges}
-    """
-    # Emotional arc → simple sequence
-    raw_arc = analysis.get("emotional_arc") or []
-    emotional_arc = []
-    for idx, stage in enumerate(raw_arc):
-        emotional_arc.append(
-            {
-                "index": idx,
-                "stage": stage.get("stage") or f"Stage {idx + 1}",
-                "emotion": stage.get("emotion") or "",
-                "intensity": float(stage.get("intensity") or 0.0),
-            }
-        )
-
-    # Symbol graph nodes from key_symbols
-    key_symbols = analysis.get("key_symbols") or []
-    max_nodes = 10
-    nodes = []
-    for s in key_symbols[:max_nodes]:
-        sym_name = (s.get("symbol") or "").strip()
-        if not sym_name:
-            continue
-        importance = float(s.get("confidence", 0.0) or 0.0)
-        nodes.append(
-            {
-                "id": sym_name,
-                "label": sym_name,
-                "importance": importance,
-            }
-        )
-
-    node_ids = {n["id"] for n in nodes}
-
-    # Edges from symbol_relations
-    relations = analysis.get("symbol_relations") or []
-    edges = []
-    for rel in relations:
-        src = (rel.get("source") or "").strip()
-        tgt = (rel.get("target") or "").strip()
-        if not src or not tgt:
-            continue
-        if src not in node_ids or tgt not in node_ids:
-            continue
-        edges.append(
-            {
-                "source": src,
-                "target": tgt,
-                "relation": rel.get("relation") or "",
-            }
-        )
-
-    return {
-        "emotional_arc": emotional_arc,
-        "symbol_graph": {
-            "nodes": nodes,
-            "edges": edges,
-        },
-    }
-
-
-# ---------------------------
-# Phase 6 helper: search across logs
-# ---------------------------
-
-def search_records(query: str, max_results: int = 100) -> List[dict]:
-    """
-    Naive full-text search across logged dreams.
-    Searches title, dream_text, life_context, detected_keywords,
-    key_symbols, summary, interpretive_narrative, narrative_pattern.
-    Returns newest-first matches with the same idx mapping as /history.
-    """
-    q = (query or "").strip()
-    if not q:
-        return []
-
-    q_low = q.lower()
-    records = read_logs()
-    records = list(reversed(records))  # newest first, same as /history
-
-    results: List[dict] = []
-    for idx, rec in enumerate(records):
-        inp = rec.get("input", {}) or {}
-        analysis = rec.get("analysis", {}) or {}
-
-        title = inp.get("title", "") or ""
-        dream_text = inp.get("dream_text", "") or ""
-        life_context = inp.get("life_context", "") or ""
-        felt_during = inp.get("felt_during", "") or ""
-        felt_after = inp.get("felt_after", "") or ""
-
-        detected_keywords = " ".join(analysis.get("detected_keywords") or [])
-        key_symbol_names = " ".join(
-            (s.get("symbol") or "") for s in (analysis.get("key_symbols") or [])
-        )
-        summary = analysis.get("summary", "") or ""
-        interpretive = analysis.get("interpretive_narrative", "") or ""
-        pattern_name = (analysis.get("narrative_pattern", {}) or {}).get("pattern_name", "") or ""
-
-        haystack = " ".join(
-            [
-                title,
-                dream_text,
-                life_context,
-                felt_during,
-                felt_after,
-                detected_keywords,
-                key_symbol_names,
-                summary,
-                interpretive,
-                pattern_name,
-            ]
-        ).lower()
-
-        if q_low in haystack:
-            snippet = dream_text[:180]
-            if len(dream_text) > 180:
-                snippet += "…"
-            results.append(
-                {
-                    "idx": idx,
-                    "timestamp": rec.get("timestamp", ""),
-                    "title": title or "(untitled)",
-                    "felt_during": felt_during,
-                    "felt_after": felt_after,
-                    "snippet": snippet,
-                }
-            )
-
-        if len(results) >= max_results:
-            break
-
-    return results
-
-
-# ---------------------------
-# Lexicon loading
-# ---------------------------
-
-def load_symbol_lexicon() -> Dict[str, Dict[str, Any]]:
-    """
-    Load symbol_lexicon.json from the project directory.
-    Keys are lowercased.
-    """
-    path = os.path.join(BASE_DIR, "symbol_lexicon.json")
-    if not os.path.exists(path):
-        return {}
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-        lex = {}
-        for k, v in raw.items():
-            lex[k.lower()] = v
-        return lex
-    except Exception:
-        return {}
-
-
-LEXICON = load_symbol_lexicon()
-
-
-def normalize_symbol_key(symbol: str) -> str:
-    """Normalize a symbol for lexicon lookup."""
-    return (symbol or "").strip().lower()
-
-
-def lookup_symbol_in_lexicon(symbol: str) -> Dict[str, Any]:
-    """
-    Try to find symbol in lexicon, with fallbacks:
-    - Exact phrase
-    - Last word of multi-word phrases
-    - Simple plural stripping
-    """
-    key = normalize_symbol_key(symbol)
-    if not key:
-        return {}
-    if key in LEXICON:
-        return LEXICON[key]
-
-    parts = key.split()
-    if len(parts) > 1:
-        last = parts[-1]
-        if last in LEXICON:
-            return LEXICON[last]
-        if last.endswith("s"):
-            singular = last[:-1]
-            if singular in LEXICON:
-                return LEXICON[singular]
-
-    if len(parts) == 1 and key.endswith("s"):
-        singular = key[:-1]
-        if singular in LEXICON:
-            return LEXICON[singular]
-
-    return {}
-
-
-# ---------------------------
-# Dream keyword parsing
-# ---------------------------
-
-DREAM_KEYWORDS = [
-    # Situations
-    "falling", "flying", "being chased", "chased", "running away", "lost",
-    "trapped", "late for", "missing a test", "exam", "test", "naked in public",
-    "embarrassed", "argument", "fight", "war", "accident", "car crash", "crash",
-    "drowning", "suffocating", "unable to speak", "cannot move", "paralyzed",
-    "searching", "looking for", "forgot something", "locked out",
-
-    # Body / health
-    "teeth falling out", "losing teeth", "hair falling out", "bleeding",
-    "injury", "sick", "illness", "pregnant", "pregnancy", "baby", "birth",
-    "dying", "death", "dead body", "funeral",
-
-    # Animals
-    "dog", "dogs", "cat", "cats", "black cat", "snake", "snakes",
-    "spider", "spiders", "rat", "rats", "wolf", "wolves", "bear",
-    "lion", "tiger", "bird", "birds", "fish", "shark", "insect", "bugs",
-
-    # People
-    "mother", "father", "mom", "dad", "child", "children",
-    "teacher", "boss", "stranger", "intruder",
-
-    # Places / vehicles
-    "house", "home", "childhood home", "school", "office", "hospital",
-    "church", "forest", "woods", "ocean", "sea", "lake", "river",
-    "mountain", "stairs", "elevator", "car", "bus", "train", "plane",
-    "airplane", "boat", "ship",
-
-    # Events / objects
-    "wedding", "marriage", "engagement", "party", "celebration",
-    "storm", "tornado", "earthquake", "fire", "flood", "explosion",
-    "weapon", "gun", "knife", "blood"
-]
-
-
-def detect_keywords(text: str) -> List[str]:
-    """
-    Detect keywords with proper word boundaries:
-    - Multi-word phrases: strict phrase boundaries
-    - Single words: strict word boundaries, with optional 's' plural
-    """
-    lowered = text.lower()
-    found: List[str] = []
-
-    for kw in DREAM_KEYWORDS:
-        if " " in kw:
-            pattern = r'(?<!\w)' + re.escape(kw) + r'(?!\w)'
-        else:
-            pattern = r'\b' + re.escape(kw) + r's?\b'
-
-        if re.search(pattern, lowered):
-            found.append(kw)
-
-    return list(dict.fromkeys(found))
-
-
-# ---------------------------
-# Candidate symbols, priority, etc.
-# ---------------------------
-
-STOPWORDS = {
-    "the", "a", "an", "and", "or", "but", "of", "to", "in", "on", "at",
-    "for", "from", "with", "without", "into", "out", "by", "about", "as",
-    "is", "was", "were", "are", "be", "been", "being", "that", "this",
-    "it", "its", "he", "she", "they", "them", "we", "us", "you", "i",
-    "my", "your", "our", "their", "his", "her"
-}
-
-COLORS = {
-    "black", "white", "red", "blue", "green", "yellow", "purple",
-    "orange", "pink", "brown", "gray", "grey", "gold", "silver"
-}
-
-
-def extract_candidate_symbols(text: str) -> List[dict]:
-    """
-    Very basic noun-ish phrase extractor.
-    """
-    tokens = re.findall(r"[A-Za-z']+", text)
-    lower = [t.lower() for t in tokens]
-    candidates: Dict[str, int] = {}
-
-    # Capitalized words (names, places)
-    for i, tok in enumerate(tokens):
-        lw = lower[i]
-        if lw in STOPWORDS or len(lw) <= 2:
-            continue
-        if tok[0].isupper() and i != 0:
-            candidates[tok] = candidates.get(tok, 0) + 1
-
-    # Color + noun bigrams
-    for i in range(len(tokens) - 1):
-        lw1, lw2 = lower[i], lower[i + 1]
-        if lw1 in COLORS and lw2 not in STOPWORDS:
-            phrase = f"{tokens[i]} {tokens[i + 1]}"
-            candidates[phrase] = candidates.get(phrase, 0) + 1
-
-    # Add keywords as phrases with counts
-    lowered_text = text.lower()
-    for kw in DREAM_KEYWORDS:
-        if " " in kw:
-            pattern = r'(?<!\w)' + re.escape(kw) + r'(?!\w)'
-        else:
-            pattern = r'\b' + re.escape(kw) + r's?\b'
-        matches = re.findall(pattern, lowered_text)
-        count = len(matches)
-        if count > 0:
-            candidates[kw] = candidates.get(kw, 0) + count
-
-    out = [{"phrase": k, "count": v} for k, v in candidates.items()]
-    out.sort(key=lambda x: x["count"], reverse=True)
-    return out[:15]
+def append_log(record: Dict[str, Any]) -> None:
+    path = load_logs_path()
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def count_occurrences(text: str, phrase: str) -> int:
     """
-    Slightly smarter occurrence count.
+    Count non-overlapping case-insensitive occurrences of phrase in text.
     """
     if not phrase:
         return 0
-    t = text.lower()
-    p = phrase.lower().strip()
-    if not p:
-        return 0
+    pattern = re.escape(phrase)
+    matches = re.findall(pattern, text, flags=re.IGNORECASE)
+    return len(matches)
 
-    exact = t.count(p)
-    if exact > 0:
-        return exact
-
-    words = p.split()
-    if len(words) > 1:
-        rev = " ".join(reversed(words))
-        rev_count = t.count(rev)
-        if rev_count > 0:
-            return rev_count
-
-    content_words = [w for w in words if w not in STOPWORDS]
-    if not content_words:
-        return 0
-    return sum(t.count(w) for w in content_words)
-
-
-def compute_priority_symbols(
-    candidate_symbols: List[dict],
-    global_symbol_stats: Dict[str, int],
-) -> List[dict]:
-    """
-    importance = local_count*2 + global_count*0.5 + lexicon_bonus
-    """
-    scored: List[dict] = []
-    for cs in candidate_symbols:
-        phrase = cs.get("phrase", "")
-        local_count = cs.get("count", 0)
-        key = phrase.lower()
-        global_count = global_symbol_stats.get(key, 0)
-        lex_info = lookup_symbol_in_lexicon(phrase)
-        lex_bonus = 1.0 if lex_info else 0.0
-        importance = local_count * 2.0 + global_count * 0.5 + lex_bonus
-        scored.append(
-            {
-                "symbol": phrase,
-                "local_count": local_count,
-                "global_count": global_count,
-                "importance": importance,
-                "has_lexicon": bool(lex_info),
-            }
-        )
-
-    scored.sort(key=lambda x: x["importance"], reverse=True)
-    return scored[:8]
-
-
-# ---------------------------
-# Data Models
-# ---------------------------
 
 @dataclass
 class SymbolMeaning:
@@ -509,12 +205,12 @@ class SymbolMeaning:
     description: str
     possible_meanings: List[str]
     confidence: float
-    local_count: int = 0
-    global_count: int = 0
+    local_count: int
+    global_count: int
 
 
 @dataclass
-class Emotion:
+class EmotionalProfile:
     name: str
     intensity: float
 
@@ -542,11 +238,11 @@ class NarrativePattern:
 
 @dataclass
 class DreamAnalysis:
-    summary: str
     micronarrative: str
+    summary: str
     interpretive_narrative: str
     key_symbols: List[SymbolMeaning]
-    emotional_profile_primary: List[Emotion]
+    emotional_profile_primary: List[EmotionalProfile]
     emotional_profile_tone: str
     emotional_arc: List[EmotionalStage]
     narrative_pattern: NarrativePattern
@@ -575,35 +271,28 @@ You will receive:
 - "candidate_symbols": phrases with counts that look symbolically important
 - "lexicon_entries": themes and notes for some symbols from a dream symbol lexicon
 - "priority_symbols": a short list of symbols with importance scores, based on:
-  - how often they appear in the dream
-  - how often similar symbols appear in other dreams
-  - whether they have lexicon entries
+    * frequency within this dream,
+    * known symbolic weight (from lexicon),
+    * and whether they overlap with detected_keywords
 
-Important rules:
+Your task is to build a structured, psychologically grounded interpretation.
 
-- Treat combined phrases ("black cat", "red car") as single symbols.
-- Pay special attention to priority_symbols when choosing your key_symbols and
-  narrative_focus. These are the best candidates for central symbolic meaning.
-- Pay attention to animals, colors, family members, and contact actions.
-- Integrate the provided life_context into symbol interpretation.
-- When symbols are culturally loaded (e.g. black cat, snake, storm, wedding),
-  give multiple possible meanings and note that meanings vary by culture and
-  personal experience.
-- When people appear in the dream, focus the symbol labels on their ROLE,
-  ACTIONS, or RELATIONSHIP to the dreamer (e.g. "warning figure", "authority
-  figure", "child asking for help") rather than on demographic traits.
+Principles:
+- Stay grounded in the dream's actual content and the life_context.
+- Make interpretations tentative: use language like "may suggest" or "could reflect".
+- Avoid superstition, fortune-telling, or claims about the future.
+- Tie symbols to emotional and situational themes, not fixed meanings.
+- Help the dreamer generate insight, not fear.
 
-You must output the following layers:
+OUTPUT STRUCTURE (high-level):
 
-1) "micronarrative"
-   - 2–6 sentences.
-   - A clean, simple retelling of the dream as a short story in the third person.
-   - Include the main events in order, in clear language.
+1) A BRIEF MICRONARRATIVE
+   - 2–4 sentences retelling the dream as a cohesive story, in the present tense.
+   - No interpretation yet, just a vivid, concise narrative.
 
-2) "summary"
-   - 3–6 sentences.
-   - A neutral recap of what happens, similar to micronarrative but more compact
-     and without extra interpretation.
+2) A SUMMARY
+   - 2–4 sentences summarizing the dream and its possible psychological meaning.
+   - This should be interpretive but gentle and non-dogmatic.
 
 3) An EMOTIONAL MODEL
    - "emotional_profile": primary emotions + overall tone.
@@ -621,45 +310,30 @@ You must output the following layers:
    - For each symbol, include description, possible meanings, and a confidence score.
 
 5) SYMBOL RELATIONSHIPS
-   - "symbol_relations": how key symbols relate to each other inside the dream.
-     Each relation is an object like:
-     {
-       "source": "Daisy",
-       "target": "dreamer",
-       "relation": "physically pushing you away from danger"
-     }
-   - Focus on important relational dynamics (chasing, protecting, warning,
-     blocking, observing, etc.).
+   - "symbol_relations": how key symbols relate to each other inside the dream narrative
+     (e.g. "cat" protects dreamer from "snake"; "storm" interrupts "wedding").
+   - This is where you connect symbols into mini-stories.
 
 6) NARRATIVE PATTERN
-   - "narrative_pattern": name and description of the main pattern.
-   - You may choose or blend patterns such as:
-     "pursuit/escape", "loss of control", "embarrassment/exposure",
-     "search/quest", "transformation", "invasion/boundary violation",
-     "caretaking/burden", "warning/intuition", "reconciliation", "reunion",
-     "decision/crossroads", "competition", "chaos/overwhelm",
-     "hidden room in the house", "crossing thresholds", "being unprepared",
-     "confrontation", "mythic encounter", "deep water/subconscious",
-     "apocalypse/internal upheaval".
+   - Pick a simple pattern label such as "confrontation", "escape", "search/quest",
+     "test/evaluation", "reunion", "loss/grief", or "transformation".
+   - Briefly explain why this pattern fits and what themes it often carries.
 
 7) INTERPRETIVE NARRATIVE
-   - "interpretive_narrative": 1–3 paragraphs.
-   - Weave together:
-     - micronarrative (the story)
-     - key_symbols
-     - emotional_profile
-     - emotional_arc
-     - narrative_pattern
-     - symbol_relations
-     - detected_keywords
-     - life_context
-   - Use plain, accessible language.
-   - Speak in the second person ("you") and use soft, tentative phrasing
-     ("this may suggest...", "it could be that...", "one way to see this is...").
-   - Do NOT sound mystical or prophetic.
-   - Do NOT diagnose or provide therapy. This is reflective, not clinical.
+   - 1–3 short paragraphs integrating symbols, emotions, and life_context into a
+     cohesive psychological interpretation.
+   - This is where you gently explore:
+       * what tensions the dreamer may be wrestling with,
+       * what conflicting desires or fears show up,
+       * and what this dream might be asking them to reflect on.
+   - Always present this as possibilities, not as fact.
 
-Output ONLY valid JSON with this structure:
+8) REFLECTION PROMPTS & CAUTIONS
+   - "reflection_prompts": 2–5 questions that the dreamer could journal about.
+   - "cautions": any notes about not over-pathologizing,
+     or about seeking professional help if the dream ties into severe distress.
+
+Final output must be VALID JSON with the following top-level keys:
 
 {
   "micronarrative": "...",
@@ -667,48 +341,160 @@ Output ONLY valid JSON with this structure:
   "interpretive_narrative": "...",
   "key_symbols": [
     {
-      "symbol": "...",
-      "description": "...",
-      "possible_meanings": ["..."],
+      "symbol": "string",
+      "description": "string",
+      "possible_meanings": ["string", ...],
       "confidence": 0.0
     }
   ],
   "emotional_profile": {
     "primary_emotions": [
-      {"name": "...", "intensity": 0.0}
+      {"name": "string", "intensity": 0.0}
     ],
-    "overall_tone": "..."
+    "overall_tone": "string"
   },
   "emotional_arc": [
-    {
-      "stage": "...",
-      "emotion": "...",
-      "intensity": 0.0
-    }
-  ],
-  "symbol_relations": [
-    {
-      "source": "...",
-      "target": "...",
-      "relation": "..."
-    }
+    {"stage": "beginning/middle/end", "emotion": "string", "intensity": 0.0}
   ],
   "narrative_pattern": {
-    "pattern_name": "...",
-    "description": "...",
-    "related_themes": ["..."]
+    "pattern_name": "string",
+    "description": "string",
+    "related_themes": ["string", ...]
   },
-  "reflection_prompts": ["..."],
-  "cautions": ["..."]
+  "symbol_relations": [
+    {"source": "string", "target": "string", "relation": "string"}
+  ],
+  "reflection_prompts": ["string", ...],
+  "cautions": ["string", ...]
 }
 
-Never output explanations outside the JSON object.
+Make sure all floats are between 0 and 1, and keep lists reasonably short (3–7 items).
 """
 
 
 # ---------------------------
-# Analyzer
+# Keyword detection + symbol helpers
 # ---------------------------
+
+
+def detect_keywords(text: str) -> List[str]:
+    """
+    Detect keywords with proper word boundaries:
+    - Multi-word phrases: strict phrase boundaries
+    - Single words: strict word boundaries, with optional 's' plural
+    """
+    lowered = text.lower()
+    found: List[str] = []
+
+    for kw in DREAM_KEYWORDS:
+        if " " in kw:
+            pattern = r'(?<!\w)' + re.escape(kw) + r'(?!\w)'
+        else:
+            pattern = r'\b' + re.escape(kw) + r's?\b'
+
+        if re.search(pattern, lowered):
+            found.append(kw)
+
+    return list(dict.fromkeys(found))
+
+
+def extract_candidate_symbols(text: str, max_phrases: int = 12) -> List[Dict[str, Any]]:
+    """
+    Very simple candidate symbol extractor:
+    - Look for 1–3 word noun-like phrases:
+      sequences with words and optional adjectives.
+    - Count frequency case-insensitively.
+    - Return top N by frequency, then length.
+    """
+    lowered = text.lower()
+
+    # Tokenize to words only
+    tokens = re.findall(r"[a-zA-Z']+", lowered)
+    phrases: Dict[str, int] = {}
+
+    # Build 1–3 word sequences
+    for i in range(len(tokens)):
+        for length in (1, 2, 3):
+            if i + length > len(tokens):
+                continue
+            phrase = " ".join(tokens[i : i + length])
+            if len(phrase) < 3:
+                continue
+            phrases[phrase] = phrases.get(phrase, 0) + 1
+
+    items = [{"phrase": p, "count": c} for p, c in phrases.items()]
+    items.sort(key=lambda x: (-x["count"], -len(x["phrase"])))
+    return items[:max_phrases]
+
+
+def lookup_symbol_in_lexicon(symbol: str) -> Dict[str, Any]:
+    """
+    Look up a symbol (case-insensitive) in the lexicon.
+    If not found, return {}.
+    """
+    key = symbol.lower().strip()
+    return DREAM_SYMBOL_LEXICON.get(key, {})
+
+
+def compute_symbol_stats_from_logs() -> Dict[str, int]:
+    """
+    Build a global frequency table of symbols from past dream logs.
+    """
+    records = read_logs()
+    counts: Dict[str, int] = {}
+
+    for rec in records:
+        analysis = rec.get("analysis", {})
+        key_syms = analysis.get("key_symbols", [])
+        for sym in key_syms:
+            label = sym.get("symbol", "").lower().strip()
+            if not label:
+                continue
+            counts[label] = counts.get(label, 0) + 1
+
+    return counts
+
+
+def compute_priority_symbols(
+    candidate_symbols: List[Dict[str, Any]],
+    global_symbol_stats: Dict[str, int],
+    max_items: int = 8,
+) -> List[Dict[str, Any]]:
+    """
+    Decide which symbols to treat as highest priority for interpretation.
+    Score based on:
+    - local frequency
+    - presence in lexicon
+    - global dream frequency
+    """
+    scored = []
+    for cs in candidate_symbols:
+        phrase = cs.get("phrase", "")
+        local_count = cs.get("count", 0)
+        info = lookup_symbol_in_lexicon(phrase)
+        in_lexicon = 1 if info else 0
+        global_count = global_symbol_stats.get(phrase.lower(), 0)
+
+        score = local_count * 2 + in_lexicon * 3 + min(global_count, 5)
+        scored.append(
+            {
+                "symbol": phrase,
+                "local_count": local_count,
+                "global_count": global_count,
+                "in_lexicon": bool(in_lexicon),
+                "score": score,
+                "lexicon_themes": info.get("themes", []),
+            }
+        )
+
+    scored.sort(key=lambda x: x["score"], reverse=True)
+    return scored[:max_items]
+
+
+# ---------------------------
+# Core analysis function
+# ---------------------------
+
 
 def analyze_dream(
     dream_text: str,
@@ -770,12 +556,12 @@ def analyze_dream(
             "key_symbols": [],
             "emotional_profile": {"primary_emotions": [], "overall_tone": "unknown"},
             "emotional_arc": [],
-            "symbol_relations": [],
             "narrative_pattern": {
                 "pattern_name": "Unknown",
                 "description": "",
                 "related_themes": [],
             },
+            "symbol_relations": [],
             "reflection_prompts": [],
             "cautions": ["Model output could not be parsed."],
         }
@@ -797,31 +583,33 @@ def analyze_dream(
             )
         )
 
-    emo_block = data.get("emotional_profile", {})
-    emotions: List[Emotion] = []
-    for e in emo_block.get("primary_emotions", []):
-        emotions.append(
-            Emotion(
-                name=e.get("name", "") or "",
-                intensity=float(e.get("intensity", 0.0) or 0.0),
-            )
+    emotional_profile_data = data.get("emotional_profile", {}) or {}
+    primary_emotions_list = emotional_profile_data.get("primary_emotions", []) or []
+    emotional_profile_primary = []
+    for e in primary_emotions_list:
+        name = e.get("name", "") or ""
+        intensity = float(e.get("intensity", 0.0) or 0.0)
+        emotional_profile_primary.append(EmotionalProfile(name=name, intensity=intensity))
+
+    emotional_arc_data = []
+    for st in data.get("emotional_arc", []):
+        stage = st.get("stage", "") or ""
+        emotion = st.get("emotion", "") or ""
+        intensity = float(st.get("intensity", 0.0) or 0.0)
+        emotional_arc_data.append(
+            EmotionalStage(stage=stage, emotion=emotion, intensity=intensity)
         )
 
-    arc_block = data.get("emotional_arc", []) or []
-    emotional_arc: List[EmotionalStage] = []
-    for stage in arc_block:
-        emotional_arc.append(
-            EmotionalStage(
-                stage=stage.get("stage", "") or "",
-                emotion=stage.get("emotion", "") or "",
-                intensity=float(stage.get("intensity", 0.0) or 0.0),
-            )
-        )
+    narrative_pattern_data = data.get("narrative_pattern", {}) or {}
+    narrative_pattern = NarrativePattern(
+        pattern_name=narrative_pattern_data.get("pattern_name", "") or "",
+        description=narrative_pattern_data.get("description", "") or "",
+        related_themes=narrative_pattern_data.get("related_themes", []) or [],
+    )
 
-    rel_block = data.get("symbol_relations", []) or []
-    symbol_relations: List[SymbolRelation] = []
-    for rel in rel_block:
-        symbol_relations.append(
+    symbol_relations_data = []
+    for rel in data.get("symbol_relations", []):
+        symbol_relations_data.append(
             SymbolRelation(
                 source=rel.get("source", "") or "",
                 target=rel.get("target", "") or "",
@@ -829,23 +617,17 @@ def analyze_dream(
             )
         )
 
-    pattern_raw = data.get("narrative_pattern", {})
-    narrative = NarrativePattern(
-        pattern_name=pattern_raw.get("pattern_name", "") or "",
-        description=pattern_raw.get("description", "") or "",
-        related_themes=pattern_raw.get("related_themes", []) or [],
-    )
-
     return DreamAnalysis(
-        summary=data.get("summary", "") or "",
         micronarrative=data.get("micronarrative", "") or "",
+        summary=data.get("summary", "") or "",
         interpretive_narrative=data.get("interpretive_narrative", "") or "",
         key_symbols=key_symbols,
-        emotional_profile_primary=emotions,
-        emotional_profile_tone=emo_block.get("overall_tone", "") or "",
-        emotional_arc=emotional_arc,
-        narrative_pattern=narrative,
-        symbol_relations=symbol_relations,
+        emotional_profile_primary=emotional_profile_primary,
+        emotional_profile_tone=emotional_profile_data.get("overall_tone", "unknown")
+        or "unknown",
+        emotional_arc=emotional_arc_data,
+        narrative_pattern=narrative_pattern,
+        symbol_relations=symbol_relations_data,
         reflection_prompts=data.get("reflection_prompts", []) or [],
         cautions=data.get("cautions", []) or [],
         detected_keywords=detected,
@@ -853,111 +635,325 @@ def analyze_dream(
 
 
 # ---------------------------
+# Visual helpers for the UI
+# ---------------------------
+
+
+def build_emotion_bars(primary_emotions: List[EmotionalProfile]) -> List[Dict[str, Any]]:
+    """
+    Prepare data for bar visualization of primary emotions.
+    """
+    return [
+        {"name": e.name, "intensity": e.intensity}
+        for e in primary_emotions
+        if e.name
+    ]
+
+
+def build_emotional_arc_timeline(
+    emotional_arc: List[EmotionalStage],
+) -> List[Dict[str, Any]]:
+    """
+    Convert emotional arc into a simple timeline structure.
+    """
+    timeline = []
+    for idx, stage in enumerate(emotional_arc):
+        timeline.append(
+            {
+                "index": idx,
+                "stage": stage.stage,
+                "emotion": stage.emotion,
+                "intensity": stage.intensity,
+            }
+        )
+    return timeline
+
+
+def build_symbol_graph(
+    key_symbols: List[SymbolMeaning],
+    relations: List[SymbolRelation],
+) -> Dict[str, Any]:
+    """
+    Build a simple graph structure of symbols and their relations.
+    """
+    nodes = []
+    for s in key_symbols:
+        nodes.append(
+            {
+                "id": s.symbol,
+                "label": s.symbol,
+                "weight": s.local_count + s.global_count,
+            }
+        )
+
+    edges = []
+    for r in relations:
+        if not r.source or not r.target:
+            continue
+        edges.append(
+            {
+                "source": r.source,
+                "target": r.target,
+                "relation": r.relation,
+            }
+        )
+
+    return {"nodes": nodes, "edges": edges}
+
+
+# ---------------------------
+# Search / history helpers
+# ---------------------------
+
+
+def search_logs(query: str) -> List[Dict[str, Any]]:
+    """
+    Very simple text search across logged dreams.
+    Searches title, dream_text, life_context, detected_keywords,
+    key_symbols, summary, interpretive_narrative, narrative_pattern.
+    Returns newest-first matches with the same idx mapping as /history.
+    """
+    q = (query or "").strip()
+    if not q:
+        return []
+
+    q_low = q.lower()
+    records = read_logs()
+    records = list(reversed(records))  # newest first
+
+    results = []
+    for idx, rec in enumerate(records):
+        inp = rec.get("input", {})
+        analysis = rec.get("analysis", {})
+
+        haystack_parts = [
+            inp.get("title", ""),
+            inp.get("dream_text", ""),
+            inp.get("life_context", ""),
+            " ".join(inp.get("detected_keywords", [])),
+            " ".join([s.get("symbol", "") for s in analysis.get("key_symbols", [])]),
+            analysis.get("summary", ""),
+            analysis.get("interpretive_narrative", ""),
+            (analysis.get("narrative_pattern", {}) or {}).get("pattern_name", ""),
+        ]
+
+        haystack = " ".join(haystack_parts).lower()
+        if q_low in haystack:
+            rec_copy = dict(rec)
+            rec_copy["_history_idx"] = idx
+            results.append(rec_copy)
+
+    return results
+
+
+def build_symbol_frequency_from_logs(max_items: int = 20) -> List[Dict[str, Any]]:
+    """
+    Build a simple frequency list of symbols across all logged dreams.
+    """
+    records = read_logs()
+    counts: Dict[str, int] = {}
+
+    for rec in records:
+        analysis = rec.get("analysis", {})
+        key_syms = analysis.get("key_symbols", [])
+        for sym in key_syms:
+            label = sym.get("symbol", "").lower().strip()
+            if not label:
+                continue
+            counts[label] = counts.get(label, 0) + 1
+
+    items = [{"label": k, "count": v} for k, v in counts.items()]
+    items.sort(key=lambda x: x["count"], reverse=True)
+    return items[:max_items]
+
+
+def build_visual_context_for_analysis(analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Prepare front-end-friendly visual structures from the existing analysis dict.
+    - emotional_arc: list of {index, stage, emotion, intensity}
+    - symbol_graph: {nodes, edges}
+    """
+    # Emotional arc → simple timeline
+    emo_arc = analysis.get("emotional_arc", []) or []
+    emotional_arc_visual = []
+    for idx, st in enumerate(emo_arc):
+        emotional_arc_visual.append(
+            {
+                "index": idx,
+                "stage": st.get("stage", ""),
+                "emotion": st.get("emotion", ""),
+                "intensity": st.get("intensity", 0.0),
+            }
+        )
+
+    # Symbol graph
+    key_syms = analysis.get("key_symbols", []) or []
+    relations = analysis.get("symbol_relations", []) or []
+
+    nodes = []
+    for s in key_syms:
+        label = s.get("symbol", "")
+        local_count = s.get("local_count", 0)
+        global_count = s.get("global_count", 0)
+        nodes.append(
+            {
+                "id": label,
+                "label": label,
+                "weight": local_count + global_count,
+            }
+        )
+
+    edges = []
+    for r in relations:
+        src = r.get("source", "")
+        tgt = r.get("target", "")
+        rel = r.get("relation", "")
+        if not src or not tgt:
+            continue
+        edges.append({"source": src, "target": tgt, "relation": rel})
+
+    return {
+        "emotional_arc_visual": emotional_arc_visual,
+        "symbol_graph": {"nodes": nodes, "edges": edges},
+    }
+
+
+# ---------------------------
 # Routes
 # ---------------------------
 
-@app.route("/", methods=["GET", "POST"])
+
+@app.route("/", methods=["GET"])
 def index():
-    if request.method == "POST":
-        title = request.form.get("dream_title", "").strip()
-        dream_text = request.form.get("dream_text", "").strip()
-        felt_during = request.form.get("felt_during", "")
-        felt_after = request.form.get("felt_after", "")
-        life_context = request.form.get("life_context", "").strip()
-
-        if not dream_text:
-            return render_template(
-                "index.html",
-                error="Please paste a dream before decoding.",
-            )
-
+    """
+    Show the dream input form + possibly a single existing dream (for quick testing).
+    """
+    # Optionally allow ?prefill=N to load a past dream into the form
+    prefill_idx = request.args.get("prefill")
+    prefill_data = None
+    if prefill_idx is not None:
         try:
-            analysis = analyze_dream(
-                dream_text=dream_text,
-                title=title,
-                felt_during=felt_during,
-                felt_after=felt_after,
-                life_context=life_context,
-            )
-        except Exception as e:
-            # TEMP: show the actual error instead of a blank 500.
-            # Once things are stable, you can remove this and rely on normal error logging.
-            return (
-                f"<h1>Decode error</h1>"
-                f"<p><strong>{type(e).__name__}</strong>: {e}</p>",
-                500,
-            )
+            idx = int(prefill_idx)
+        except ValueError:
+            idx = None
 
-        analysis_dict = {
-            "summary": analysis.summary,
-            "micronarrative": analysis.micronarrative,
-            "interpretive_narrative": analysis.interpretive_narrative,
-            "key_symbols": [
-                {
-                    "symbol": s.symbol,
-                    "description": s.description,
-                    "possible_meanings": s.possible_meanings,
-                    "confidence": s.confidence,
-                    "local_count": s.local_count,
-                    "global_count": s.global_count,
+        if idx is not None:
+            records = read_logs()
+            if 0 <= idx < len(records):
+                rec = records[idx]
+                inp = rec.get("input", {})
+                prefill_data = {
+                    "title": inp.get("title", ""),
+                    "dream_text": inp.get("dream_text", ""),
+                    "felt_during": inp.get("felt_during", ""),
+                    "felt_after": inp.get("felt_after", ""),
+                    "life_context": inp.get("life_context", ""),
                 }
-                for s in analysis.key_symbols
-            ],
-            "emotional_profile_primary": [
-                {"name": e.name, "intensity": e.intensity}
-                for e in analysis.emotional_profile_primary
-            ],
-            "emotional_profile_tone": analysis.emotional_profile_tone,
-            "emotional_arc": [
-                {
-                    "stage": st.stage,
-                    "emotion": st.emotion,
-                    "intensity": st.intensity,
-                }
-                for st in analysis.emotional_arc
-            ],
-            "narrative_pattern": {
-                "pattern_name": analysis.narrative_pattern.pattern_name,
-                "description": analysis.narrative_pattern.description,
-                "related_themes": analysis.narrative_pattern.related_themes,
-            },
-            "symbol_relations": [
-                {
-                    "source": r.source,
-                    "target": r.target,
-                    "relation": r.relation,
-                }
-                for r in analysis.symbol_relations
-            ],
-            "reflection_prompts": analysis.reflection_prompts,
-            "cautions": analysis.cautions,
-            "detected_keywords": analysis.detected_keywords,
-        }
 
-        input_payload = {
+    return render_template("index.html", prefill=prefill_data)
+
+
+@app.route("/decode", methods=["POST"])
+def decode():
+    """
+    Handle form submission, run analysis, and show result.
+    """
+    dream_text = request.form.get("dream_text", "").strip()
+    title = request.form.get("title", "").strip()
+    felt_during = request.form.get("felt_during", "").strip()
+    felt_after = request.form.get("felt_after", "").strip()
+    life_context = request.form.get("life_context", "").strip()
+
+    if not dream_text:
+        abort(400, "Dream text is required.")
+
+    try:
+        analysis = analyze_dream(
+            dream_text=dream_text,
+            title=title,
+            felt_during=felt_during,
+            felt_after=felt_after,
+            life_context=life_context,
+        )
+    except Exception as e:
+        # TEMP: show the actual error instead of a blank 500.
+        # Once things are stable, you can remove this and rely on normal error logging.
+        return (
+            f"<h1>Decode error</h1>"
+            f"<p><strong>{type(e).__name__}</strong>: {e}</p>",
+            500,
+        )
+
+    # Build a serializable dict for logging and template
+    analysis_dict = {
+        "micronarrative": analysis.micronarrative,
+        "summary": analysis.summary,
+        "interpretive_narrative": analysis.interpretive_narrative,
+        "key_symbols": [
+            {
+                "symbol": s.symbol,
+                "description": s.description,
+                "possible_meanings": s.possible_meanings,
+                "confidence": s.confidence,
+                "local_count": s.local_count,
+                "global_count": s.global_count,
+            }
+            for s in analysis.key_symbols
+        ],
+        "emotional_profile_primary": [
+            {"name": e.name, "intensity": e.intensity}
+            for e in analysis.emotional_profile_primary
+        ],
+        "emotional_profile_tone": analysis.emotional_profile_tone,
+        "emotional_arc": [
+            {
+                "stage": st.stage,
+                "emotion": st.emotion,
+                "intensity": st.intensity,
+            }
+            for st in analysis.emotional_arc
+        ],
+        "narrative_pattern": {
+            "pattern_name": analysis.narrative_pattern.pattern_name,
+            "description": analysis.narrative_pattern.description,
+            "related_themes": analysis.narrative_pattern.related_themes,
+        },
+        "symbol_relations": [
+            {
+                "source": r.source,
+                "target": r.target,
+                "relation": r.relation,
+            }
+            for r in analysis.symbol_relations
+        ],
+        "reflection_prompts": analysis.reflection_prompts,
+        "cautions": analysis.cautions,
+        "detected_keywords": analysis.detected_keywords,
+    }
+
+    # Log the dream + analysis
+    record = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "input": {
             "title": title,
             "dream_text": dream_text,
             "felt_during": felt_during,
             "felt_after": felt_after,
             "life_context": life_context,
-        }
-        log_dream(input_payload, analysis_dict)
+            "detected_keywords": analysis.detected_keywords,
+        },
+        "analysis": analysis_dict,
+    }
+    append_log(record)
 
-        visual = build_visual_context_for_analysis(analysis_dict)
-        motif_stats = compute_motif_frequencies_from_logs()
+    # Attach visual context for the UI
+    visual_ctx = build_visual_context_for_analysis(analysis_dict)
 
-        return render_template(
-            "result.html",
-            title=title,
-            dream_text=dream_text,
-            analysis=analysis_dict,
-            visual=visual,
-            motif_stats=motif_stats,
-            from_history=False,
-        )
-
-    # GET
-    return render_template("index.html")
+    return render_template(
+        "result.html",
+        analysis=analysis_dict,
+        visual_ctx=visual_ctx,
+    )
 
 
 @app.route("/history")
@@ -975,78 +971,80 @@ def history():
             {
                 "idx": idx,
                 "timestamp": rec.get("timestamp", ""),
-                "title": inp.get("title", "(untitled)"),
+                "title": inp.get("title", ""),
+                "dream_text": inp.get("dream_text", ""),
                 "felt_during": inp.get("felt_during", ""),
                 "felt_after": inp.get("felt_after", ""),
+                "life_context": inp.get("life_context", ""),
             }
         )
 
-    return render_template("history.html", records=indexed)
+    symbol_freq = build_symbol_frequency_from_logs()
+
+    return render_template(
+        "history.html",
+        records=indexed,
+        symbol_freq=symbol_freq,
+    )
 
 
 @app.route("/history/<int:idx>")
 def history_detail(idx: int):
     """
-    Show a single logged dream by index (from newest-first list).
+    Show details for a single logged dream.
     """
     records = read_logs()
-    records = list(reversed(records))
+    records = list(reversed(records))  # newest first
 
     if idx < 0 or idx >= len(records):
-        abort(404)
+        abort(404, "Dream not found.")
 
     rec = records[idx]
-    inp = rec.get("input", {})
-    analysis = rec.get("analysis", {}) or {}
-
-    title = inp.get("title", "(untitled)")
-    dream_text = inp.get("dream_text", "")
-
-    visual = build_visual_context_for_analysis(analysis)
-    motif_stats = compute_motif_frequencies_from_logs()
+    analysis = rec.get("analysis", {})
+    visual_ctx = build_visual_context_for_analysis(analysis)
 
     return render_template(
         "result.html",
-        title=title,
-        dream_text=dream_text,
         analysis=analysis,
-        visual=visual,
-        motif_stats=motif_stats,
-        from_history=True,
+        visual_ctx=visual_ctx,
     )
 
 
 @app.route("/search")
 def search():
     """
-    Search over dream history.
+    Search across dream history.
     """
     query = request.args.get("q", "").strip()
-    results = search_records(query) if query else []
-    return render_template("search.html", query=query, results=results)
+    results = search_logs(query)
+    symbol_freq = build_symbol_frequency_from_logs()
 
+    indexed = []
+    for idx, rec in enumerate(results):
+        inp = rec.get("input", {})
+        indexed.append(
+            {
+                "idx": rec.get("_history_idx", idx),
+                "timestamp": rec.get("timestamp", ""),
+                "title": inp.get("title", ""),
+                "dream_text": inp.get("dream_text", ""),
+                "felt_during": inp.get("felt_during", ""),
+                "felt_after": inp.get("felt_after", ""),
+                "life_context": inp.get("life_context", ""),
+            }
+        )
 
-@app.route("/debug/log-info")
-def debug_log_info():
-    """
-    Simple debug endpoint to verify where dreams are being stored.
-    Not meant for production users; just for you.
-    """
-    info = {
-        "LOG_DIR": LOG_DIR,
-        "LOG_FILE": LOG_FILE,
-        "exists": os.path.exists(LOG_FILE),
-        "size_bytes": os.path.getsize(LOG_FILE) if os.path.exists(LOG_FILE) else 0,
-    }
-    return app.response_class(
-        response=json.dumps(info, indent=2),
-        mimetype="application/json",
+    return render_template(
+        "search.html",
+        query=query,
+        records=indexed,
+        symbol_freq=symbol_freq,
     )
 
 
 # ---------------------------
-# Run (local dev)
+# Entry point
 # ---------------------------
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
