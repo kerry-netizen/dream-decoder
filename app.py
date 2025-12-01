@@ -8,9 +8,13 @@ from typing import List, Dict, Any
 from flask import Flask, render_template, request, abort
 from openai import OpenAI
 
-# Initialize Flask app and OpenAI client
+# ---------------------------
+# App + OpenAI client
+# ---------------------------
+
 app = Flask(__name__)
-client = OpenAI()
+client = OpenAI()  # Uses OPENAI_API_KEY from environment
+
 
 # ---------------------------
 # Logging config
@@ -18,8 +22,8 @@ client = OpenAI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Use an environment variable if available (for Render / prod),
-# otherwise default to a "logs" folder next to app.py (for local dev).
+# For production (Render), set DD_LOG_DIR in env, e.g. /var/data/logs
+# For local dev, it defaults to "<project>/logs"
 LOG_DIR = os.environ.get("DD_LOG_DIR", os.path.join(BASE_DIR, "logs"))
 LOG_FILE = os.path.join(LOG_DIR, "dreams.jsonl")
 
@@ -258,7 +262,7 @@ def search_records(query: str, max_results: int = 100) -> List[dict]:
 
 
 # ---------------------------
-# Load symbol lexicon
+# Lexicon loading
 # ---------------------------
 
 def load_symbol_lexicon() -> Dict[str, Dict[str, Any]]:
@@ -861,13 +865,28 @@ def index():
         felt_after = request.form.get("felt_after", "")
         life_context = request.form.get("life_context", "").strip()
 
-        analysis = analyze_dream(
-            dream_text=dream_text,
-            title=title,
-            felt_during=felt_during,
-            felt_after=felt_after,
-            life_context=life_context,
-        )
+        if not dream_text:
+            return render_template(
+                "index.html",
+                error="Please paste a dream before decoding.",
+            )
+
+        try:
+            analysis = analyze_dream(
+                dream_text=dream_text,
+                title=title,
+                felt_during=felt_during,
+                felt_after=felt_after,
+                life_context=life_context,
+            )
+        except Exception as e:
+            # TEMP: show the actual error instead of a blank 500.
+            # Once things are stable, you can remove this and rely on normal error logging.
+            return (
+                f"<h1>Decode error</h1>"
+                f"<p><strong>{type(e).__name__}</strong>: {e}</p>",
+                500,
+            )
 
         analysis_dict = {
             "summary": analysis.summary,
@@ -937,6 +956,7 @@ def index():
             from_history=False,
         )
 
+    # GET
     return render_template("index.html")
 
 
@@ -1025,7 +1045,7 @@ def debug_log_info():
 
 
 # ---------------------------
-# Run
+# Run (local dev)
 # ---------------------------
 
 if __name__ == "__main__":
