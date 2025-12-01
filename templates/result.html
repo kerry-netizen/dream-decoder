@@ -1,217 +1,138 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Dream Interpretation – Dream Decoder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta charset="utf-8">
+  <title>Dream Decoder – Results</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 20px auto; line-height: 1.6; }
+    h1, h2, h3 { margin-top: 24px; }
+    .symbol {
+      margin-bottom: 14px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+    .meta {
+      color: #555;
+      font-size: 0.9em;
+    }
+    .banner {
+      padding: 8px 12px;
+      background: #eef6ff;
+      border-left: 4px solid #3c82f6;
+      margin: 18px 0;
+    }
+    a { text-decoration: none; color: #0366d6; }
+    a:hover { text-decoration: underline; }
+    .footer-links { margin-top: 30px; font-size: 0.9em; }
+    details { margin-top: 16px; }
+    details summary { cursor: pointer; font-weight: 600; }
+  </style>
 </head>
+<body>
 
-<body class="dd-body dd-dark">
+  <h1>Dream Analysis</h1>
 
-  <div class="dd-app">
+  {% if title %}
+    <h2>{{ title }}</h2>
+  {% endif %}
 
-    <!-- Top bar -->
-    <header class="dd-header">
-      <div class="dd-logo">Dream Decoder</div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <a href="{{ url_for('history') }}" class="dd-icon-button" aria-label="Dream History">⟳</a>
-        <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="New Dream">＋</a>
-        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
-          🌙
-        </button>
+  {% if analysis.detected_keywords %}
+    <div class="banner">
+      <strong>Detected motifs:</strong>
+      {{ analysis.detected_keywords | join(", ") }}
+    </div>
+  {% endif %}
+
+  <!-- Interpretive Narrative first: main "hit" -->
+  {% if analysis.interpretive_narrative %}
+    <h3>Interpretive Narrative</h3>
+    <p>{{ analysis.interpretive_narrative }}</p>
+  {% endif %}
+
+  <!-- Everything else is drill-down -->
+
+  <details open>
+    <summary>Summary</summary>
+    <p>{{ analysis.summary }}</p>
+  </details>
+
+  <details>
+    <summary>Key Symbols &amp; Motifs</summary>
+    {% for s in analysis.key_symbols %}
+      <div class="symbol" title="Occurrences in this dream: {{ s.local_count }} | Across all dreams: {{ s.global_count }}">
+        <strong>{{ s.symbol }}</strong><br>
+        <span class="meta">{{ s.description }}</span><br>
+        <ul>
+          {% for m in s.possible_meanings %}
+            <li>{{ m }}</li>
+          {% endfor %}
+        </ul>
+        <small class="meta">
+          Confidence: {{ "%.0f"|format(s.confidence * 100) }}% &nbsp;|&nbsp;
+          Local count: {{ s.local_count }} &nbsp;|&nbsp;
+          Global count: {{ s.global_count }}
+        </small>
       </div>
-    </header>
+    {% endfor %}
+  </details>
 
-    <main class="dd-main">
+  <details>
+    <summary>Emotional Landscape</summary>
+    <p><strong>Overall tone:</strong> {{ analysis.emotional_profile_tone }}</p>
+    <ul>
+      {% for e in analysis.emotional_profile_primary %}
+        <li>{{ e.name }} – {{ "%.0f"|format(e.intensity * 100) }}%</li>
+      {% endfor %}
+    </ul>
 
-      <!-- Interpretation Card -->
-      <section class="dd-result-card">
+    {% if analysis.emotional_arc %}
+      <h4>Emotional Arc</h4>
+      <ul>
+        {% for st in analysis.emotional_arc %}
+          <li>
+            <strong>{{ st.stage|capitalize }}:</strong>
+            {{ st.emotion }} – {{ "%.0f"|format(st.intensity * 100) }}%
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </details>
 
-        <div class="dd-result-header">
-          <div class="dd-result-title">
-            Interpretation — {{ (mode or "standard")|capitalize }} Mode
-          </div>
-          {% if title %}
-            <div style="font-size: 0.9rem; color: #c8d0db; margin-top: 0.25rem;">
-              “{{ title }}”
-            </div>
-          {% endif %}
-        </div>
+  <details>
+    <summary>Narrative Pattern</summary>
+    <p><strong>{{ analysis.narrative_pattern.pattern_name }}</strong></p>
+    <p>{{ analysis.narrative_pattern.description }}</p>
+    <ul>
+      {% for t in analysis.narrative_pattern.related_themes %}
+        <li>{{ t }}</li>
+      {% endfor %}
+    </ul>
+  </details>
 
-        <!-- Original Dream (collapsible) -->
-        {% if dream_text %}
-        <details class="dd-dream-details" open>
-          <summary>Your Dream</summary>
-          <p>{{ dream_text }}</p>
-        </details>
-        {% endif %}
+  <details>
+    <summary>Reflection Prompts</summary>
+    <ul>
+      {% for q in analysis.reflection_prompts %}
+        <li>{{ q }}</li>
+      {% endfor %}
+    </ul>
+  </details>
 
-        <div class="dd-result-body">
+  <details>
+    <summary>Cautions</summary>
+    <ul>
+      {% for c in analysis.cautions %}
+        <li>{{ c }}</li>
+      {% endfor %}
+    </ul>
+  </details>
 
-          {# Shortcut reference #}
-          {% set a = analysis %}
-
-          <!-- Summary -->
-          {% if a.summary %}
-          <section style="margin-bottom: 1rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Summary
-            </h2>
-            <p>{{ a.summary }}</p>
-          </section>
-          {% endif %}
-
-          <!-- Interpretive Narrative -->
-          {% if a.interpretive_narrative %}
-          <section style="margin-bottom: 1.1rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Interpretive Narrative
-            </h2>
-            <p>{{ a.interpretive_narrative }}</p>
-          </section>
-          {% endif %}
-
-          <!-- Key Symbols -->
-          {% if a.key_symbols and a.key_symbols|length > 0 %}
-          <section style="margin-bottom: 1.1rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Key Symbols
-            </h2>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              {% for s in a.key_symbols %}
-                <li style="margin-bottom: 0.6rem;">
-                  <div style="font-weight: 500;">
-                    {{ s.symbol }}
-                    {% if s.local_count or s.global_count %}
-                      <span style="font-size: 0.75rem; color: #a5acb8;">
-                        (in this dream: {{ s.local_count or 0 }},
-                        across logs: {{ s.global_count or 0 }})
-                      </span>
-                    {% endif %}
-                  </div>
-                  {% if s.description %}
-                    <div style="font-size: 0.85rem; color: #e7eaf0;">
-                      {{ s.description }}
-                    </div>
-                  {% endif %}
-                  {% if s.possible_meanings %}
-                    <div style="font-size: 0.8rem; color: #a5acb8; margin-top: 0.25rem;">
-                      Possible meanings:
-                    </div>
-                    <ul style="margin: 0.15rem 0 0.1rem 1rem; padding: 0; font-size: 0.8rem; color: #c8d0db;">
-                      {% for m in s.possible_meanings %}
-                        <li>{{ m }}</li>
-                      {% endfor %}
-                    </ul>
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-          </section>
-          {% endif %}
-
-          <!-- Emotional Profile -->
-          {% if (a.emotional_profile_primary and a.emotional_profile_primary|length > 0) or a.emotional_profile_tone %}
-          <section style="margin-bottom: 1.1rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Emotional Profile
-            </h2>
-
-            {% if a.emotional_profile_tone %}
-              <p style="font-size: 0.85rem; color: #a5acb8; margin: 0 0 0.4rem;">
-                Overall tone: {{ a.emotional_profile_tone }}
-              </p>
-            {% endif %}
-
-            {% if a.emotional_profile_primary and a.emotional_profile_primary|length > 0 %}
-              <ul style="list-style: none; padding: 0; margin: 0;">
-                {% for e in a.emotional_profile_primary %}
-                  <li style="margin-bottom: 0.35rem; font-size: 0.85rem;">
-                    <span style="font-weight: 500;">{{ e.name }}</span>
-                    <span style="font-size: 0.8rem; color: #a5acb8;">
-                      — intensity {{ "%.2f"|format(e.intensity) }}
-                    </span>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-          </section>
-          {% endif %}
-
-          <!-- Narrative Pattern -->
-          {% if a.narrative_pattern %}
-          <section style="margin-bottom: 1.1rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Narrative Pattern
-            </h2>
-            {% if a.narrative_pattern.pattern_name %}
-              <p style="font-size: 0.9rem; margin: 0 0 0.25rem;">
-                <strong>{{ a.narrative_pattern.pattern_name }}</strong>
-              </p>
-            {% endif %}
-            {% if a.narrative_pattern.description %}
-              <p style="font-size: 0.9rem; margin: 0 0 0.25rem;">
-                {{ a.narrative_pattern.description }}
-              </p>
-            {% endif %}
-            {% if a.narrative_pattern.related_themes %}
-              <p style="font-size: 0.8rem; color: #a5acb8; margin: 0;">
-                Related themes:
-                {{ a.narrative_pattern.related_themes | join(", ") }}
-              </p>
-            {% endif %}
-          </section>
-          {% endif %}
-
-          <!-- Detected Motifs -->
-          {% if a.detected_keywords and a.detected_keywords|length > 0 %}
-          <section style="margin-bottom: 1.1rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Detected Motifs
-            </h2>
-            <p style="font-size: 0.85rem;">
-              {{ a.detected_keywords | join(", ") }}
-            </p>
-          </section>
-          {% endif %}
-
-          <!-- Reflection Prompts -->
-          {% if a.reflection_prompts and a.reflection_prompts|length > 0 %}
-          <section style="margin-bottom: 1.1rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Reflection Prompts
-            </h2>
-            <ul style="margin: 0; padding-left: 1rem; font-size: 0.85rem;">
-              {% for q in a.reflection_prompts %}
-                <li>{{ q }}</li>
-              {% endfor %}
-            </ul>
-          </section>
-          {% endif %}
-
-          <!-- Cautions -->
-          {% if a.cautions and a.cautions|length > 0 %}
-          <section style="margin-bottom: 0.5rem;">
-            <h2 style="font-size: 0.95rem; margin: 0 0 0.35rem; color: #c8d0db;">
-              Cautions
-            </h2>
-            <ul style="margin: 0; padding-left: 1rem; font-size: 0.85rem; color: #a5acb8;">
-              {% for c in a.cautions %}
-                <li>{{ c }}</li>
-              {% endfor %}
-            </ul>
-          </section>
-          {% endif %}
-
-        </div>
-      </section>
-
-    </main>
+  <div class="footer-links">
+    <a href="/">← Decode another dream</a> &nbsp;|&nbsp;
+    <a href="/history">Dream history</a>
   </div>
-
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
 </html>

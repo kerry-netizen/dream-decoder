@@ -270,7 +270,6 @@ def extract_candidate_symbols(text: str) -> List[dict]:
     # Add keywords as phrases with counts
     lowered_text = text.lower()
     for kw in DREAM_KEYWORDS:
-        # Only count full phrase occurrences to avoid junk
         if " " in kw:
             pattern = r'(?<!\w)' + re.escape(kw) + r'(?!\w)'
         else:
@@ -339,6 +338,13 @@ class Emotion:
 
 
 @dataclass
+class EmotionalStage:
+    stage: str   # e.g. "beginning", "middle", "end"
+    emotion: str
+    intensity: float
+
+
+@dataclass
 class NarrativePattern:
     pattern_name: str
     description: str
@@ -352,6 +358,7 @@ class DreamAnalysis:
     key_symbols: List[SymbolMeaning]
     emotional_profile_primary: List[Emotion]
     emotional_profile_tone: str
+    emotional_arc: List[EmotionalStage]
     narrative_pattern: NarrativePattern
     reflection_prompts: List[str]
     cautions: List[str]
@@ -394,22 +401,49 @@ Important rules:
   description if they are clearly central to the dreamer's emotional reaction,
   but avoid making them the core symbolic label.
 
-You must produce TWO different layers:
+You must produce THREE main layers:
 
 1) A SHORT SUMMARY (field: "summary")
    - 3–6 sentences.
    - Neutral recap of what happens in the dream, in simple language.
 
-2) An INTERPRETIVE NARRATIVE (field: "interpretive_narrative")
+2) An EMOTIONAL MODEL
+   - "emotional_profile": primary emotions + overall tone.
+   - "emotional_arc": how emotion shifts across the dream, as a list of stages.
+     Use stages like "beginning", "middle", "end" or other simple labels.
+
+   Example emotional_arc format:
+   "emotional_arc": [
+     {"stage": "beginning", "emotion": "curiosity", "intensity": 0.5},
+     {"stage": "middle", "emotion": "fear", "intensity": 0.8},
+     {"stage": "end", "emotion": "relief", "intensity": 0.6}
+   ]
+
+3) An INTERPRETIVE NARRATIVE (field: "interpretive_narrative")
    - 1–3 paragraphs.
-   - Weave together the symbols, emotions, narrative pattern, detected_keywords,
-     candidate_symbols, lexicon_entries, and life_context into a coherent
-     psychological story.
+   - Weave together:
+     - key_symbols
+     - emotional_profile
+     - emotional_arc
+     - narrative_pattern
+     - detected_keywords
+     - candidate_symbols
+     - lexicon_entries
+     - life_context
    - Use plain, accessible language.
    - Speak in the second person ("you") and use soft, tentative phrasing
      ("this may suggest...", "it could be that...", "one way to see this is...").
    - Do NOT sound mystical or prophetic. Stay grounded and possibility-based.
    - Do NOT diagnose or provide therapy. This is reflective, not clinical.
+
+NARRATIVE PATTERN HINTS:
+- When helpful, choose or blend patterns from ideas like:
+  "pursuit/escape", "loss of control", "embarrassment/exposure", "search/quest",
+  "transformation", "invasion/boundary violation", "caretaking/burden",
+  "warning/intuition", "reconciliation", "reunion", "decision/crossroads",
+  "competition", "chaos/overwhelm", "hidden room in the house",
+  "crossing thresholds", "being unprepared", "confrontation",
+  "mythic encounter", "deep water/subconscious", "apocalypse/internal upheaval".
 
 Output ONLY valid JSON with this structure:
 
@@ -430,6 +464,13 @@ Output ONLY valid JSON with this structure:
     ],
     "overall_tone": "..."
   },
+  "emotional_arc": [
+    {
+      "stage": "...",
+      "emotion": "...",
+      "intensity": 0.0
+    }
+  ],
   "narrative_pattern": {
     "pattern_name": "...",
     "description": "...",
@@ -505,6 +546,7 @@ def analyze_dream(
             "interpretive_narrative": "",
             "key_symbols": [],
             "emotional_profile": {"primary_emotions": [], "overall_tone": "unknown"},
+            "emotional_arc": [],
             "narrative_pattern": {
                 "pattern_name": "Unknown",
                 "description": "",
@@ -541,6 +583,17 @@ def analyze_dream(
             )
         )
 
+    arc_block = data.get("emotional_arc", []) or []
+    emotional_arc: List[EmotionalStage] = []
+    for stage in arc_block:
+        emotional_arc.append(
+            EmotionalStage(
+                stage=stage.get("stage", "") or "",
+                emotion=stage.get("emotion", "") or "",
+                intensity=float(stage.get("intensity", 0.0) or 0.0),
+            )
+        )
+
     pattern_raw = data.get("narrative_pattern", {})
     narrative = NarrativePattern(
         pattern_name=pattern_raw.get("pattern_name", "") or "",
@@ -554,6 +607,7 @@ def analyze_dream(
         key_symbols=key_symbols,
         emotional_profile_primary=emotions,
         emotional_profile_tone=emo_block.get("overall_tone", "") or "",
+        emotional_arc=emotional_arc,
         narrative_pattern=narrative,
         reflection_prompts=data.get("reflection_prompts", []) or [],
         cautions=data.get("cautions", []) or [],
@@ -601,6 +655,14 @@ def index():
                 for e in analysis.emotional_profile_primary
             ],
             "emotional_profile_tone": analysis.emotional_profile_tone,
+            "emotional_arc": [
+                {
+                    "stage": st.stage,
+                    "emotion": st.emotion,
+                    "intensity": st.intensity,
+                }
+                for st in analysis.emotional_arc
+            ],
             "narrative_pattern": {
                 "pattern_name": analysis.narrative_pattern.pattern_name,
                 "description": analysis.narrative_pattern.description,
