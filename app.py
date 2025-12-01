@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import List, Dict, Any
 
 from flask import Flask, render_template, request, redirect, url_for
-
 from openai import OpenAI
 
 app = Flask(__name__)
@@ -13,11 +12,12 @@ client = OpenAI()  # Uses OPENAI_API_KEY
 
 
 # ---------------------------
-# Logging
+# Paths & logging
 # ---------------------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(BASE_DIR, "dream_logs.jsonl")
+LEXICON_PATH = os.path.join(BASE_DIR, "symbol_lexicon.json")
 
 
 def append_log(record: Dict[str, Any]) -> None:
@@ -45,7 +45,8 @@ def read_logs() -> List[Dict[str, Any]]:
 # Symbol lexicon + keywords
 # ---------------------------
 
-DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
+# Fallback lexicon (used only if JSON file is missing or invalid)
+DEFAULT_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
     "cat": {
         "themes": ["independence", "intuition", "feminine energy"],
         "notes": "Cats can reflect autonomy, emotional distance, or a need for comfort on your own terms.",
@@ -140,52 +141,40 @@ DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
     },
 }
 
-DREAM_KEYWORDS: List[str] = sorted(
-    {
-        "cat",
-        "snake",
-        "water",
-        "river",
-        "ocean",
-        "lake",
-        "house",
-        "door",
-        "window",
-        "car",
-        "train",
-        "bus",
-        "falling",
-        "teeth",
-        "flight",
-        "flying",
-        "school",
-        "exam",
-        "baby",
-        "forest",
-        "road",
-        "bridge",
-        "storm",
-        "animal",
-        "shadow",
-        "mirror",
-        "boat",
-        "milk",
-        "knight",
-        "armor",
-    }
-)
+# Try to load the rich JSON lexicon; fall back to the in-code one if needed
+try:
+    with open(LEXICON_PATH, "r", encoding="utf-8") as f:
+        loaded_lex = json.load(f)
+    if isinstance(loaded_lex, dict) and loaded_lex:
+        DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = loaded_lex
+    else:
+        DREAM_SYMBOL_LEXICON = DEFAULT_SYMBOL_LEXICON
+except Exception:
+    DREAM_SYMBOL_LEXICON = DEFAULT_SYMBOL_LEXICON
+
+# Keywords are now derived directly from the active lexicon
+DREAM_KEYWORDS: List[str] = sorted(DREAM_SYMBOL_LEXICON.keys())
 
 
 def detect_keywords(text: str) -> List[str]:
-    """Detect motifs with proper word boundaries."""
+    """
+    Detect motifs using the active DREAM_KEYWORDS list.
+
+    - Handles single words and multi-word phrases.
+    - Case-insensitive.
+    - Allows simple plural 's' on single-word entries.
+    """
     lowered = text.lower()
     found: List[str] = []
 
     for kw in DREAM_KEYWORDS:
-        if " " in kw:
-            pattern = r"(?<!\w)" + re.escape(kw) + r"(?!\w)"
+        kw_lower = kw.lower()
+        if " " in kw_lower:
+            # Multi-word phrase, match as-is with word boundaries on both sides
+            pattern = r"(?<!\w)" + re.escape(kw_lower) + r"(?!\w)"
         else:
-            pattern = r"\b" + re.escape(kw) + r"s?\b"
+            # Single word: allow optional trailing 's'
+            pattern = r"\b" + re.escape(kw_lower) + r"s?\b"
 
         if re.search(pattern, lowered):
             found.append(kw)
@@ -195,7 +184,7 @@ def detect_keywords(text: str) -> List[str]:
 
 
 def simple_candidate_symbols(text: str, max_items: int = 10) -> List[Dict[str, Any]]:
-    """Very simple candidate symbol extractor."""
+    """Very simple candidate symbol extractor based on word frequency."""
     lowered = text.lower()
     tokens = re.findall(r"[a-zA-Z']+", lowered)
     stop = {
@@ -234,7 +223,10 @@ def simple_candidate_symbols(text: str, max_items: int = 10) -> List[Dict[str, A
 def build_priority_symbols(
     candidates: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
-    """Score symbols based on local frequency + lexicon presence."""
+    """
+    Score symbols based on local frequency + presence in the lexicon.
+    Larger lexicon → richer priority mapping.
+    """
     scored = []
     for c in candidates:
         phrase = c.get("phrase", "")
@@ -389,7 +381,8 @@ def analyze_dream(
         "emotional_profile_primary": primary_emotions,
         "emotional_profile_tone": overall_tone,
         "emotional_arc": data.get("emotional_arc", []) or [],
-        "narrative_pattern": data.get("narrative_pattern", {}) or {
+        "narrative_pattern": data.get("narrative_pattern", {})
+        or {
             "pattern_name": "",
             "description": "",
             "related_themes": [],
