@@ -4,18 +4,16 @@ import re
 from datetime import datetime
 from typing import List, Dict, Any
 
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, redirect, url_for
+
 from openai import OpenAI
 
-# ---------------------------
-# App + OpenAI client
-# ---------------------------
-
 app = Flask(__name__)
-client = OpenAI()  # Uses OPENAI_API_KEY from environment
+client = OpenAI()  # Uses OPENAI_API_KEY
+
 
 # ---------------------------
-# Logging setup
+# Logging
 # ---------------------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,17 +28,17 @@ def append_log(record: Dict[str, Any]) -> None:
 def read_logs() -> List[Dict[str, Any]]:
     if not os.path.exists(LOG_FILE):
         return []
-    rows = []
+    out = []
     with open(LOG_FILE, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             try:
-                rows.append(json.loads(line))
+                out.append(json.loads(line))
             except Exception:
                 continue
-    return rows
+    return out
 
 
 # ---------------------------
@@ -177,34 +175,27 @@ DREAM_KEYWORDS: List[str] = sorted(
     }
 )
 
-# ---------------------------
-# Helpers
-# ---------------------------
-
 
 def detect_keywords(text: str) -> List[str]:
-    """
-    Detect simple dream motifs using word boundaries, allowing plural for single words.
-    """
+    """Detect motifs with proper word boundaries."""
     lowered = text.lower()
     found: List[str] = []
+
     for kw in DREAM_KEYWORDS:
         if " " in kw:
-            pattern = r"(?<!\\w)" + re.escape(kw) + r"(?!\\w)"
+            pattern = r"(?<!\w)" + re.escape(kw) + r"(?!\w)"
         else:
-            pattern = r"\\b" + re.escape(kw) + r"s?\\b"
+            pattern = r"\b" + re.escape(kw) + r"s?\b"
+
         if re.search(pattern, lowered):
             found.append(kw)
-    # preserve order of first appearance
+
+    # de-duplicate, keep order
     return list(dict.fromkeys(found))
 
 
 def simple_candidate_symbols(text: str, max_items: int = 10) -> List[Dict[str, Any]]:
-    """
-    Very simple candidate symbol extractor:
-    - 1-word tokens longer than 3 chars, not obvious stopwords
-    - counted by frequency
-    """
+    """Very simple candidate symbol extractor."""
     lowered = text.lower()
     tokens = re.findall(r"[a-zA-Z']+", lowered)
     stop = {
@@ -228,6 +219,7 @@ def simple_candidate_symbols(text: str, max_items: int = 10) -> List[Dict[str, A
         "under",
         "through",
     }
+
     counts: Dict[str, int] = {}
     for tok in tokens:
         if len(tok) < 4 or tok in stop:
@@ -242,9 +234,7 @@ def simple_candidate_symbols(text: str, max_items: int = 10) -> List[Dict[str, A
 def build_priority_symbols(
     candidates: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
-    """
-    Lightweight priority scoring: local frequency + lexicon presence.
-    """
+    """Score symbols based on local frequency + lexicon presence."""
     scored = []
     for c in candidates:
         phrase = c.get("phrase", "")
@@ -266,7 +256,7 @@ def build_priority_symbols(
 
 
 # ---------------------------
-# System prompt for the model
+# Model prompt
 # ---------------------------
 
 SYSTEM_PROMPT = """
@@ -280,9 +270,9 @@ You will receive:
 - "dream_text"
 - "felt_during", "felt_after"
 - "life_context"
-- "detected_keywords": motifs auto-detected in the text
-- "candidate_symbols": phrases with counts that look symbolically important
-- "priority_symbols": symbols scored higher based on usage + lexicon
+- "detected_keywords"
+- "candidate_symbols"
+- "priority_symbols"
 
 Principles:
 - Stay grounded in the dream's actual content and the life_context.
@@ -291,7 +281,7 @@ Principles:
 - Tie symbols to emotional and situational themes, not fixed meanings.
 - Help the dreamer generate insight, not fear.
 
-OUTPUT must be VALID JSON with these top-level keys:
+Return VALID JSON with:
 
 {
   "micronarrative": "...",
@@ -326,13 +316,9 @@ OUTPUT must be VALID JSON with these top-level keys:
   "cautions": ["string", ...]
 }
 
-All float values must be between 0 and 1. Keep lists reasonably short (3–7 items).
+All intensities are floats 0–1. Keep lists short (3–7 items).
 """
 
-
-# ---------------------------
-# Core analysis function
-# ---------------------------
 
 def analyze_dream(
     dream_text: str,
@@ -391,7 +377,6 @@ def analyze_dream(
             "cautions": ["Model output could not be parsed."],
         }
 
-    # Normalize and enrich a bit for the template
     emotional_profile = data.get("emotional_profile", {}) or {}
     primary_emotions = emotional_profile.get("primary_emotions", []) or []
     overall_tone = emotional_profile.get("overall_tone", "unknown") or "unknown"
@@ -419,16 +404,27 @@ def analyze_dream(
 
 
 # ---------------------------
-# Routes
+# Routes – robust against 405
 # ---------------------------
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "POST":
+        # Handle decode directly from /
+        return handle_decode()
     return render_template("index.html")
 
 
-@app.route("/decode", methods=["POST"])
+@app.route("/decode", methods=["GET", "POST"])
 def decode():
+    if request.method == "POST":
+        # Handle decode from /decode
+        return handle_decode()
+    # GET /decode → send them to the main form
+    return redirect(url_for("index"))
+
+
+def handle_decode():
     dream_text = request.form.get("dream_text", "").strip()
     dream_title = request.form.get("dream_title", "").strip()
     felt_during = request.form.get("felt_during", "").strip()
@@ -470,10 +466,6 @@ def decode():
 
     return render_template("result.html", analysis=analysis)
 
-
-# ---------------------------
-# Run (local dev)
-# ---------------------------
 
 if __name__ == "__main__":
     app.run(debug=True)

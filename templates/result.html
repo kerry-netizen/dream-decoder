@@ -30,17 +30,9 @@
       margin-bottom: 0.5rem;
     }
 
-    h1 {
-      font-size: 1.75rem;
-    }
-
-    h2 {
-      font-size: 1.25rem;
-    }
-
-    h3 {
-      font-size: 1.05rem;
-    }
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; }
 
     .meta {
       font-size: 0.9rem;
@@ -216,7 +208,9 @@
         <div class="symbol-header">
           <div class="symbol-name">{{ sym.symbol }}</div>
           <div class="symbol-meta">
-            Confidence: {{ (sym.confidence * 100) | round(0) | int }}%
+            {% if sym.confidence is defined %}
+              Confidence: {{ (sym.confidence * 100) | round(0) | int }}%
+            {% endif %}
           </div>
         </div>
         {% if sym.description %}
