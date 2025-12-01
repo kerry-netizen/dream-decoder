@@ -317,6 +317,37 @@ def count_occurrences(text: str, phrase: str) -> int:
     return sum(t.count(w) for w in content_words)
 
 
+def compute_priority_symbols(
+    candidate_symbols: List[dict],
+    global_symbol_stats: Dict[str, int],
+) -> List[dict]:
+    """
+    Compute an importance score per candidate symbol and return top N.
+    importance = local_count*2 + global_count*0.5 + lexicon_bonus
+    """
+    scored: List[dict] = []
+    for cs in candidate_symbols:
+        phrase = cs.get("phrase", "")
+        local_count = cs.get("count", 0)
+        key = phrase.lower()
+        global_count = global_symbol_stats.get(key, 0)
+        lex_info = lookup_symbol_in_lexicon(phrase)
+        lex_bonus = 1.0 if lex_info else 0.0
+        importance = local_count * 2.0 + global_count * 0.5 + lex_bonus
+        scored.append(
+            {
+                "symbol": phrase,
+                "local_count": local_count,
+                "global_count": global_count,
+                "importance": importance,
+                "has_lexicon": bool(lex_info),
+            }
+        )
+
+    scored.sort(key=lambda x: x["importance"], reverse=True)
+    return scored[:8]
+
+
 # ---------------------------
 # Data Models
 # ---------------------------
@@ -345,6 +376,13 @@ class EmotionalStage:
 
 
 @dataclass
+class SymbolRelation:
+    source: str
+    target: str
+    relation: str
+
+
+@dataclass
 class NarrativePattern:
     pattern_name: str
     description: str
@@ -354,12 +392,14 @@ class NarrativePattern:
 @dataclass
 class DreamAnalysis:
     summary: str
+    micronarrative: str
     interpretive_narrative: str
     key_symbols: List[SymbolMeaning]
     emotional_profile_primary: List[Emotion]
     emotional_profile_tone: str
     emotional_arc: List[EmotionalStage]
     narrative_pattern: NarrativePattern
+    symbol_relations: List[SymbolRelation]
     reflection_prompts: List[str]
     cautions: List[str]
     detected_keywords: List[str]
@@ -376,78 +416,102 @@ Your job is not just to list symbols, but to help the dreamer understand how
 those symbols, emotions, and situations might fit together into a psychological
 story about where they are right now.
 
+You will receive:
+- "dream_text"
+- "felt_during", "felt_after"
+- "life_context"
+- "detected_keywords": motifs auto-detected in the text
+- "candidate_symbols": phrases with counts that look symbolically important
+- "lexicon_entries": themes and notes for some symbols from a dream symbol lexicon
+- "priority_symbols": a short list of symbols with importance scores, based on:
+  - how often they appear in the dream
+  - how often similar symbols appear in other dreams
+  - whether they have lexicon entries
+
 Important rules:
 
 - Treat combined phrases ("black cat", "red car") as single symbols.
+- Pay special attention to priority_symbols when choosing your key_symbols and
+  narrative_focus. These are the best candidates for central symbolic meaning.
 - Pay attention to animals, colors, family members, and contact actions.
 - Integrate the provided life_context into symbol interpretation.
-- You will receive:
-  - "detected_keywords": common dream motifs automatically found in the text.
-  - "candidate_symbols": a list of phrases with counts that appear important.
-  - "lexicon_entries": structured notes from a dream symbol lexicon, including
-    themes and notes for some symbols.
-  You MUST consider these when deciding which key symbols and narrative patterns
-  to emphasize. Either include them as symbols or clearly take them into account
-  in the narrative (internally).
-
 - When symbols are culturally loaded (e.g. black cat, snake, storm, wedding),
   give multiple possible meanings and note that meanings vary by culture and
   personal experience.
-
 - When people appear in the dream, focus the symbol labels on their ROLE,
   ACTIONS, or RELATIONSHIP to the dreamer (e.g. "warning figure", "authority
-  figure", "child asking for help") rather than on demographic traits such as
-  race, ethnicity, body size, or age. You may still mention those traits in the
-  description if they are clearly central to the dreamer's emotional reaction,
-  but avoid making them the core symbolic label.
+  figure", "child asking for help") rather than on demographic traits.
 
-You must produce THREE main layers:
+You must output the following layers:
 
-1) A SHORT SUMMARY (field: "summary")
+1) "micronarrative"
+   - 2–6 sentences.
+   - A clean, simple retelling of the dream as a short story in the third person.
+   - Include the main events in order, in clear language.
+
+2) "summary"
    - 3–6 sentences.
-   - Neutral recap of what happens in the dream, in simple language.
+   - A neutral recap of what happens, similar to micronarrative but more compact
+     and without extra interpretation.
 
-2) An EMOTIONAL MODEL
+3) An EMOTIONAL MODEL
    - "emotional_profile": primary emotions + overall tone.
    - "emotional_arc": how emotion shifts across the dream, as a list of stages.
-     Use stages like "beginning", "middle", "end" or other simple labels.
+     Example:
+     "emotional_arc": [
+       {"stage": "beginning", "emotion": "curiosity", "intensity": 0.5},
+       {"stage": "middle", "emotion": "fear", "intensity": 0.8},
+       {"stage": "end", "emotion": "relief", "intensity": 0.6}
+     ]
 
-   Example emotional_arc format:
-   "emotional_arc": [
-     {"stage": "beginning", "emotion": "curiosity", "intensity": 0.5},
-     {"stage": "middle", "emotion": "fear", "intensity": 0.8},
-     {"stage": "end", "emotion": "relief", "intensity": 0.6}
-   ]
+4) SYMBOL MODEL
+   - "key_symbols": 3–7 symbols, chosen with strong reference to priority_symbols,
+     candidate_symbols, lexicon_entries, and detected_keywords.
+   - For each symbol, include description, possible meanings, and a confidence score.
 
-3) An INTERPRETIVE NARRATIVE (field: "interpretive_narrative")
-   - 1–3 paragraphs.
+5) SYMBOL RELATIONSHIPS
+   - "symbol_relations": how key symbols relate to each other inside the dream.
+     Each relation is an object like:
+     {
+       "source": "Daisy",
+       "target": "dreamer",
+       "relation": "physically pushing you away from danger"
+     }
+   - Focus on important relational dynamics (chasing, protecting, warning,
+     blocking, observing, etc.).
+
+6) NARRATIVE PATTERN
+   - "narrative_pattern": name and description of the main pattern.
+   - You may choose or blend patterns such as:
+     "pursuit/escape", "loss of control", "embarrassment/exposure",
+     "search/quest", "transformation", "invasion/boundary violation",
+     "caretaking/burden", "warning/intuition", "reconciliation", "reunion",
+     "decision/crossroads", "competition", "chaos/overwhelm",
+     "hidden room in the house", "crossing thresholds", "being unprepared",
+     "confrontation", "mythic encounter", "deep water/subconscious",
+     "apocalypse/internal upheaval".
+
+7) INTERPRETIVE NARRATIVE
+   - "interpretive_narrative": 1–3 paragraphs.
    - Weave together:
+     - micronarrative (the story)
      - key_symbols
      - emotional_profile
      - emotional_arc
      - narrative_pattern
+     - symbol_relations
      - detected_keywords
-     - candidate_symbols
-     - lexicon_entries
      - life_context
    - Use plain, accessible language.
    - Speak in the second person ("you") and use soft, tentative phrasing
      ("this may suggest...", "it could be that...", "one way to see this is...").
-   - Do NOT sound mystical or prophetic. Stay grounded and possibility-based.
+   - Do NOT sound mystical or prophetic.
    - Do NOT diagnose or provide therapy. This is reflective, not clinical.
-
-NARRATIVE PATTERN HINTS:
-- When helpful, choose or blend patterns from ideas like:
-  "pursuit/escape", "loss of control", "embarrassment/exposure", "search/quest",
-  "transformation", "invasion/boundary violation", "caretaking/burden",
-  "warning/intuition", "reconciliation", "reunion", "decision/crossroads",
-  "competition", "chaos/overwhelm", "hidden room in the house",
-  "crossing thresholds", "being unprepared", "confrontation",
-  "mythic encounter", "deep water/subconscious", "apocalypse/internal upheaval".
 
 Output ONLY valid JSON with this structure:
 
 {
+  "micronarrative": "...",
   "summary": "...",
   "interpretive_narrative": "...",
   "key_symbols": [
@@ -469,6 +533,13 @@ Output ONLY valid JSON with this structure:
       "stage": "...",
       "emotion": "...",
       "intensity": 0.0
+    }
+  ],
+  "symbol_relations": [
+    {
+      "source": "...",
+      "target": "...",
+      "relation": "..."
     }
   ],
   "narrative_pattern": {
@@ -498,6 +569,7 @@ def analyze_dream(
     detected = detect_keywords(dream_text)
     candidate_symbols = extract_candidate_symbols(dream_text)
     global_symbol_stats = compute_symbol_stats_from_logs()
+    priority_symbols = compute_priority_symbols(candidate_symbols, global_symbol_stats)
 
     # Build lexicon context for candidate symbols
     lex_entries = []
@@ -524,6 +596,7 @@ def analyze_dream(
         "detected_keywords": detected,
         "candidate_symbols": candidate_symbols,
         "lexicon_entries": lex_entries,
+        "priority_symbols": priority_symbols,
     }
 
     completion = client.chat.completions.create(
@@ -542,11 +615,13 @@ def analyze_dream(
         data = json.loads(raw)
     except Exception:
         data = {
+            "micronarrative": "",
             "summary": "Parsing error.",
             "interpretive_narrative": "",
             "key_symbols": [],
             "emotional_profile": {"primary_emotions": [], "overall_tone": "unknown"},
             "emotional_arc": [],
+            "symbol_relations": [],
             "narrative_pattern": {
                 "pattern_name": "Unknown",
                 "description": "",
@@ -594,6 +669,17 @@ def analyze_dream(
             )
         )
 
+    rel_block = data.get("symbol_relations", []) or []
+    symbol_relations: List[SymbolRelation] = []
+    for rel in rel_block:
+        symbol_relations.append(
+            SymbolRelation(
+                source=rel.get("source", "") or "",
+                target=rel.get("target", "") or "",
+                relation=rel.get("relation", "") or "",
+            )
+        )
+
     pattern_raw = data.get("narrative_pattern", {})
     narrative = NarrativePattern(
         pattern_name=pattern_raw.get("pattern_name", "") or "",
@@ -603,12 +689,14 @@ def analyze_dream(
 
     return DreamAnalysis(
         summary=data.get("summary", "") or "",
+        micronarrative=data.get("micronarrative", "") or "",
         interpretive_narrative=data.get("interpretive_narrative", "") or "",
         key_symbols=key_symbols,
         emotional_profile_primary=emotions,
         emotional_profile_tone=emo_block.get("overall_tone", "") or "",
         emotional_arc=emotional_arc,
         narrative_pattern=narrative,
+        symbol_relations=symbol_relations,
         reflection_prompts=data.get("reflection_prompts", []) or [],
         cautions=data.get("cautions", []) or [],
         detected_keywords=detected,
@@ -638,6 +726,7 @@ def index():
 
         analysis_dict = {
             "summary": analysis.summary,
+            "micronarrative": analysis.micronarrative,
             "interpretive_narrative": analysis.interpretive_narrative,
             "key_symbols": [
                 {
@@ -668,6 +757,14 @@ def index():
                 "description": analysis.narrative_pattern.description,
                 "related_themes": analysis.narrative_pattern.related_themes,
             },
+            "symbol_relations": [
+                {
+                    "source": r.source,
+                    "target": r.target,
+                    "relation": r.relation,
+                }
+                for r in analysis.symbol_relations
+            ],
             "reflection_prompts": analysis.reflection_prompts,
             "cautions": analysis.cautions,
             "detected_keywords": analysis.detected_keywords,
