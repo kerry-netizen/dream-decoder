@@ -15,12 +15,6 @@
     <header class="dd-header">
       <div class="dd-logo">Dream Decoder</div>
       <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <a href="{{ url_for('history') }}" class="dd-icon-button" aria-label="View Dream History">
-          🕒
-        </a>
-        <a href="{{ url_for('search') }}" class="dd-icon-button" aria-label="Search Dreams">
-          🔍
-        </a>
         <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
           🌙
         </button>
@@ -36,13 +30,12 @@
         </p>
 
         {% if error %}
-          <p class="dd-error" style="color:#ff8080; margin-bottom:0.75rem;">
+          <p style="color:#ff8a8a; margin-bottom:0.75rem;">
             {{ error }}
           </p>
         {% endif %}
 
-        <!-- Post directly to "/" which your app.py handles with methods=["GET", "POST"] -->
-        <form method="post" action="{{ url_for('index') }}">
+        <form method="post" action="{{ url_for('decode') }}">
           <label for="dream_title" class="dd-label">Dream title (optional)</label>
           <input type="text" id="dream_title" name="dream_title" class="dd-input" />
 
