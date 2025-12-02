@@ -335,7 +335,7 @@ def analyze_dream(
     }
 
     completion = client.chat.completions.create(
-        model="gpt-41",
+        model="gpt-4.1",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": json.dumps(payload)},
