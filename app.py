@@ -1,7 +1,6 @@
 import json
 import os
 import re
-import difflib
 from datetime import datetime
 from typing import List, Dict, Any
 
@@ -11,14 +10,12 @@ from openai import OpenAI
 app = Flask(__name__)
 client = OpenAI()  # Uses OPENAI_API_KEY
 
-
 # ----------------------------------------------------
 # Paths & Logging
 # ----------------------------------------------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(BASE_DIR, "dream_logs.jsonl")
-LEXICON_PATH = os.path.join(BASE_DIR, "symbol_lexicon.json")
 
 
 def append_log(record: Dict[str, Any]) -> None:
@@ -29,7 +26,7 @@ def append_log(record: Dict[str, Any]) -> None:
 def read_logs() -> List[Dict[str, Any]]:
     if not os.path.exists(LOG_FILE):
         return []
-    out = []
+    out: List[Dict[str, Any]] = []
     with open(LOG_FILE, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -43,23 +40,275 @@ def read_logs() -> List[Dict[str, Any]]:
 
 
 # ----------------------------------------------------
-# Lexicon Loader
+# Built-in Symbol Lexicon (no external JSON)
 # ----------------------------------------------------
 
-def load_lexicon() -> Dict[str, Dict[str, Any]]:
-    try:
-        with open(LEXICON_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if isinstance(data, dict) and data:
-                return data
-    except Exception:
-        pass
-    return {}
-
-
-DREAM_SYMBOL_LEXICON = load_lexicon()
-if not DREAM_SYMBOL_LEXICON:
-    raise RuntimeError("symbol_lexicon.json failed to load or is empty.")
+DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
+    "cat": {
+        "themes": ["independence", "intuition", "boundaries"],
+        "notes": "Cats can reflect emotional independence or sensitivity to personal space."
+    },
+    "dog": {
+        "themes": ["loyalty", "companionship", "protection"],
+        "notes": "Dogs often relate to trusted relationships or a desire for support."
+    },
+    "snake": {
+        "themes": ["transformation", "danger", "hidden emotion"],
+        "notes": "Snakes can represent change, fear, or something emerging from the unconscious."
+    },
+    "spider": {
+        "themes": ["entrapment", "patience", "plans"],
+        "notes": "Spiders may point to feeling caught in a situation or weaving long-term plans."
+    },
+    "rat": {
+        "themes": ["disgust", "survival", "hidden problems"],
+        "notes": "Rats can symbolize anxiety about betrayal or contamination."
+    },
+    "wolf": {
+        "themes": ["instinct", "pack dynamics", "threat"],
+        "notes": "Wolves may reflect primal instincts or fear of being targeted."
+    },
+    "bear": {
+        "themes": ["power", "rest", "territory"],
+        "notes": "Bears can represent big emotion or a need for hibernation/rest."
+    },
+    "lion": {
+        "themes": ["courage", "authority", "pride"],
+        "notes": "Lions often relate to personal power or confronting dominance."
+    },
+    "tiger": {
+        "themes": ["anger", "wild energy", "fear"],
+        "notes": "Tigers may point to intense, wary emotions."
+    },
+    "bird": {
+        "themes": ["freedom", "perspective", "messages"],
+        "notes": "Birds can symbolize the desire to rise above problems."
+    },
+    "fish": {
+        "themes": ["unconscious", "emotion", "intuition"],
+        "notes": "Fish often relate to feelings just below awareness."
+    },
+    "shark": {
+        "themes": ["predatory threat", "fear", "competition"],
+        "notes": "Sharks may represent threats or ruthless people/situations."
+    },
+    "horse": {
+        "themes": ["vitality", "drive", "freedom"],
+        "notes": "Horses reflect energy, sexual vitality, or forward motion."
+    },
+    "unicorn": {
+        "themes": ["idealism", "fantasy", "purity"],
+        "notes": "Unicorns point to magical or idealized desires."
+    },
+    "baby": {
+        "themes": ["new beginnings", "vulnerability", "responsibility"],
+        "notes": "Babies symbolize new projects or delicate parts of self."
+    },
+    "child": {
+        "themes": ["innocence", "potential", "past self"],
+        "notes": "Children often reflect younger you or something developing."
+    },
+    "mother": {
+        "themes": ["nurture", "care", "control"],
+        "notes": "Mothers can represent emotional support or smothering."
+    },
+    "father": {
+        "themes": ["authority", "structure", "judgment"],
+        "notes": "Fathers often relate to rules, expectations, or self-critique."
+    },
+    "stranger": {
+        "themes": ["unknown self", "new situation", "uncertainty"],
+        "notes": "Strangers stand in for parts of you or life you don't yet know."
+    },
+    "guide": {
+        "themes": ["intuition", "inner wisdom", "transition"],
+        "notes": "A guide figure often represents your inner compass or readiness to change."
+    },
+    "faceless guide": {
+        "themes": ["mystery", "ambiguous help", "identity in flux"],
+        "notes": "A faceless guide suggests guidance without a clear identity."
+    },
+    "intruder": {
+        "themes": ["boundary violation", "fear", "unwanted influence"],
+        "notes": "Intruders mirror anxiety about privacy or safety."
+    },
+    "house": {
+        "themes": ["self", "psyche", "life structure"],
+        "notes": "Houses represent your inner world or life situation."
+    },
+    "childhood home": {
+        "themes": ["past influences", "family patterns", "nostalgia"],
+        "notes": "Points to old emotional patterns resurfacing."
+    },
+    "school": {
+        "themes": ["evaluation", "learning", "comparison"],
+        "notes": "School dreams often involve feeling tested or judged."
+    },
+    "office": {
+        "themes": ["work", "obligation", "performance"],
+        "notes": "Offices echo concerns about productivity or status."
+    },
+    "hospital": {
+        "themes": ["healing", "vulnerability", "crisis"],
+        "notes": "Hospitals signal something needing care/repair."
+    },
+    "forest": {
+        "themes": ["unknown", "mystery", "inner exploration"],
+        "notes": "Forests represent entering the depths of your psyche."
+    },
+    "ocean": {
+        "themes": ["deep emotion", "vastness", "overwhelm"],
+        "notes": "Oceans symbolize emotional depths or overwhelm."
+    },
+    "river": {
+        "themes": ["life flow", "transition", "direction"],
+        "notes": "Rivers reflect how your life is moving."
+    },
+    "lake": {
+        "themes": ["still emotion", "reflection", "containment"],
+        "notes": "Lakes point to contained feelings or reflection."
+    },
+    "mountain": {
+        "themes": ["challenge", "aspiration", "perspective"],
+        "notes": "Mountains represent big goals or obstacles."
+    },
+    "car": {
+        "themes": ["agency", "direction", "control"],
+        "notes": "Cars reflect how in control you feel of your path."
+    },
+    "train": {
+        "themes": ["life path", "routine", "collective journey"],
+        "notes": "Trains suggest being on set tracks or shared paths."
+    },
+    "plane": {
+        "themes": ["ambition", "transition", "risk"],
+        "notes": "Planes symbolize bigger shifts or risks."
+    },
+    "stairs": {
+        "themes": ["progress", "regression", "movement between levels"],
+        "notes": "Stairs reflect moving up/down emotionally or psychologically."
+    },
+    "door": {
+        "themes": ["opportunity", "threshold", "choice"],
+        "notes": "Doors represent transitions and decisions."
+    },
+    "window": {
+        "themes": ["perspective", "distance", "longing"],
+        "notes": "Windows show how you view a situation."
+    },
+    "bridge": {
+        "themes": ["transition", "connection", "risk"],
+        "notes": "Bridges mark crossings between phases."
+    },
+    "storm": {
+        "themes": ["emotional turmoil", "conflict", "release"],
+        "notes": "Storms mirror intense emotion or conflict."
+    },
+    "fire": {
+        "themes": ["passion", "destruction", "purification"],
+        "notes": "Fire can burn away what no longer serves or express anger."
+    },
+    "flood": {
+        "themes": ["emotional overwhelm", "loss of control", "cleansing"],
+        "notes": "Floods depict feelings rising too fast to handle."
+    },
+    "exam": {
+        "themes": ["evaluation", "self-judgment", "performance anxiety"],
+        "notes": "Exam dreams are classic for fearing exposure as unprepared."
+    },
+    "teeth falling out": {
+        "themes": ["vulnerability", "appearance", "loss of power"],
+        "notes": "Teeth dreams concern aging, power, or being seen."
+    },
+    "flying": {
+        "themes": ["freedom", "escape", "perspective"],
+        "notes": "Flying can feel liberating or like rising above problems."
+    },
+    "falling": {
+        "themes": ["loss of control", "fear of failure", "instability"],
+        "notes": "Falling reflects anxiety about losing safety or status."
+    },
+    "naked in public": {
+        "themes": ["exposure", "shame", "vulnerability"],
+        "notes": "These dreams reflect fear of being too visible or judged."
+    },
+    "chase": {
+        "themes": ["avoidance", "fear", "unresolved issues"],
+        "notes": "Being chased points to something you’re avoiding."
+    },
+    "death": {
+        "themes": ["change", "ending", "transition"],
+        "notes": "Dream death rarely predicts literal death; it reflects endings."
+    },
+    "funeral": {
+        "themes": ["closure", "mourning", "letting go"],
+        "notes": "Funerals represent saying goodbye to roles or relationships."
+    },
+    "wedding": {
+        "themes": ["union", "commitment", "integration"],
+        "notes": "Weddings echo commitments or parts of life coming together."
+    },
+    "pregnancy": {
+        "themes": ["potential", "growth", "creative process"],
+        "notes": "Pregnancy often signals something new developing within you."
+    },
+    "blood": {
+        "themes": ["life force", "injury", "sacrifice"],
+        "notes": "Blood points to strong emotion or vital stakes."
+    },
+    "mirror": {
+        "themes": ["self-image", "identity", "self-reflection"],
+        "notes": "Mirrors invite you to look at how you see yourself."
+    },
+    "phone": {
+        "themes": ["communication", "connection", "missed messages"],
+        "notes": "Phones reflect how heard/connected you feel."
+    },
+    "lost": {
+        "themes": ["confusion", "search for direction", "identity"],
+        "notes": "Feeling lost mirrors uncertainty about path or role."
+    },
+    "trapped": {
+        "themes": ["stuckness", "constraint", "pressure"],
+        "notes": "Being trapped echoes feeling constrained or powerless."
+    },
+    "museum": {
+        "themes": ["memory", "life review", "reflection"],
+        "notes": "Museums are curated spaces of remembered or unresolved moments."
+    },
+    "letter": {
+        "themes": ["communication", "unfinished business", "messages"],
+        "notes": "Unopened letters symbolize unresolved communication."
+    },
+    "starlight": {
+        "themes": ["guidance", "hope", "cosmic perspective"],
+        "notes": "Starlight suggests insight emerging in the dark."
+    },
+    "constellation": {
+        "themes": ["pattern recognition", "connection", "destiny"],
+        "notes": "Constellations are about seeing patterns in scattered points."
+    },
+    "glass": {
+        "themes": ["transparency", "fragility", "clarity"],
+        "notes": "Glass reflects vulnerability or seeing clearly through something."
+    },
+    "cracked glass": {
+        "themes": ["instability", "breakthrough", "fragility"],
+        "notes": "Cracks suggest something under strain or about to change."
+    },
+    "alarm": {
+        "themes": ["urgency", "warning", "awakening"],
+        "notes": "Alarms point to rising internal pressure or awareness."
+    },
+    "gravity shift": {
+        "themes": ["imbalance", "change", "perspective shift"],
+        "notes": "Shifting gravity mirrors feeling off-balance or destabilized."
+    },
+    "galaxy face": {
+        "themes": ["cosmic identity", "mystery", "inner truth"],
+        "notes": "A face made of stars suggests identity in flux and depth."
+    }
+}
 
 DREAM_KEYWORDS: List[str] = sorted(DREAM_SYMBOL_LEXICON.keys())
 
@@ -76,26 +325,19 @@ SYNONYMS: Dict[str, str] = {
     "stars": "starlight",
     "star": "starlight",
     "constellations": "constellation",
-    "guides": "guide",
-    "guardian": "guide",
-    "mentor": "guide",
     "glass": "glass",
     "shattered": "cracked glass",
     "shatter": "cracked glass",
     "burn": "fire",
     "burned": "fire",
     "burning": "fire",
-    "galaxy": "galaxy face",
-    "cosmic": "galaxy face",
     "water": "ocean",
     "flood": "ocean",
     "fall": "falling",
     "falling": "falling",
     "tilt": "gravity shift",
     "tilting": "gravity shift",
-    "gravity": "gravity shift",
-    "museum": "museum",
-    "bridge": "bridge"
+    "gravity": "gravity shift"
 }
 
 
@@ -109,65 +351,45 @@ def normalize_word(word: str) -> str:
 
 
 # ----------------------------------------------------
-# Conceptual Motif Detector (Mode A)
+# Conceptual Motif Detector (high sensitivity)
 # ----------------------------------------------------
 
 def detect_keywords(text: str) -> List[str]:
-    """
-    High-sensitivity motif detector:
-    - matches lexicon keys directly
-    - normalizes synonyms & plurals
-    - fuzzy matches similar terms
-    - adds conceptual motifs from contextual cues
-    """
     lowered = text.lower()
     found: List[str] = []
     seen: set[str] = set()
 
-    # Tokenize
     tokens = re.findall(r"[a-zA-Z']+", lowered)
     normalized_tokens = [normalize_word(tok) for tok in tokens]
 
-    # 1) Direct matches via normalized tokens
+    # 1) Direct matches
     for nt in normalized_tokens:
         if nt in DREAM_KEYWORDS and nt not in seen:
             found.append(nt)
             seen.add(nt)
 
-    # 2) Multiword motifs (exact phrase)
+    # 2) Multi-word motifs by literal phrase (e.g., "cracked glass", "gravity shift")
     for kw in DREAM_KEYWORDS:
         if " " in kw and kw in lowered and kw not in seen:
             found.append(kw)
             seen.add(kw)
 
-    # 3) Fuzzy lexical matches (spell / variant softness)
-    for tok in tokens:
-        close = difflib.get_close_matches(tok, DREAM_KEYWORDS, n=1, cutoff=0.82)
-        if close:
-            key = close[0]
-            if key not in seen:
-                found.append(key)
-                seen.add(key)
-
-    # 4) Conceptual cues (associative triggers)
+    # 3) Conceptual cues: weaker hints that still map to motifs
     cues = {
-        "fall": "falling",
-        "tilt": "gravity shift",
-        "shatter": "cracked glass",
-        "collapse": "fire",
-        "burn": "fire",
-        "glow": "starlight",
-        "star": "starlight",
         "mirror": "mirror",
         "child": "child",
         "door": "door",
         "guide": "guide",
-        "galaxy": "galaxy face",
         "museum": "museum",
         "letter": "letter",
         "ocean": "ocean",
         "water": "ocean",
-        "bridge": "bridge"
+        "bridge": "bridge",
+        "star": "starlight",
+        "glow": "starlight",
+        "collapse": "fire",
+        "alarm": "alarm",
+        "glass": "glass"
     }
 
     for cue, motif in cues.items():
@@ -187,7 +409,7 @@ def simple_candidate_symbols(text: str, max_items: int = 12) -> List[Dict[str, A
     tokens = re.findall(r"[a-zA-Z']+", lowered)
     stop = {
         "the", "and", "this", "that", "from", "into", "onto",
-        "just", "like", "your", "with", "have", "then"
+        "just", "like", "your", "with", "have", "then", "were"
     }
 
     counts: Dict[str, int] = {}
@@ -288,30 +510,25 @@ All intensities are floats 0–1. Keep lists short (3–7 items).
 
 
 # ----------------------------------------------------
-# LLM Execution (4o + silent fallback to 4o-mini)
+# LLM Calls – 4o + fallback to 4o-mini
 # ----------------------------------------------------
 
 def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Call gpt-4o with timeout + silent fallback to gpt-4o-mini.
-    Always returns something JSON-parseable or raises.
-    """
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": json.dumps(payload)},
     ]
 
-    # Primary attempt: gpt-4o
+    # Primary: gpt-4o
     try:
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=messages,
             response_format={"type": "json_object"},
             temperature=0.6,
-            timeout=8,  # critical for Render free tier
+            timeout=8,
         )
-        raw = completion.choices[0].message.content
-        return json.loads(raw)
+        return json.loads(completion.choices[0].message.content)
     except Exception:
         # Silent fallback: gpt-4o-mini
         completion = client.chat.completions.create(
@@ -321,8 +538,7 @@ def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
             temperature=0.6,
             timeout=8,
         )
-        raw = completion.choices[0].message.content
-        return json.loads(raw)
+        return json.loads(completion.choices[0].message.content)
 
 
 def analyze_dream(
