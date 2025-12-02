@@ -7,24 +7,41 @@
     <style>
         body {
             background: #0f0f16;
-            font-family: "Inter", sans-serif;
+            font-family: "Inter", system-ui, sans-serif;
             color: #e6e6ff;
             margin: 0;
             padding: 0;
         }
 
-        h1 {
-            margin-top: 0;
-        }
-
         .container {
             max-width: 800px;
-            margin: 50px auto;
+            margin: 40px auto 60px;
             background: #151521;
-            padding: 35px;
+            padding: 26px 22px 34px;
             border-radius: 14px;
-            box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
             border: 1px solid #232333;
+            box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px 12px 40px;
+                padding: 22px 16px 26px;
+            }
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 14.5px;
+            color: #bcbce0;
+            line-height: 1.5;
+            margin-top: 0;
+            margin-bottom: 18px;
         }
 
         label {
@@ -32,19 +49,19 @@
             margin-top: 18px;
             margin-bottom: 6px;
             font-weight: 500;
-            font-size: 15px;
+            font-size: 16px;
         }
 
         input[type="text"],
         textarea,
         select {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 9px;
             background: #1f1f2b;
             border: 1px solid #33334c;
             color: #e6e6ff;
-            font-size: 15px;
+            font-size: 16px;
             outline: none;
             resize: none;
             box-sizing: border-box;
@@ -57,27 +74,30 @@
             box-shadow: 0 0 0 2px rgba(122, 93, 249, 0.35);
         }
 
-        /* MAIN DREAM BOX — LARGE + AUTOEXPAND */
+        /* MAIN DREAM BOX */
         #dream_text {
             min-height: 220px;
-            line-height: 1.4;
+            line-height: 1.45;
             overflow-y: hidden;
         }
 
-        /* SMALL CONTEXT BOX */
+        /* CONTEXT BOX */
         #life_context {
             min-height: 70px;
         }
 
-        /* BUTTON */
+        ::placeholder {
+            color: #77778f;
+        }
+
         button {
             width: 100%;
-            margin-top: 28px;
+            margin-top: 26px;
             padding: 15px;
             background: linear-gradient(90deg, #7a5df9, #9855ff);
             border: none;
             color: white;
-            font-size: 17px;
+            font-size: 16px;
             border-radius: 30px;
             cursor: pointer;
             font-weight: 600;
@@ -89,33 +109,25 @@
             transform: scale(1.02);
         }
 
-        /* PLACEHOLDER TEXT */
-        ::placeholder {
-            color: #77778f;
+        .error {
+            margin-top: 10px;
+            color: #ff9f9f;
+            font-size: 13px;
         }
 
-        /* DROP SHADOW TOP TITLE */
-        .title {
-            font-size: 26px;
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        /* OPTIONAL SMALL DECORATION */
         .moon {
             position: fixed;
-            top: 18px;
-            right: 20px;
+            top: 14px;
+            right: 18px;
             font-size: 22px;
             opacity: 0.7;
         }
     </style>
 
     <script>
-        // Auto-expand main dream box as user types
         function autoExpand(el) {
             el.style.height = "auto";
-            el.style.height = (el.scrollHeight) + "px";
+            el.style.height = el.scrollHeight + "px";
         }
     </script>
 </head>
@@ -126,27 +138,26 @@
 <div class="container">
     <div class="title">Decode a Dream</div>
 
-    <p style="margin-top:-10px; margin-bottom:25px; line-height:1.4; color:#bcbce0;">
+    <p class="description">
         Paste a recent dream and get a reflective, narrative interpretation.<br>
         Avoid real names or highly identifying details.
     </p>
 
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
     <form method="POST" action="/">
-        
-        <!-- Dream title -->
+
         <label>Dream title (optional)</label>
         <input type="text" name="dream_title" placeholder="e.g., The Observatory Below the Sea">
 
-        <!-- MAIN DREAM BOX -->
         <label>Your dream</label>
-        <textarea 
-            id="dream_text" 
-            name="dream_text" 
-            placeholder="Tell me everything you remember..."
-            oninput="autoExpand(this)"
-        ></textarea>
+        <textarea id="dream_text"
+                  name="dream_text"
+                  placeholder="Tell me everything you remember..."
+                  oninput="autoExpand(this)"></textarea>
 
-        <!-- Felt during -->
         <label>How did you feel during the dream? (optional)</label>
         <select name="felt_during">
             <option value="">Select one</option>
@@ -159,7 +170,6 @@
             <option value="helpless">Helpless</option>
         </select>
 
-        <!-- Felt after -->
         <label>How did you feel after waking? (optional)</label>
         <select name="felt_after">
             <option value="">Select one</option>
@@ -171,13 +181,10 @@
             <option value="tired">Tired</option>
         </select>
 
-        <!-- Context -->
         <label>Anything in your life you think might be connected? (optional)</label>
-        <textarea 
-            id="life_context" 
-            name="life_context" 
-            placeholder="Recent stresses, decisions, events..."
-        ></textarea>
+        <textarea id="life_context"
+                  name="life_context"
+                  placeholder="Recent stresses, decisions, events..."></textarea>
 
         <button type="submit">Decode my dream</button>
     </form>

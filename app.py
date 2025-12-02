@@ -29,67 +29,67 @@ def append_log(record: Dict[str, Any]) -> None:
 # ----------------------------------------------------
 
 DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
-    "cat": {"themes": ["independence", "intuition"], "notes": "Emotional independence, sensitivity to boundaries."},
-    "dog": {"themes": ["loyalty", "support"], "notes": "Trust, companionship, desire for support."},
-    "snake": {"themes": ["transformation", "fear"], "notes": "Unsettling change, hidden emotion."},
-    "spider": {"themes": ["entrapment"], "notes": "Feeling caught in a situation or web of obligations."},
-    "rat": {"themes": ["disgust", "hidden problems"], "notes": "Something unwanted creeping into awareness."},
-    "wolf": {"themes": ["instinct", "threat"], "notes": "Primal drive or sense of being hunted/targeted."},
-    "bear": {"themes": ["power", "rest"], "notes": "Big emotion, territorial defense, need to hibernate."},
-    "lion": {"themes": ["pride", "authority"], "notes": "Leadership, dominance, or pride issues."},
-    "tiger": {"themes": ["anger"], "notes": "Intense emotion you’re wary of (especially anger)."},
-    "bird": {"themes": ["freedom", "perspective"], "notes": "Desire to rise above problems or see broadly."},
-    "fish": {"themes": ["emotion"], "notes": "Submerged feelings, intuitions just below awareness."},
-    "shark": {"themes": ["threat"], "notes": "Perceived predators, ruthless competition."},
-    "horse": {"themes": ["drive"], "notes": "Vitality, sexual energy, forward momentum."},
-    "unicorn": {"themes": ["idealism"], "notes": "Fantasy, impossible or idealized desires."},
-    "baby": {"themes": ["new beginnings"], "notes": "Something new, vulnerable, needing care."},
-    "child": {"themes": ["innocence", "past self"], "notes": "Younger aspects of you, potential and vulnerability."},
-    "mother": {"themes": ["care"], "notes": "Nurture, emotional holding, or smothering."},
-    "father": {"themes": ["authority"], "notes": "Rules, expectations, internal critic."},
-    "stranger": {"themes": ["unknown"], "notes": "Unknown parts of self, new situations."},
-    "guide": {"themes": ["intuition"], "notes": "Inner compass, subtle guidance."},
-    "faceless guide": {"themes": ["mystery"], "notes": "Guidance without clear identity; you feel led but not sure by whom."},
-    "house": {"themes": ["self"], "notes": "Your inner world or life structure."},
-    "forest": {"themes": ["mystery"], "notes": "Exploration of the unconscious."},
-    "ocean": {"themes": ["depth"], "notes": "Vast, overwhelming emotion or unconscious material."},
-    "river": {"themes": ["flow"], "notes": "Direction and momentum of your life."},
-    "lake": {"themes": ["containment"], "notes": "Still emotion, reflection, containment."},
-    "mountain": {"themes": ["challenge"], "notes": "Obstacles, lofty goals, perspective."},
-    "car": {"themes": ["control"], "notes": "Sense of control over your path."},
-    "train": {"themes": ["path"], "notes": "Life track, momentum, routines."},
-    "plane": {"themes": ["transition"], "notes": "Major changes or ambitions."},
-    "stairs": {"themes": ["progress"], "notes": "Moving between levels of insight or emotion."},
+    "cat": {"themes": ["independence", "intuition"], "notes": "May point toward emotional independence or boundaries."},
+    "dog": {"themes": ["loyalty", "support"], "notes": "Can reflect trust, attachment, or desire for companionship."},
+    "snake": {"themes": ["transformation", "fear"], "notes": "May represent change, fear, or something hidden rising up."},
+    "spider": {"themes": ["entrapment"], "notes": "Often relates to intricate plans or feeling caught."},
+    "rat": {"themes": ["disgust", "hidden problems"], "notes": "Can reflect anxiety about contamination or betrayal."},
+    "wolf": {"themes": ["instinct", "threat"], "notes": "Might signal primal drives or feeling targeted."},
+    "bear": {"themes": ["power", "rest"], "notes": "May represent strong emotion or need for retreat."},
+    "lion": {"themes": ["pride", "authority"], "notes": "Often symbolizes leadership or confidence struggles."},
+    "tiger": {"themes": ["anger"], "notes": "Can reflect intense emotion or threat."},
+    "bird": {"themes": ["freedom"], "notes": "Desire to rise above circumstances or gain perspective."},
+    "fish": {"themes": ["emotion"], "notes": "Emotions beneath the surface."},
+    "shark": {"themes": ["threat"], "notes": "Perceived danger or competition."},
+    "horse": {"themes": ["drive"], "notes": "Momentum, vitality, or energetic movement forward."},
+    "unicorn": {"themes": ["idealism"], "notes": "Longing for purity or magic amid complexity."},
+    "baby": {"themes": ["new beginnings"], "notes": "A fragile new feeling, project, or version of self."},
+    "child": {"themes": ["innocence", "past self"], "notes": "Your younger self, vulnerability or early coping patterns."},
+    "mother": {"themes": ["care"], "notes": "Support, comfort, or emotional smothering."},
+    "father": {"themes": ["authority"], "notes": "Judgment, rules, or internal criticism."},
+    "stranger": {"themes": ["unknown"], "notes": "Emerging part of self not yet recognized."},
+    "guide": {"themes": ["intuition"], "notes": "Inner direction nudging toward growth."},
+    "faceless guide": {"themes": ["mystery"], "notes": "Guidance without clarity — a sense of being led."},
+    "house": {"themes": ["self"], "notes": "Your internal structure, emotional rooms, or identity."},
+    "forest": {"themes": ["mystery"], "notes": "Exploring subconscious territory."},
+    "ocean": {"themes": ["depth"], "notes": "Overwhelming emotion or vast intuitive material."},
+    "river": {"themes": ["flow"], "notes": "Life direction or momentum."},
+    "lake": {"themes": ["containment"], "notes": "Still reflection or emotional quiet."},
+    "mountain": {"themes": ["challenge"], "notes": "Big aspirations or obstacles."},
+    "car": {"themes": ["control"], "notes": "Agency, autonomy, ability to steer life."},
+    "train": {"themes": ["path"], "notes": "Long-term momentum or established route."},
+    "plane": {"themes": ["transition"], "notes": "Major shifts or ambitions taking off."},
+    "stairs": {"themes": ["progress"], "notes": "Moving between layers of emotion or insight."},
     "door": {"themes": ["opportunity"], "notes": "Thresholds, decisions, new phases."},
-    "window": {"themes": ["perspective"], "notes": "How you see a situation, or longing."},
-    "bridge": {"themes": ["transition"], "notes": "Crossing between states or roles."},
-    "storm": {"themes": ["conflict"], "notes": "Emotional turmoil, brewing conflict."},
-    "fire": {"themes": ["destruction", "purification"], "notes": "Burning away the old, passion or anger."},
-    "flood": {"themes": ["overwhelm"], "notes": "Emotions rising too fast to manage."},
-    "mirror": {"themes": ["identity"], "notes": "Self-image, reflection, seeing yourself clearly or distorted."},
-    "lost": {"themes": ["confusion"], "notes": "Searching for direction or role."},
-    "trapped": {"themes": ["pressure"], "notes": "Feeling stuck or constrained."},
+    "window": {"themes": ["perspective"], "notes": "Seeing differently."},
+    "bridge": {"themes": ["transition"], "notes": "Crossing between internal states."},
+    "storm": {"themes": ["conflict"], "notes": "Inner turmoil."},
+    "fire": {"themes": ["purification"], "notes": "Burning away the old."},
+    "flood": {"themes": ["overwhelm"], "notes": "Overflow of emotion."},
+    "mirror": {"themes": ["identity"], "notes": "Self-reflection or distorted self-image."},
+    "lost": {"themes": ["confusion"], "notes": "Searching for orientation."},
+    "trapped": {"themes": ["pressure"], "notes": "Feeling stuck."},
 
-    # Dream-Decoder-specific symbols
-    "museum": {"themes": ["memory"], "notes": "Life review, curated memories, unresolved moments."},
-    "letter": {"themes": ["unfinished business"], "notes": "Unspoken or unresolved communication."},
-    "starlight": {"themes": ["guidance"], "notes": "Subtle insight or hope."},
-    "constellation": {"themes": ["connection"], "notes": "Seeing patterns in events or memories."},
-    "glass": {"themes": ["clarity"], "notes": "Transparency, vulnerability, seeing through a barrier."},
-    "cracked glass": {"themes": ["instability"], "notes": "Something under strain or about to change."},
-    "alarm": {"themes": ["urgency"], "notes": "Inner warning, rising awareness."},
-    "gravity shift": {"themes": ["imbalance"], "notes": "Perspective or stability changing."},
-    "galaxy face": {"themes": ["mystery"], "notes": "Identity in flux, feeling part of something larger."},
+    # Dream Decoder symbols
+    "museum": {"themes": ["memory"], "notes": "Curation of past experiences."},
+    "letter": {"themes": ["unfinished business"], "notes": "Message or unresolved communication."},
+    "starlight": {"themes": ["guidance"], "notes": "Small insights in darkness."},
+    "constellation": {"themes": ["connection"], "notes": "Seeing patterns in life events."},
+    "glass": {"themes": ["clarity"], "notes": "Transparency or emotional fragility."},
+    "cracked glass": {"themes": ["instability"], "notes": "A fragile situation under stress."},
+    "alarm": {"themes": ["urgency"], "notes": "Internal alarm or boundary crossed."},
+    "gravity shift": {"themes": ["imbalance"], "notes": "Perspective changing, ground shifting."},
+    "galaxy face": {"themes": ["mystery"], "notes": "Identity in transformation."},
 }
 
-DREAM_KEYWORDS: List[str] = sorted(DREAM_SYMBOL_LEXICON.keys())
+DREAM_KEYWORDS = sorted(DREAM_SYMBOL_LEXICON.keys())
 
 
 # ----------------------------------------------------
 # Synonym Normalization
 # ----------------------------------------------------
 
-SYNONYMS: Dict[str, str] = {
+SYNONYMS = {
     "stars": "starlight",
     "star": "starlight",
     "letters": "letter",
@@ -123,21 +123,18 @@ def detect_keywords(text: str) -> List[str]:
     lowered = text.lower()
     tokens = re.findall(r"[a-zA-Z']+", lowered)
 
-    found: List[str] = []
-    seen = set()
+    found, seen = [], set()
 
     # token-level matches
     for tok in tokens:
         nt = normalize(tok)
         if nt in DREAM_KEYWORDS and nt not in seen:
-            found.append(nt)
-            seen.add(nt)
+            found.append(nt); seen.add(nt)
 
     # multiword motifs
     for kw in DREAM_KEYWORDS:
         if " " in kw and kw in lowered and kw not in seen:
-            found.append(kw)
-            seen.add(kw)
+            found.append(kw); seen.add(kw)
 
     # contextual cues
     cues = {
@@ -154,10 +151,10 @@ def detect_keywords(text: str) -> List[str]:
         "glass": "glass",
         "collapse": "fire",
     }
+
     for cue, motif in cues.items():
         if cue in lowered and motif in DREAM_KEYWORDS and motif not in seen:
-            found.append(motif)
-            seen.add(motif)
+            found.append(motif); seen.add(motif)
 
     return found
 
@@ -166,21 +163,22 @@ def detect_keywords(text: str) -> List[str]:
 # Candidate Symbols & Priority
 # ----------------------------------------------------
 
-def simple_candidate_symbols(text: str, max_items: int = 12) -> List[Dict[str, Any]]:
-    tokens = re.findall(r"[a-zA-Z']+", text.lower())
-    stop = {"the", "and", "this", "that", "from", "just", "like", "then", "with", "your"}
+def simple_candidate_symbols(text: str, max_items=12):
+    lowered = text.lower()
+    tokens = re.findall(r"[a-zA-Z']+", lowered)
+    stop = {"the","and","this","that","from","just","like","then","with","your"}
 
-    counts: Dict[str, int] = {}
+    counts = {}
     for tok in tokens:
         if len(tok) < 4 or tok in stop:
             continue
         counts[tok] = counts.get(tok, 0) + 1
 
-    items = [{"phrase": k, "count": v} for k, v in counts.items()]
+    items = [{"phrase": k, "count": v} for k,v in counts.items()]
     return sorted(items, key=lambda x: (-x["count"], -len(x["phrase"])))[:max_items]
 
 
-def build_priority_symbols(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def build_priority_symbols(candidates):
     scored = []
     for c in candidates:
         phrase = c["phrase"].lower()
@@ -188,98 +186,58 @@ def build_priority_symbols(candidates: List[Dict[str, Any]]) -> List[Dict[str, A
         lex = DREAM_SYMBOL_LEXICON.get(norm)
         score = c["count"] * 2 + (4 if lex else 0)
 
+        # Mode B: symbol + short interpretive sentence
+        description = None
+        if lex:
+            description = lex.get("notes")
+
         scored.append({
             "symbol": norm,
             "original": phrase,
-            "local_count": c["count"],
+            "description": description,
             "in_lexicon": bool(lex),
             "score": score,
-            "lexicon_themes": lex.get("themes", []) if lex else []
         })
 
     return sorted(scored, key=lambda x: x["score"], reverse=True)[:10]
 
 
 # ----------------------------------------------------
-# Rich Interpretation Prompt (Summary-heavy, Deep Dive optional)
+# SYSTEM PROMPT (Summary-heavy, Symbol Mode B)
 # ----------------------------------------------------
 
 SYSTEM_PROMPT = """
 You are Dream Decoder, an evidence-informed, non-mystical interpreter of dreams.
 
-Your job is to weave symbols, emotions, and situations into a psychologically
-meaningful narrative.
+Return VALID JSON.
 
-You will receive:
-- dream_text
-- felt_during, felt_after
-- life_context
-- detected_keywords
-- candidate_symbols
-- priority_symbols
+Formatting:
+- "micronarrative": 1–2 sentences only.
+- "summary": 3–5 sentences, rich but concise. This is the primary interpretive section.
+- "interpretive_narrative": 3–6 paragraphs (deeper dive).
+- "key_symbols": for each symbol include:
+    { "symbol": "...", "description": "a short interpretive sentence" }
+- "emotional_arc": list of:
+    { "stage": "beginning/middle/end", "emotion": "string", "intensity": 0.0 }
 
-Principles:
-- Stay grounded in the dream's actual content and the life_context.
-- Make interpretations tentative: use language like "may suggest" or "could reflect".
-- Avoid superstition, fortune-telling, or claims about the future.
-- Focus on psychological meaning, emotional patterns, and inner conflicts.
-- Help the dreamer generate insight, not fear.
-- It is okay to be rich and detailed, but structure your output clearly.
-
-Return VALID JSON with:
-
-{
-  "micronarrative": "...",
-  "summary": "...",
-  "interpretive_narrative": "...",
-  "key_symbols": [...],
-  "emotional_profile": {...},
-  "emotional_arc": [...],
-  "narrative_pattern": {...},
-  "symbol_relations": [...],
-  "reflection_prompts": [...],
-  "cautions": [...]
-}
-
-Formatting / richness:
-- "micronarrative": 1–2 sentences retelling the dream vividly but concisely.
-- "summary": 5–7 sentences giving a psychologically rich, high-level interpretation.
-  This should carry most of the interpretive weight and be very readable on a phone.
-- "interpretive_narrative": treat this as a deeper dive. Write 3–6 short paragraphs
-  (roughly 400–800 words total) weaving symbols, emotions, and life_context into a
-  cohesive psychological story. Feel free to be more exploratory and reflective here.
-- "key_symbols": 3–7 key symbols with 2–3 possible meanings and a confidence
-  value between 0 and 1.
-- "emotional_profile": 3–5 primary emotions with intensities 0–1 and an overall tone.
-- "emotional_arc": must be a list of objects like
-  {"stage": "beginning/middle/end", "emotion": "string", "intensity": 0.0}.
-  If you aren't sure, return [] rather than raw strings.
-- "narrative_pattern": clearly name the psychological pattern (e.g. "Threshold Crossing",
-  "Life Review", "Avoidance vs Confrontation") and briefly describe it.
-- "symbol_relations": only include real links like
-  {"source": "child", "target": "door", "relation": "points toward choice"}.
-  If you don't see clear relationships, return [].
-- "reflection_prompts": 3–6 thoughtful, gentle questions inviting self-reflection.
-- "cautions": 2–4 short reminders about not over-literalizing the dream.
-
-Keep JSON structure strict, but allow prose fields to be rich and textured.
+Be reflective and grounded, not mystical.
+Do NOT mention confidence.
+Do NOT generate empty placeholder fields.
 """
 
-
 # ----------------------------------------------------
-# LLM Call (mini-only, 30-second timeout)
+# LLM CALL
 # ----------------------------------------------------
 
-def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": json.dumps(payload)},
+def call_model(payload):
+    messages=[
+        {"role":"system","content":SYSTEM_PROMPT},
+        {"role":"user","content":json.dumps(payload)}
     ]
-
-    response = client.chat.completions.create(
+    response=client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
-        response_format={"type": "json_object"},
+        response_format={"type":"json_object"},
         temperature=0.7,
         timeout=30,
     )
@@ -287,118 +245,96 @@ def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # ----------------------------------------------------
-# Helper: Normalize emotional structures for templates
+# Normalize emotional fields for template safety
 # ----------------------------------------------------
 
-def normalize_emotional_profile(raw_profile: Any) -> (List[Dict[str, Any]], str):
-    profile = raw_profile or {}
-    if not isinstance(profile, dict):
-        profile = {}
+def normalize_emotional_profile(raw):
+    profile = raw or {}
+    if not isinstance(profile, dict): profile={}
     primary_raw = profile.get("primary_emotions", []) or []
-    overall_tone = profile.get("overall_tone", "unknown") or "unknown"
-
-    normalized_primary: List[Dict[str, Any]] = []
+    tone = profile.get("overall_tone","unknown") or "unknown"
+    out=[]
     for item in primary_raw:
         if isinstance(item, dict):
-            name = item.get("name") or item.get("emotion") or str(item)
-            intensity = item.get("intensity", 0.0)
+            name = item.get("name") or item.get("emotion") or ""
+            inten = item.get("intensity",0.0)
         else:
-            name = str(item)
-            intensity = 0.0
-        if not isinstance(intensity, (int, float)):
-            intensity = 0.0
-        normalized_primary.append({"name": name, "intensity": float(intensity)})
-
-    return normalized_primary, overall_tone
+            name=str(item); inten=0.0
+        if not isinstance(inten,(int,float)): inten=0.0
+        out.append({"name":name,"intensity":float(inten)})
+    return out, tone
 
 
-def normalize_emotional_arc(raw_arc: Any) -> List[Dict[str, Any]]:
-    arc = raw_arc or []
-    normalized_arc: List[Dict[str, Any]] = []
-
-    if not isinstance(arc, list):
-        return normalized_arc
-
+def normalize_emotional_arc(raw):
+    arc = raw or []
+    if not isinstance(arc,list): return []
+    out=[]
     for st in arc:
-        if isinstance(st, dict):
-            stage = st.get("stage") or ""
-            emotion = st.get("emotion") or st.get("name") or ""
-            intensity = st.get("intensity", 0.0)
+        if isinstance(st,dict):
+            stage = st.get("stage","")
+            emo = st.get("emotion") or st.get("name") or ""
+            inten = st.get("intensity",0.0)
         else:
-            stage = ""
-            emotion = str(st)
-            intensity = 0.0
-        if not isinstance(intensity, (int, float)):
-            intensity = 0.0
-        normalized_arc.append(
-            {"stage": stage, "emotion": emotion, "intensity": float(intensity)}
-        )
-
-    return normalized_arc
+            stage=""; emo=str(st); inten=0.0
+        if not isinstance(inten,(int,float)): inten=0.0
+        out.append({"stage":stage,"emotion":emo,"intensity":float(inten)})
+    return out
 
 
 # ----------------------------------------------------
-# Dream Analysis
+# Main analysis
 # ----------------------------------------------------
 
-def analyze_dream(
-    dream_text: str,
-    title: str = "",
-    felt_during: str = "",
-    felt_after: str = "",
-    life_context: str = "",
-) -> Dict[str, Any]:
-
+def analyze_dream(dream_text, title="", felt_during="", felt_after="", life_context=""):
     detected = detect_keywords(dream_text)
     candidates = simple_candidate_symbols(dream_text)
     priority = build_priority_symbols(candidates)
 
     payload = {
-        "dream_title": title,
-        "dream_text": dream_text,
-        "felt_during": felt_during,
-        "felt_after": felt_after,
-        "life_context": life_context,
-        "detected_keywords": detected,
-        "candidate_symbols": candidates,
-        "priority_symbols": priority,
+        "dream_title":title,
+        "dream_text":dream_text,
+        "felt_during":felt_during,
+        "felt_after":felt_after,
+        "life_context":life_context,
+        "detected_keywords":detected,
+        "candidate_symbols":candidates,
+        "priority_symbols":priority,
     }
 
     try:
         data = call_model(payload)
     except Exception as e:
-        error_msg = f"{type(e).__name__}: {e}"
-        print("MODEL ERROR:", error_msg, flush=True)
-        data = {
-            "micronarrative": "",
-            "summary": f"There was an error contacting the model: {error_msg}",
-            "interpretive_narrative": "",
-            "key_symbols": [],
-            "emotional_profile": {"primary_emotions": [], "overall_tone": "unknown"},
-            "emotional_arc": [],
-            "narrative_pattern": {},
-            "symbol_relations": [],
-            "reflection_prompts": [],
-            "cautions": ["Model call failed.", error_msg],
+        err=f"{type(e).__name__}: {e}"
+        print("MODEL ERROR:",err,flush=True)
+        data={
+            "micronarrative":"",
+            "summary":f"There was an error contacting the model: {err}",
+            "interpretive_narrative":"",
+            "key_symbols":[],
+            "emotional_profile":{"primary_emotions":[],"overall_tone":"unknown"},
+            "emotional_arc":[],
+            "narrative_pattern":{},
+            "symbol_relations":[],
+            "reflection_prompts":[],
+            "cautions":[err]
         }
 
-    raw_profile = data.get("emotional_profile", {}) or {}
-    normalized_primary, tone = normalize_emotional_profile(raw_profile)
-    normalized_arc = normalize_emotional_arc(data.get("emotional_arc", []))
+    primary,tone=normalize_emotional_profile(data.get("emotional_profile"))
+    arc=normalize_emotional_arc(data.get("emotional_arc"))
 
     return {
-        "micronarrative": data.get("micronarrative", "") or "",
-        "summary": data.get("summary", "") or "",
-        "interpretive_narrative": data.get("interpretive_narrative", "") or "",
-        "key_symbols": data.get("key_symbols", []) or [],
-        "emotional_profile_primary": normalized_primary,
-        "emotional_profile_tone": tone,
-        "emotional_arc": normalized_arc,
-        "narrative_pattern": data.get("narrative_pattern", {}) or {},
-        "symbol_relations": data.get("symbol_relations", []) or [],
-        "reflection_prompts": data.get("reflection_prompts", []) or [],
-        "cautions": data.get("cautions", []) or [],
-        "detected_keywords": detected,
+        "micronarrative":data.get("micronarrative",""),
+        "summary":data.get("summary",""),
+        "interpretive_narrative":data.get("interpretive_narrative",""),
+        "key_symbols":data.get("key_symbols",[]),
+        "emotional_profile_primary":primary,
+        "emotional_profile_tone":tone,
+        "emotional_arc":arc,
+        "narrative_pattern":data.get("narrative_pattern",{}),
+        "symbol_relations":data.get("symbol_relations",[]),
+        "reflection_prompts":data.get("reflection_prompts",[]),
+        "cautions":data.get("cautions",[]),
+        "detected_keywords":detected,
     }
 
 
@@ -406,53 +342,52 @@ def analyze_dream(
 # Routes
 # ----------------------------------------------------
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/",methods=["GET","POST"])
 def index():
-    if request.method == "POST":
+    if request.method=="POST":
         return handle_decode()
     return render_template("index.html")
 
 
-@app.route("/decode", methods=["GET", "POST"])
+@app.route("/decode",methods=["GET","POST"])
 def decode():
-    if request.method == "POST":
+    if request.method=="POST":
         return handle_decode()
     return redirect(url_for("index"))
 
 
 def handle_decode():
-    dream_text = request.form.get("dream_text", "").strip()
-    dream_title = request.form.get("dream_title", "").strip()
-    felt_during = request.form.get("felt_during", "").strip()
-    felt_after = request.form.get("felt_after", "").strip()
-    life_context = request.form.get("life_context", "").strip()
+    dream_text=request.form.get("dream_text","").strip()
+    dream_title=request.form.get("dream_title","").strip()
+    felt_during=request.form.get("felt_during","").strip()
+    felt_after=request.form.get("felt_after","").strip()
+    life_context=request.form.get("life_context","").strip()
 
     if not dream_text:
-        return render_template("index.html", error="Please paste a dream before decoding.")
+        return render_template("index.html",error="Paste a dream first!")
 
-    analysis = analyze_dream(
+    analysis=analyze_dream(
         dream_text=dream_text,
         title=dream_title,
         felt_during=felt_during,
         felt_after=felt_after,
-        life_context=life_context,
+        life_context=life_context
     )
 
-    record = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "input": {
-            "title": dream_title,
-            "dream_text": dream_text,
-            "felt_during": felt_during,
-            "felt_after": felt_after,
-            "life_context": life_context,
+    append_log({
+        "timestamp":datetime.utcnow().isoformat(),
+        "input":{
+            "title":dream_title,
+            "dream_text":dream_text,
+            "felt_during":felt_during,
+            "felt_after":felt_after,
+            "life_context":life_context,
         },
-        "analysis": analysis,
-    }
-    append_log(record)
+        "analysis":analysis
+    })
 
-    return render_template("result.html", analysis=analysis)
+    return render_template("result.html",analysis=analysis)
 
 
-if __name__ == "__main__":
+if __name__=="__main__":
     app.run(debug=True)
