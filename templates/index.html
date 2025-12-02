@@ -23,48 +23,51 @@
             box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
         }
 
+        /* Mobile layout */
         @media (max-width: 600px) {
             .container {
-                margin: 20px 12px 40px;
-                padding: 22px 16px 26px;
+                margin: 26px 12px 50px;
+                padding: 26px 18px 32px;
             }
         }
 
         .title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .description {
-            font-size: 14.5px;
+            font-size: 15px;
             color: #bcbce0;
-            line-height: 1.5;
+            line-height: 1.55;
             margin-top: 0;
-            margin-bottom: 18px;
+            margin-bottom: 22px;
         }
 
+        /* Form elements */
         label {
             display: block;
-            margin-top: 18px;
-            margin-bottom: 6px;
+            margin-top: 24px;      /* increased */
+            margin-bottom: 10px;   /* increased */
             font-weight: 500;
-            font-size: 16px;
+            font-size: 17px;
         }
 
         input[type="text"],
         textarea,
         select {
             width: 100%;
-            padding: 14px;
-            border-radius: 9px;
+            padding: 16px;       /* bigger tap target */
+            border-radius: 10px;
             background: #1f1f2b;
             border: 1px solid #33334c;
             color: #e6e6ff;
-            font-size: 16px;
+            font-size: 17px;
             outline: none;
             resize: none;
             box-sizing: border-box;
+            margin-bottom: 10px; /* added spacing */
         }
 
         input[type="text"]:focus,
@@ -76,28 +79,29 @@
 
         /* MAIN DREAM BOX */
         #dream_text {
-            min-height: 220px;
+            min-height: 240px;   /* larger initial space */
             line-height: 1.45;
             overflow-y: hidden;
         }
 
         /* CONTEXT BOX */
         #life_context {
-            min-height: 70px;
+            min-height: 80px;
         }
 
         ::placeholder {
             color: #77778f;
         }
 
+        /* Submit button */
         button {
             width: 100%;
-            margin-top: 26px;
-            padding: 15px;
+            margin-top: 32px;      /* more breathing room */
+            padding: 17px;
             background: linear-gradient(90deg, #7a5df9, #9855ff);
             border: none;
             color: white;
-            font-size: 16px;
+            font-size: 17px;
             border-radius: 30px;
             cursor: pointer;
             font-weight: 600;
@@ -109,12 +113,14 @@
             transform: scale(1.02);
         }
 
+        /* Error message */
         .error {
             margin-top: 10px;
             color: #ff9f9f;
-            font-size: 13px;
+            font-size: 14px;
         }
 
+        /* Little moon icon */
         .moon {
             position: fixed;
             top: 14px;
@@ -125,6 +131,7 @@
     </style>
 
     <script>
+        /* Auto-expanding dream textarea */
         function autoExpand(el) {
             el.style.height = "auto";
             el.style.height = el.scrollHeight + "px";
@@ -136,6 +143,7 @@
 <div class="moon">🌙</div>
 
 <div class="container">
+
     <div class="title">Decode a Dream</div>
 
     <p class="description">
@@ -149,15 +157,18 @@
 
     <form method="POST" action="/">
 
+        <!-- Dream title -->
         <label>Dream title (optional)</label>
         <input type="text" name="dream_title" placeholder="e.g., The Observatory Below the Sea">
 
+        <!-- Main dream content -->
         <label>Your dream</label>
         <textarea id="dream_text"
                   name="dream_text"
                   placeholder="Tell me everything you remember..."
                   oninput="autoExpand(this)"></textarea>
 
+        <!-- Felt During -->
         <label>How did you feel during the dream? (optional)</label>
         <select name="felt_during">
             <option value="">Select one</option>
@@ -170,6 +181,7 @@
             <option value="helpless">Helpless</option>
         </select>
 
+        <!-- Felt After -->
         <label>How did you feel after waking? (optional)</label>
         <select name="felt_after">
             <option value="">Select one</option>
@@ -181,6 +193,7 @@
             <option value="tired">Tired</option>
         </select>
 
+        <!-- Context -->
         <label>Anything in your life you think might be connected? (optional)</label>
         <textarea id="life_context"
                   name="life_context"
@@ -188,6 +201,7 @@
 
         <button type="submit">Decode my dream</button>
     </form>
+
 </div>
 
 </body>
