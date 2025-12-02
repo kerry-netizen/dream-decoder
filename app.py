@@ -29,204 +29,57 @@ def append_log(record: Dict[str, Any]) -> None:
 # ----------------------------------------------------
 
 DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
-    "cat": {
-        "themes": ["independence", "intuition"],
-        "notes": "Emotional independence, sensitivity to boundaries."
-    },
-    "dog": {
-        "themes": ["loyalty", "support"],
-        "notes": "Trust, companionship, desire for support."
-    },
-    "snake": {
-        "themes": ["transformation", "fear"],
-        "notes": "Unsettling change, hidden emotion."
-    },
-    "spider": {
-        "themes": ["entrapment"],
-        "notes": "Feeling caught in a situation or web of obligations."
-    },
-    "rat": {
-        "themes": ["disgust", "hidden problems"],
-        "notes": "Something unwanted creeping into awareness."
-    },
-    "wolf": {
-        "themes": ["instinct", "threat"],
-        "notes": "Primal drive or sense of being hunted/targeted."
-    },
-    "bear": {
-        "themes": ["power", "rest"],
-        "notes": "Big emotion, territorial defense, need to hibernate."
-    },
-    "lion": {
-        "themes": ["pride", "authority"],
-        "notes": "Leadership, dominance, or pride issues."
-    },
-    "tiger": {
-        "themes": ["anger"],
-        "notes": "Intense emotion you’re wary of (especially anger)."
-    },
-    "bird": {
-        "themes": ["freedom", "perspective"],
-        "notes": "Desire to rise above problems or see broadly."
-    },
-    "fish": {
-        "themes": ["emotion"],
-        "notes": "Submerged feelings, intuitions just below awareness."
-    },
-    "shark": {
-        "themes": ["threat"],
-        "notes": "Perceived predators, ruthless competition."
-    },
-    "horse": {
-        "themes": ["drive"],
-        "notes": "Vitality, sexual energy, forward momentum."
-    },
-    "unicorn": {
-        "themes": ["idealism"],
-        "notes": "Fantasy, impossible or idealized desires."
-    },
-    "baby": {
-        "themes": ["new beginnings"],
-        "notes": "Something new, vulnerable, needing care."
-    },
-    "child": {
-        "themes": ["innocence", "past self"],
-        "notes": "Younger aspects of you, potential and vulnerability."
-    },
-    "mother": {
-        "themes": ["care"],
-        "notes": "Nurture, emotional holding, or smothering."
-    },
-    "father": {
-        "themes": ["authority"],
-        "notes": "Rules, expectations, internal critic."
-    },
-    "stranger": {
-        "themes": ["unknown"],
-        "notes": "Unknown parts of self, new situations."
-    },
-    "guide": {
-        "themes": ["intuition"],
-        "notes": "Inner compass, subtle guidance."
-    },
-    "faceless guide": {
-        "themes": ["mystery"],
-        "notes": "Guidance without clear identity; you feel led but not sure by whom."
-    },
-    "house": {
-        "themes": ["self"],
-        "notes": "Your inner world or life structure."
-    },
-    "forest": {
-        "themes": ["mystery"],
-        "notes": "Exploration of the unconscious."
-    },
-    "ocean": {
-        "themes": ["depth"],
-        "notes": "Vast, overwhelming emotion or unconscious material."
-    },
-    "river": {
-        "themes": ["flow"],
-        "notes": "Direction and momentum of your life."
-    },
-    "lake": {
-        "themes": ["containment"],
-        "notes": "Still emotion, reflection, containment."
-    },
-    "mountain": {
-        "themes": ["challenge"],
-        "notes": "Obstacles, lofty goals, perspective."
-    },
-    "car": {
-        "themes": ["control"],
-        "notes": "Sense of control over your path."
-    },
-    "train": {
-        "themes": ["path"],
-        "notes": "Life track, momentum, routines."
-    },
-    "plane": {
-        "themes": ["transition"],
-        "notes": "Major changes or ambitions."
-    },
-    "stairs": {
-        "themes": ["progress"],
-        "notes": "Moving between levels of insight or emotion."
-    },
-    "door": {
-        "themes": ["opportunity"],
-        "notes": "Thresholds, decisions, new phases."
-    },
-    "window": {
-        "themes": ["perspective"],
-        "notes": "How you see a situation, or longing."
-    },
-    "bridge": {
-        "themes": ["transition"],
-        "notes": "Crossing between states or roles."
-    },
-    "storm": {
-        "themes": ["conflict"],
-        "notes": "Emotional turmoil, brewing conflict."
-    },
-    "fire": {
-        "themes": ["destruction", "purification"],
-        "notes": "Burning away the old, passion or anger."
-    },
-    "flood": {
-        "themes": ["overwhelm"],
-        "notes": "Emotions rising too fast to manage."
-    },
-    "mirror": {
-        "themes": ["identity"],
-        "notes": "Self-image, reflection, seeing yourself clearly or distorted."
-    },
-    "lost": {
-        "themes": ["confusion"],
-        "notes": "Searching for direction or role."
-    },
-    "trapped": {
-        "themes": ["pressure"],
-        "notes": "Feeling stuck or constrained."
-    },
+    "cat": {"themes": ["independence", "intuition"], "notes": "Emotional independence, sensitivity to boundaries."},
+    "dog": {"themes": ["loyalty", "support"], "notes": "Trust, companionship, desire for support."},
+    "snake": {"themes": ["transformation", "fear"], "notes": "Unsettling change, hidden emotion."},
+    "spider": {"themes": ["entrapment"], "notes": "Feeling caught in a situation or web of obligations."},
+    "rat": {"themes": ["disgust", "hidden problems"], "notes": "Something unwanted creeping into awareness."},
+    "wolf": {"themes": ["instinct", "threat"], "notes": "Primal drive or sense of being hunted/targeted."},
+    "bear": {"themes": ["power", "rest"], "notes": "Big emotion, territorial defense, need to hibernate."},
+    "lion": {"themes": ["pride", "authority"], "notes": "Leadership, dominance, or pride issues."},
+    "tiger": {"themes": ["anger"], "notes": "Intense emotion you’re wary of (especially anger)."},
+    "bird": {"themes": ["freedom", "perspective"], "notes": "Desire to rise above problems or see broadly."},
+    "fish": {"themes": ["emotion"], "notes": "Submerged feelings, intuitions just below awareness."},
+    "shark": {"themes": ["threat"], "notes": "Perceived predators, ruthless competition."},
+    "horse": {"themes": ["drive"], "notes": "Vitality, sexual energy, forward momentum."},
+    "unicorn": {"themes": ["idealism"], "notes": "Fantasy, impossible or idealized desires."},
+    "baby": {"themes": ["new beginnings"], "notes": "Something new, vulnerable, needing care."},
+    "child": {"themes": ["innocence", "past self"], "notes": "Younger aspects of you, potential and vulnerability."},
+    "mother": {"themes": ["care"], "notes": "Nurture, emotional holding, or smothering."},
+    "father": {"themes": ["authority"], "notes": "Rules, expectations, internal critic."},
+    "stranger": {"themes": ["unknown"], "notes": "Unknown parts of self, new situations."},
+    "guide": {"themes": ["intuition"], "notes": "Inner compass, subtle guidance."},
+    "faceless guide": {"themes": ["mystery"], "notes": "Guidance without clear identity; you feel led but not sure by whom."},
+    "house": {"themes": ["self"], "notes": "Your inner world or life structure."},
+    "forest": {"themes": ["mystery"], "notes": "Exploration of the unconscious."},
+    "ocean": {"themes": ["depth"], "notes": "Vast, overwhelming emotion or unconscious material."},
+    "river": {"themes": ["flow"], "notes": "Direction and momentum of your life."},
+    "lake": {"themes": ["containment"], "notes": "Still emotion, reflection, containment."},
+    "mountain": {"themes": ["challenge"], "notes": "Obstacles, lofty goals, perspective."},
+    "car": {"themes": ["control"], "notes": "Sense of control over your path."},
+    "train": {"themes": ["path"], "notes": "Life track, momentum, routines."},
+    "plane": {"themes": ["transition"], "notes": "Major changes or ambitions."},
+    "stairs": {"themes": ["progress"], "notes": "Moving between levels of insight or emotion."},
+    "door": {"themes": ["opportunity"], "notes": "Thresholds, decisions, new phases."},
+    "window": {"themes": ["perspective"], "notes": "How you see a situation, or longing."},
+    "bridge": {"themes": ["transition"], "notes": "Crossing between states or roles."},
+    "storm": {"themes": ["conflict"], "notes": "Emotional turmoil, brewing conflict."},
+    "fire": {"themes": ["destruction", "purification"], "notes": "Burning away the old, passion or anger."},
+    "flood": {"themes": ["overwhelm"], "notes": "Emotions rising too fast to manage."},
+    "mirror": {"themes": ["identity"], "notes": "Self-image, reflection, seeing yourself clearly or distorted."},
+    "lost": {"themes": ["confusion"], "notes": "Searching for direction or role."},
+    "trapped": {"themes": ["pressure"], "notes": "Feeling stuck or constrained."},
 
-    # Extended for Dream Decoder
-    "museum": {
-        "themes": ["memory"],
-        "notes": "Life review, curated memories, unresolved moments."
-    },
-    "letter": {
-        "themes": ["unfinished business"],
-        "notes": "Unspoken or unresolved communication."
-    },
-    "starlight": {
-        "themes": ["guidance"],
-        "notes": "Small lights in darkness, subtle insight or hope."
-    },
-    "constellation": {
-        "themes": ["connection"],
-        "notes": "Seeing patterns in events or memories."
-    },
-    "glass": {
-        "themes": ["clarity"],
-        "notes": "Transparency, vulnerability, seeing through a barrier."
-    },
-    "cracked glass": {
-        "themes": ["instability"],
-        "notes": "Something under strain or about to change."
-    },
-    "alarm": {
-        "themes": ["urgency"],
-        "notes": "Inner warning, rising awareness."
-    },
-    "gravity shift": {
-        "themes": ["imbalance"],
-        "notes": "Perspective or stability changing."
-    },
-    "galaxy face": {
-        "themes": ["mystery"],
-        "notes": "Identity in flux, feeling part of something larger."
-    },
+    # Dream-Decoder-specific symbols
+    "museum": {"themes": ["memory"], "notes": "Life review, curated memories, unresolved moments."},
+    "letter": {"themes": ["unfinished business"], "notes": "Unspoken or unresolved communication."},
+    "starlight": {"themes": ["guidance"], "notes": "Subtle insight or hope."},
+    "constellation": {"themes": ["connection"], "notes": "Seeing patterns in events or memories."},
+    "glass": {"themes": ["clarity"], "notes": "Transparency, vulnerability, seeing through a barrier."},
+    "cracked glass": {"themes": ["instability"], "notes": "Something under strain or about to change."},
+    "alarm": {"themes": ["urgency"], "notes": "Inner warning, rising awareness."},
+    "gravity shift": {"themes": ["imbalance"], "notes": "Perspective or stability changing."},
+    "galaxy face": {"themes": ["mystery"], "notes": "Identity in flux, feeling part of something larger."},
 }
 
 DREAM_KEYWORDS: List[str] = sorted(DREAM_SYMBOL_LEXICON.keys())
@@ -273,20 +126,20 @@ def detect_keywords(text: str) -> List[str]:
     found: List[str] = []
     seen = set()
 
-    # 1) token-level normalized matches
+    # token-level matches
     for tok in tokens:
         nt = normalize(tok)
         if nt in DREAM_KEYWORDS and nt not in seen:
             found.append(nt)
             seen.add(nt)
 
-    # 2) phrase-level literal matches (multiword motifs)
+    # multiword motifs
     for kw in DREAM_KEYWORDS:
         if " " in kw and kw in lowered and kw not in seen:
             found.append(kw)
             seen.add(kw)
 
-    # 3) contextual cues for extra richness
+    # contextual cues
     cues = {
         "mirror": "mirror",
         "child": "child",
@@ -403,7 +256,7 @@ Keep JSON structure strict, but allow prose fields to be rich and textured.
 
 
 # ----------------------------------------------------
-# LLM Call (mini-only, timeout)
+# LLM Call (mini-only, 30-second timeout)
 # ----------------------------------------------------
 
 def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -417,7 +270,7 @@ def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
         messages=messages,
         response_format={"type": "json_object"},
         temperature=0.7,
-        timeout=8,
+        timeout=30,  # ← increased timeout to fix APITimeoutError
     )
     return json.loads(response.choices[0].message.content)
 
@@ -453,7 +306,6 @@ def analyze_dream(
         data = call_model(payload)
     except Exception as e:
         error_msg = f"{type(e).__name__}: {e}"
-        # log to Render logs
         print("MODEL ERROR:", error_msg, flush=True)
         data = {
             "micronarrative": "",
