@@ -270,9 +270,60 @@ def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
         messages=messages,
         response_format={"type": "json_object"},
         temperature=0.7,
-        timeout=30,  # ← increased timeout to fix APITimeoutError
+        timeout=30,
     )
     return json.loads(response.choices[0].message.content)
+
+
+# ----------------------------------------------------
+# Helper: Normalize emotional structures for templates
+# ----------------------------------------------------
+
+def normalize_emotional_profile(raw_profile: Any) -> (List[Dict[str, Any]], str):
+    profile = raw_profile or {}
+    if not isinstance(profile, dict):
+        profile = {}
+    primary_raw = profile.get("primary_emotions", []) or []
+    overall_tone = profile.get("overall_tone", "unknown") or "unknown"
+
+    normalized_primary: List[Dict[str, Any]] = []
+    for item in primary_raw:
+        if isinstance(item, dict):
+            name = item.get("name") or item.get("emotion") or str(item)
+            intensity = item.get("intensity", 0.0)
+        else:
+            name = str(item)
+            intensity = 0.0
+        if not isinstance(intensity, (int, float)):
+            intensity = 0.0
+        normalized_primary.append({"name": name, "intensity": float(intensity)})
+
+    return normalized_primary, overall_tone
+
+
+def normalize_emotional_arc(raw_arc: Any) -> List[Dict[str, Any]]:
+    arc = raw_arc or []
+    normalized_arc: List[Dict[str, Any]] = []
+
+    if not isinstance(arc, list):
+        return normalized_arc
+
+    for st in arc:
+        if isinstance(st, dict):
+            stage = st.get("stage") or ""
+            emotion = st.get("emotion") or st.get("name") or ""
+            intensity = st.get("intensity", 0.0)
+        else:
+            stage = ""
+            emotion = str(st)
+            intensity = 0.0
+        if not isinstance(intensity, (int, float)):
+            intensity = 0.0
+        normalized_arc.append(
+            {"stage": stage, "emotion": emotion, "intensity": float(intensity)}
+        )
+
+    return normalized_arc
 
 
 # ----------------------------------------------------
@@ -320,18 +371,18 @@ def analyze_dream(
             "cautions": ["Model call failed.", error_msg],
         }
 
-    profile = data.get("emotional_profile", {}) or {}
-    primary = profile.get("primary_emotions", []) or []
-    tone = profile.get("overall_tone", "unknown") or "unknown"
+    raw_profile = data.get("emotional_profile", {}) or {}
+    normalized_primary, tone = normalize_emotional_profile(raw_profile)
+    normalized_arc = normalize_emotional_arc(data.get("emotional_arc", []))
 
     return {
         "micronarrative": data.get("micronarrative", "") or "",
         "summary": data.get("summary", "") or "",
         "interpretive_narrative": data.get("interpretive_narrative", "") or "",
         "key_symbols": data.get("key_symbols", []) or [],
-        "emotional_profile_primary": primary,
+        "emotional_profile_primary": normalized_primary,
         "emotional_profile_tone": tone,
-        "emotional_arc": data.get("emotional_arc", []) or [],
+        "emotional_arc": normalized_arc,
         "narrative_pattern": data.get("narrative_pattern", {}) or {},
         "symbol_relations": data.get("symbol_relations", []) or [],
         "reflection_prompts": data.get("reflection_prompts", []) or [],
