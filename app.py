@@ -453,6 +453,8 @@ def analyze_dream(
         data = call_model(payload)
     except Exception as e:
         error_msg = f"{type(e).__name__}: {e}"
+        # log to Render logs
+        print("MODEL ERROR:", error_msg, flush=True)
         data = {
             "micronarrative": "",
             "summary": f"There was an error contacting the model: {error_msg}",
