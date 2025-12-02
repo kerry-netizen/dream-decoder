@@ -1,333 +1,455 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Dream Decoder – Result</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Dream Decoder – Result</title>
+    <style>
+        body {
+            background: #0f0f16;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 0;
+        }
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 1.5rem;
-      background: #0b1020;
-      color: #f4f4f7;
-      line-height: 1.5;
-    }
+        .container {
+            max-width: 900px;
+            margin: 40px auto 60px;
+            background: #151521;
+            padding: 24px 20px 30px;
+            border-radius: 14px;
+            box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+            border: 1px solid #232333;
+        }
 
-    a {
-      color: #8ab4ff;
-      text-decoration: none;
-    }
+        @media (min-width: 768px) {
+            .container {
+                padding: 32px 34px 38px;
+                margin-top: 55px;
+            }
+        }
 
-    a:hover {
-      text-decoration: underline;
-    }
+        h1 {
+            margin: 0 0 10px;
+            font-size: 24px;
+        }
 
-    h1, h2, h3 {
-      font-weight: 600;
-      margin-top: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
+        h2 {
+            margin-top: 26px;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
 
-    h1 { font-size: 1.75rem; }
-    h2 { font-size: 1.25rem; }
-    h3 { font-size: 1.05rem; }
+        p {
+            line-height: 1.5;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
 
-    .meta {
-      font-size: 0.9rem;
-      opacity: 0.8;
-      margin-bottom: 1rem;
-    }
+        .badge-row {
+            margin: 12px 0 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
 
-    .pill-row {
-      margin: 0.25rem 0 1rem;
-    }
+        .badge {
+            padding: 5px 9px;
+            border-radius: 999px;
+            border: 1px solid #32324a;
+            background: #1c1c29;
+            font-size: 12px;
+            color: #c6c6f2;
+        }
 
-    .pill {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      margin: 0.15rem 0.25rem 0.15rem 0;
-      border-radius: 999px;
-      background: #1b253b;
-      font-size: 0.8rem;
-      border: 1px solid #283552;
-    }
+        .section {
+            margin-top: 18px;
+            padding-top: 10px;
+            border-top: 1px solid #26263a;
+        }
 
-    .card {
-      margin: 0.75rem 0;
-      padding: 0.85rem 1rem;
-      border-radius: 0.75rem;
-      border: 1px solid #283552;
-      background: #111729;
-    }
+        .label {
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 11px;
+            color: #9a9ac7;
+            margin-bottom: 4px;
+        }
 
-    details.card > summary {
-      cursor: pointer;
-      outline: none;
-      list-style: none;
-    }
+        .summary-text {
+            font-size: 15px;
+            color: #deddfb;
+        }
 
-    details.card > summary::-webkit-details-marker {
-      display: none;
-    }
+        .muted {
+            color: #a0a0c6;
+            font-size: 13px;
+        }
 
-    details.card > summary::before {
-      content: "▶";
-      display: inline-block;
-      margin-right: 0.4rem;
-      font-size: 0.8rem;
-      transform-origin: center;
-      transition: transform 0.15s ease-out;
-      opacity: 0.8;
-    }
+        .toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            border: 1px solid #32324a;
+            background: #1a1a27;
+            padding: 6px 11px;
+            font-size: 12px;
+            color: #c8c8ff;
+            cursor: pointer;
+            margin-top: 6px;
+        }
 
-    details[open].card > summary::before {
-      transform: rotate(90deg);
-    }
+        .toggle-btn span.chevron {
+            font-size: 12px;
+        }
 
-    details.card > summary strong {
-      font-size: 0.95rem;
-    }
+        .card {
+            background: #181827;
+            border-radius: 10px;
+            border: 1px solid #26263a;
+            padding: 10px 12px;
+            margin-top: 8px;
+        }
 
-    .card .body {
-      margin-top: 0.6rem;
-      font-size: 0.92rem;
-    }
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
 
-    .symbol-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.5rem;
-    }
+        .symbol-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 6px 0 0;
+        }
 
-    .symbol-name {
-      font-weight: 600;
-    }
+        .symbol-list li {
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
 
-    .symbol-meta {
-      font-size: 0.8rem;
-      opacity: 0.75;
-      white-space: nowrap;
-    }
+        .chips-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
 
-    .muted {
-      opacity: 0.8;
-      font-size: 0.9rem;
-    }
+        .chip {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #202033;
+            border: 1px solid #343453;
+        }
 
-    ul {
-      margin: 0.3rem 0 0.6rem 1.1rem;
-      padding: 0;
-    }
+        .small-heading {
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
 
-    .footer-links {
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
+        .list-plain {
+            padding-left: 18px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
 
-    .badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      padding: 0.1rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid #283552;
-      background: #141d33;
-      margin-left: 0.3rem;
-      opacity: 0.9;
-    }
+        .list-plain li {
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
 
-    .inline-label {
-      font-size: 0.85rem;
-      opacity: 0.8;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
+        .tone-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid #35355a;
+            background: #1b1b2b;
+            font-size: 12px;
+            margin-top: 2px;
+        }
 
-    .arc-item {
-      font-size: 0.9rem;
-      margin: 0.1rem 0;
-    }
+        .back-link {
+            display: inline-block;
+            margin-top: 18px;
+            font-size: 13px;
+            color: #9f9fff;
+            text-decoration: none;
+        }
 
-    .arc-label {
-      font-weight: 500;
-    }
-  </style>
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .top-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #a0a0c6;
+        }
+
+        .btn-row {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            border-radius: 999px;
+            background: linear-gradient(90deg, #7a5df9, #9855ff);
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-ghost {
+            border-radius: 999px;
+            background: #181827;
+            border: 1px solid #333355;
+            color: #c8c8ff;
+            font-size: 12px;
+            padding: 6px 11px;
+            cursor: pointer;
+        }
+
+        .btn-ghost:hover {
+            border-color: #7a5df9;
+        }
+    </style>
+
+    <script>
+        function toggleSection(id, chevronId) {
+            const el = document.getElementById(id);
+            const chev = document.getElementById(chevronId);
+            if (!el) return;
+            const isHidden = el.style.display === "none" || el.style.display === "";
+            el.style.display = isHidden ? "block" : "none";
+            if (chev) {
+                chev.textContent = isHidden ? "▾" : "▸";
+            }
+        }
+    </script>
 </head>
 <body>
 
-  <h1>Dream Analysis</h1>
-
-  <div class="meta">
-    <span class="inline-label">Detected motifs:</span>
-    {% if analysis.detected_keywords and analysis.detected_keywords|length > 0 %}
-      {{ analysis.detected_keywords | join(', ') }}
-    {% else %}
-      none detected
-    {% endif %}
-  </div>
-
-  {% if analysis.micronarrative %}
-    <details class="card" open>
-      <summary><strong>Micronarrative</strong></summary>
-      <div class="body">
-        <p>{{ analysis.micronarrative }}</p>
-      </div>
-    </details>
-  {% endif %}
-
-  {% if analysis.summary %}
-    <h2>Summary</h2>
-    <div class="card">
-      <div class="body">
-        <p>{{ analysis.summary }}</p>
-      </div>
-    </div>
-  {% endif %}
-
-  {% if analysis.interpretive_narrative %}
-    <details class="card" open>
-      <summary><strong>Interpretive Analysis</strong><span class="badge">Core insight</span></summary>
-      <div class="body">
-        {% for paragraph in analysis.interpretive_narrative.split('\n\n') %}
-          {% if paragraph.strip() %}
-            <p>{{ paragraph }}</p>
-          {% endif %}
-        {% endfor %}
-      </div>
-    </details>
-  {% endif %}
-
-  {% if analysis.key_symbols and analysis.key_symbols|length > 0 %}
-    <h2>Key Symbols &amp; Motifs</h2>
-
-    {% for sym in analysis.key_symbols %}
-      <div class="card">
-        <div class="symbol-header">
-          <div class="symbol-name">{{ sym.symbol }}</div>
-          <div class="symbol-meta">
-            {% if sym.confidence is defined %}
-              Confidence: {{ (sym.confidence * 100) | round(0) | int }}%
+<div class="container">
+    <div class="top-meta">
+        <div>
+            <div class="title">Dream Analysis</div>
+            {% if analysis.micronarrative or analysis.summary %}
+            <div class="subtitle">A reflective, symbolic interpretation based on your dream.</div>
             {% endif %}
-          </div>
         </div>
-        {% if sym.description %}
-          <p class="muted">{{ sym.description }}</p>
-        {% endif %}
+        <div>
+            <a href="{{ url_for('index') }}" class="back-link">← Decode another dream</a>
+        </div>
+    </div>
 
-        {% if sym.possible_meanings and sym.possible_meanings|length > 0 %}
-          <ul>
-            {% for meaning in sym.possible_meanings %}
-              <li>{{ meaning }}</li>
+    {% if analysis.detected_keywords %}
+    <div class="section">
+        <div class="label">Detected motifs</div>
+        <div class="badge-row">
+            {% for kw in analysis.detected_keywords %}
+            <div class="badge">{{ kw }}</div>
             {% endfor %}
-          </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- SUMMARY FRONT AND CENTER -->
+    <div class="section">
+        <div class="label">Summary</div>
+        <p class="summary-text">
+            {{ analysis.summary }}
+        </p>
+
+        {% if analysis.micronarrative %}
+        <button class="toggle-btn" type="button"
+                onclick="toggleSection('micro-block', 'micro-chevron')">
+            <span id="micro-chevron" class="chevron">▸</span>
+            <span>Show dream retelling</span>
+        </button>
+        <div id="micro-block" style="display:none; margin-top:8px;">
+            <div class="small-heading">Micronarrative</div>
+            <p class="muted">{{ analysis.micronarrative }}</p>
+        </div>
         {% endif %}
-      </div>
-    {% endfor %}
-  {% endif %}
+    </div>
 
-  <h2>Emotional Landscape</h2>
-  <div class="card">
-    <div class="body">
-      <p>
-        <span class="inline-label">Overall tone:</span>
-        {{ analysis.emotional_profile_tone or 'unknown' }}
-      </p>
-
-      {% if analysis.emotional_profile_primary and analysis.emotional_profile_primary|length > 0 %}
-        <div class="pill-row">
-          {% for emo in analysis.emotional_profile_primary %}
-            <span class="pill">
-              {{ emo.name }} – {{ (emo.intensity * 100) | round(0) | int }}%
-            </span>
-          {% endfor %}
+    <!-- KEY SYMBOLS -->
+    {% if analysis.key_symbols %}
+    <div class="section">
+        <div class="label">Key symbols</div>
+        {% for sym in analysis.key_symbols %}
+        <div class="card">
+            <div class="card-title">
+                {{ sym.symbol | default("symbol") }}
+                {% if sym.confidence is defined %}
+                    <span class="muted">· confidence {{ (sym.confidence * 100) | round(0) | int }}%</span>
+                {% endif %}
+            </div>
+            {% if sym.description %}
+            <p class="muted">{{ sym.description }}</p>
+            {% endif %}
+            {% if sym.possible_meanings %}
+            <ul class="symbol-list">
+                {% for m in sym.possible_meanings %}
+                <li>• {{ m }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
-      {% else %}
-        <p class="muted">No primary emotional profile detected.</p>
-      {% endif %}
-
-      {% if analysis.emotional_arc and analysis.emotional_arc|length > 0 %}
-        <h3>Emotional Arc</h3>
-        {% for st in analysis.emotional_arc %}
-          <div class="arc-item">
-            <span class="arc-label">
-              {{ st.stage | capitalize }}:
-            </span>
-            {{ st.emotion }} – {{ (st.intensity * 100) | round(0) | int }}%
-          </div>
         {% endfor %}
-      {% endif %}
     </div>
-  </div>
+    {% endif %}
 
-  <h2>Narrative Pattern</h2>
-  <div class="card">
-    <div class="body">
-      {% if analysis.narrative_pattern.pattern_name %}
-        <p><strong>{{ analysis.narrative_pattern.pattern_name }}</strong></p>
-      {% endif %}
+    <!-- BUTTON TO SHOW DEEP DIVE -->
+    <div class="section">
+        <button class="btn-primary" type="button"
+                onclick="toggleSection('deep-block', 'deep-chevron')">
+            <span id="deep-chevron" class="chevron">▸</span>
+            Show full interpretation & details
+        </button>
+    </div>
 
-      {% if analysis.narrative_pattern.description %}
-        <p class="muted">{{ analysis.narrative_pattern.description }}</p>
-      {% endif %}
-
-      {% if analysis.narrative_pattern.related_themes and analysis.narrative_pattern.related_themes|length > 0 %}
-        <div class="pill-row">
-          {% for theme in analysis.narrative_pattern.related_themes %}
-            <span class="pill">{{ theme }}</span>
-          {% endfor %}
+    <!-- DEEP DIVE BLOCK -->
+    <div id="deep-block" style="display:none;">
+        {% if analysis.interpretive_narrative %}
+        <div class="section">
+            <div class="label">Full interpretation</div>
+            <p class="muted" style="white-space:pre-wrap;">{{ analysis.interpretive_narrative }}</p>
         </div>
-      {% endif %}
-    </div>
-  </div>
+        {% endif %}
 
-  {% if analysis.symbol_relations and analysis.symbol_relations|length > 0 %}
-    <h2>Symbol Relationships</h2>
-    <div class="card">
-      <div class="body">
-        <ul>
-          {% for rel in analysis.symbol_relations %}
-            <li>
-              <strong>{{ rel.source }}</strong> → <strong>{{ rel.target }}</strong>:
-              {{ rel.relation }}
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-  {% endif %}
+        <!-- EMOTIONAL PROFILE -->
+        {% if analysis.emotional_profile_primary or analysis.emotional_profile_tone %}
+        <div class="section">
+            <div class="label">Emotional landscape</div>
+            {% if analysis.emotional_profile_tone %}
+            <div class="tone-pill">Overall tone: {{ analysis.emotional_profile_tone }}</div>
+            {% endif %}
 
-  {% if analysis.reflection_prompts and analysis.reflection_prompts|length > 0 %}
-    <h2>Reflection Prompts</h2>
-    <div class="card">
-      <div class="body">
-        <ul>
-          {% for prompt in analysis.reflection_prompts %}
-            <li>{{ prompt }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-  {% endif %}
+            {% if analysis.emotional_profile_primary %}
+            <div class="small-heading" style="margin-top:8px;">Primary emotions</div>
+            <div class="chips-row">
+                {% for e in analysis.emotional_profile_primary %}
+                <div class="chip">
+                    {{ e.name }} –
+                    {% if e.intensity is defined %}
+                        {{ (e.intensity * 100) | round(0) | int }}%
+                    {% else %}
+                        n/a
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
 
-  {% if analysis.cautions and analysis.cautions|length > 0 %}
-    <h2>Cautions</h2>
-    <div class="card">
-      <div class="body">
-        <ul>
-          {% for line in analysis.cautions %}
-            <li>{{ line }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-  {% endif %}
+        <!-- EMOTIONAL ARC -->
+        {% if analysis.emotional_arc %}
+        <div class="section">
+            <div class="label">Emotional arc</div>
+            <ul class="list-plain">
+                {% for st in analysis.emotional_arc %}
+                <li>
+                    {% if st.stage %}<strong>{{ st.stage | capitalize }}:</strong> {% endif %}
+                    {{ st.emotion }}
+                    {% if st.intensity is defined %}
+                        – {{ (st.intensity * 100) | round(0) | int }}%
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
 
-  <div class="footer-links">
-    <a href="{{ url_for('index') }}">Decode another dream</a>
-  </div>
+        <!-- NARRATIVE PATTERN -->
+        {% if analysis.narrative_pattern %}
+        <div class="section">
+            <div class="label">Narrative pattern</div>
+            {% if analysis.narrative_pattern.pattern_name %}
+            <div class="small-heading">{{ analysis.narrative_pattern.pattern_name }}</div>
+            {% endif %}
+            {% if analysis.narrative_pattern.description %}
+            <p class="muted">{{ analysis.narrative_pattern.description }}</p>
+            {% endif %}
+            {% if analysis.narrative_pattern.related_themes %}
+            <div class="chips-row">
+                {% for t in analysis.narrative_pattern.related_themes %}
+                <div class="chip">{{ t }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- SYMBOL RELATIONS -->
+        {% if analysis.symbol_relations %}
+        <div class="section">
+            <div class="label">Symbol relationships</div>
+            <ul class="list-plain">
+                {% for rel in analysis.symbol_relations %}
+                <li>
+                    <strong>{{ rel.source }}</strong> → <strong>{{ rel.target }}</strong>:
+                    {{ rel.relation }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- REFLECTION PROMPTS -->
+        {% if analysis.reflection_prompts %}
+        <div class="section">
+            <div class="label">Reflection prompts</div>
+            <ul class="list-plain">
+                {% for q in analysis.reflection_prompts %}
+                <li>{{ q }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- CAUTIONS -->
+        {% if analysis.cautions %}
+        <div class="section">
+            <div class="label">Cautions</div>
+            <ul class="list-plain">
+                {% for c in analysis.cautions %}
+                <li class="muted">{{ c }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="section" style="margin-top:22px;">
+        <a href="{{ url_for('index') }}" class="back-link">← Decode another dream</a>
+    </div>
+</div>
 
 </body>
 </html>
