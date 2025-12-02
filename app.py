@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from openai import OpenAI
 
 app = Flask(__name__)
-client = OpenAI()  # uses OPENAI_API_KEY
+client = OpenAI()  # Uses OPENAI_API_KEY
 
 
 # ----------------------------------------------------
@@ -25,76 +25,78 @@ def append_log(record: Dict[str, Any]) -> None:
 
 
 # ----------------------------------------------------
-# Built-in Symbol Lexicon (no external JSON required)
+# Built-in Symbol Lexicon (self-contained)
 # ----------------------------------------------------
 
 DREAM_SYMBOL_LEXICON: Dict[str, Dict[str, Any]] = {
-    "cat": {"themes": ["independence", "intuition"], "notes": "Emotional independence."},
-    "dog": {"themes": ["loyalty", "support"], "notes": "Trust and companionship."},
-    "snake": {"themes": ["transformation", "fear"], "notes": "Unsettling change."},
-    "spider": {"themes": ["entrapment"], "notes": "Feeling caught."},
-    "rat": {"themes": ["disgust", "hidden problems"], "notes": "Something unwanted surfacing."},
-    "wolf": {"themes": ["instinct"], "notes": "Primal drive or threat."},
-    "bear": {"themes": ["power"], "notes": "Emotional or territorial defense."},
-    "lion": {"themes": ["pride", "authority"], "notes": "Leadership or dominance."},
-    "tiger": {"themes": ["anger"], "notes": "Intense emotion."},
-    "bird": {"themes": ["freedom"], "notes": "Desire to rise above issues."},
-    "fish": {"themes": ["emotion"], "notes": "Submerged feelings."},
-    "shark": {"themes": ["threat"], "notes": "Danger beneath the surface."},
-    "horse": {"themes": ["drive"], "notes": "Vitality and momentum."},
-    "unicorn": {"themes": ["idealism"], "notes": "Wishfulness."},
-    "baby": {"themes": ["new beginnings"], "notes": "Something new forming."},
-    "child": {"themes": ["innocence", "past self"], "notes": "Younger aspects of you."},
-    "mother": {"themes": ["care"], "notes": "Support or control."},
-    "father": {"themes": ["authority"], "notes": "Judgment or structure."},
-    "stranger": {"themes": ["unknown"], "notes": "Unknown situations or self-aspects."},
-    "guide": {"themes": ["intuition"], "notes": "Inner direction."},
-    "faceless guide": {"themes": ["mystery"], "notes": "Guidance without clarity."},
-    "house": {"themes": ["self"], "notes": "Your inner life or structure."},
-    "forest": {"themes": ["mystery"], "notes": "Exploring the unconscious."},
-    "ocean": {"themes": ["depth"], "notes": "Overwhelming emotion."},
-    "river": {"themes": ["flow"], "notes": "Life direction."},
-    "lake": {"themes": ["containment"], "notes": "Still emotion."},
-    "mountain": {"themes": ["aspiration"], "notes": "Challenges and goals."},
-    "car": {"themes": ["control"], "notes": "Direction of life."},
-    "train": {"themes": ["path"], "notes": "Momentum or routine."},
-    "plane": {"themes": ["transition"], "notes": "Big changes."},
-    "stairs": {"themes": ["progress"], "notes": "Moving between psychological layers."},
-    "door": {"themes": ["opportunity"], "notes": "Thresholds and choices."},
-    "window": {"themes": ["perspective"], "notes": "Desire to see differently."},
-    "bridge": {"themes": ["transition"], "notes": "Crossing between states."},
-    "storm": {"themes": ["conflict"], "notes": "Emotional turbulence."},
-    "fire": {"themes": ["destruction", "purification"], "notes": "Burning away the old."},
-    "flood": {"themes": ["overwhelm"], "notes": "Emotion rising uncontrollably."},
-    "mirror": {"themes": ["identity"], "notes": "Self-reflection."},
-    "lost": {"themes": ["confusion"], "notes": "Searching for direction."},
-    "trapped": {"themes": ["pressure"], "notes": "Feeling constrained."},
+    "cat": {"themes": ["independence", "intuition"], "notes": "Emotional independence, sensitivity to boundaries."},
+    "dog": {"themes": ["loyalty", "support"], "notes": "Trust, companionship, desire for support."},
+    "snake": {"themes": ["transformation", "fear"], "notes": "Unsettling change, hidden emotion."},
+    "spider": {"themes": ["entrapment"], "notes": "Feeling caught in a situation or web of obligations."},
+    "rat": {"themes": ["disgust", "hidden problems"], "notes": "Something unwanted creeping into awareness."},
+    "wolf": {"themes": ["instinct", "threat"], "notes": "Primal drive or sense of being hunted/targeted."},
+    "bear": {"themes": ["power", "rest"], "notes": "Big emotion, territorial defense, need to hibernate."},
+    "lion": {"themes": ["pride", "authority"], "notes": "Leadership, dominance, or pride issues."},
+    "tiger": {"themes": ["anger"], "notes": "Intense emotion you’re wary of (especially anger)."},
+    "bird": {"themes": ["freedom", "perspective"], "notes": "Desire to rise above problems or see broadly."},
+    "fish": {"themes": ["emotion"], "notes": "Submerged feelings, intuitions just below awareness."},
+    "shark": {"themes": ["threat"], "notes": "Perceived predators, ruthless competition."},
+    "horse": {"themes": ["drive"], "notes": "Vitality, sexual energy, forward momentum."},
+    "unicorn": {"themes": ["idealism"], "notes": "Fantasy, impossible or idealized desires."},
+    "baby": {"themes": ["new beginnings"], "notes": "Something new, vulnerable, needing care."},
+    "child": {"themes": ["innocence", "past self"], "notes": "Younger aspects of you, potential and vulnerability."},
+    "mother": {"themes": ["care"], "notes": "Nurture, emotional holding, or smothering."},
+    "father": {"themes": ["authority"], "notes": "Rules, expectations, internal critic."},
+    "stranger": {"themes": ["unknown"], "notes": "Unknown parts of self, new situations."},
+    "guide": {"themes": ["intuition"], "notes": "Inner compass, subtle guidance."},
+    "faceless guide": {"themes": ["mystery"], "notes": "Guidance without clear identity; you feel led but not sure by whom."},
+    "house": {"themes": ["self"], "notes": "Your inner world or life structure."},
+    "forest": {"themes": ["mystery"], "notes": "Exploration of the unconscious."},
+    "ocean": {"themes": ["depth"], "notes": "Vast, overwhelming emotion or unconscious material."},
+    "river": {"themes": ["flow"], "notes": "Direction and momentum of your life."},
+    "lake": {"themes": ["containment"], "notes": "Still emotion, reflection, containment."},
+    "mountain": {"themes": ["challenge"], "notes": "Obstacles, lofty goals, perspective."},
+    "car": {"themes": ["control"], "notes": "Sense of control over your path."},
+    "train": {"themes": ["path"], "notes": "Life track, momentum, routines."},
+    "plane": {"themes": ["transition"], "notes": "Major changes or ambitions."},
+    "stairs": {"themes": ["progress"], "notes": "Moving between levels of insight or emotion."},
+    "door": {"themes": ["opportunity"], "notes": "Thresholds, decisions, new phases."},
+    "window": {"themes": ["perspective"], "notes": "How you see a situation, or longing."},
+    "bridge": {"themes": ["transition"], "notes": "Crossing between states or roles."},
+    "storm": {"themes": ["conflict"], "notes": "Emotional turmoil, brewing conflict."},
+    "fire": {"themes": ["destruction", "purification"], "notes": "Burning away the old, passion or anger."},
+    "flood": {"themes": ["overwhelm"], "notes": "Emotions rising too fast to manage."},
+    "mirror": {"themes": ["identity"], "notes": "Self-image, reflection, seeing yourself clearly or distorted."},
+    "lost": {"themes": ["confusion"], "notes": "Searching for direction or role."},
+    "trapped": {"themes": ["pressure"], "notes": "Feeling stuck or constrained."},
 
-    # Dream Decoder additions
-    "museum": {"themes": ["memory"], "notes": "Archive of the self."},
-    "letter": {"themes": ["unfinished business"], "notes": "Unspoken communication."},
-    "starlight": {"themes": ["guidance"], "notes": "Light in darkness."},
-    "constellation": {"themes": ["connection"], "notes": "Seeing patterns."},
-    "glass": {"themes": ["clarity"], "notes": "Transparency, vulnerability."},
-    "cracked glass": {"themes": ["instability"], "notes": "Strain or breakthrough."},
-    "alarm": {"themes": ["urgency"], "notes": "Awareness rising."},
-    "gravity shift": {"themes": ["imbalance"], "notes": "Perspective changing."},
-    "galaxy face": {"themes": ["mystery"], "notes": "Identity in transformation."}
+    # Extended for Dream Decoder
+    "museum": {"themes": ["memory"], "notes": "Life review, curated memories, unresolved moments."},
+    "letter": {"themes": ["unfinished business"], "notes": "Unspoken or unresolved communication."},
+    "starlight": {"themes": ["guidance"], "notes": "Small lights in darkness, subtle insight or hope."},
+    "constellation": {"themes": ["connection"], "notes": "Seeing patterns in events or memories."},
+    "glass": {"themes": ["clarity"], "notes": "Transparency, vulnerability, seeing through a barrier."},
+    "cracked glass": {"themes": ["instability"], "notes": "Something under strain or about to change."},
+    "alarm": {"themes": ["urgency"], "notes": "Inner warning, rising awareness."},
+    "gravity shift": {"themes": ["imbalance"], "notes": "Perspective or stability changing."},
+    "galaxy face": {"themes": ["mystery"], "notes": "Identity in flux, feeling part of something larger."}
 }
 
-DREAM_KEYWORDS = sorted(DREAM_SYMBOL_LEXICON.keys())
+DREAM_KEYWORDS: List[str] = sorted(DREAM_SYMBOL_LEXICON.keys())
 
 
 # ----------------------------------------------------
 # Synonym Normalization
 # ----------------------------------------------------
 
-SYNONYMS = {
+SYNONYMS: Dict[str, str] = {
     "stars": "starlight",
     "star": "starlight",
     "letters": "letter",
     "messages": "letter",
+    "message": "letter",
     "burning": "fire",
+    "burned": "fire",
     "water": "ocean",
     "flood": "ocean",
     "tilt": "gravity shift",
@@ -114,30 +116,30 @@ def normalize(word: str) -> str:
 
 
 # ----------------------------------------------------
-# High-Sensitivity Motif Detector (Mode A)
+# High-Sensitivity Motif Detector
 # ----------------------------------------------------
 
 def detect_keywords(text: str) -> List[str]:
     lowered = text.lower()
     tokens = re.findall(r"[a-zA-Z']+", lowered)
 
-    found = []
+    found: List[str] = []
     seen = set()
 
-    # 1. Token-level matching
+    # 1) token-level normalized matches
     for tok in tokens:
         nt = normalize(tok)
         if nt in DREAM_KEYWORDS and nt not in seen:
             found.append(nt)
             seen.add(nt)
 
-    # 2. Phrase-level matching
+    # 2) phrase-level literal matches (multiword motifs)
     for kw in DREAM_KEYWORDS:
         if " " in kw and kw in lowered and kw not in seen:
             found.append(kw)
             seen.add(kw)
 
-    # 3. Contextual cues
+    # 3) contextual cues for extra richness
     cues = {
         "mirror": "mirror",
         "child": "child",
@@ -149,12 +151,11 @@ def detect_keywords(text: str) -> List[str]:
         "star": "starlight",
         "glow": "starlight",
         "alarm": "alarm",
-        "collapse": "fire",
         "glass": "glass",
+        "collapse": "fire",
     }
-
     for cue, motif in cues.items():
-        if cue in lowered and motif not in seen and motif in DREAM_KEYWORDS:
+        if cue in lowered and motif in DREAM_KEYWORDS and motif not in seen:
             found.append(motif)
             seen.add(motif)
 
@@ -167,9 +168,9 @@ def detect_keywords(text: str) -> List[str]:
 
 def simple_candidate_symbols(text: str, max_items: int = 12) -> List[Dict[str, Any]]:
     tokens = re.findall(r"[a-zA-Z']+", text.lower())
-    stop = {"the", "and", "this", "that", "from", "just", "like", "then", "with"}
+    stop = {"the", "and", "this", "that", "from", "just", "like", "then", "with", "your"}
 
-    counts = {}
+    counts: Dict[str, int] = {}
     for tok in tokens:
         if len(tok) < 4 or tok in stop:
             continue
@@ -209,55 +210,69 @@ You are Dream Decoder, an evidence-informed, non-mystical interpreter of dreams.
 Your job is to weave symbols, emotions, and situations into a psychologically
 meaningful narrative.
 
+You will receive:
+- dream_text
+- felt_during, felt_after
+- life_context
+- detected_keywords
+- candidate_symbols
+- priority_symbols
+
+Principles:
+- Stay grounded in the dream's actual content and the life_context.
+- Make interpretations tentative: use language like "may suggest" or "could reflect".
+- Avoid superstition, fortune-telling, or claims about the future.
+- Focus on psychological meaning, emotional patterns, and inner conflicts.
+- Help the dreamer generate insight, not fear.
+- It is okay to be rich and detailed in your explanations.
+
 Return VALID JSON with:
 
-- micronarrative: 2–4 vivid sentences retelling the dream.
-- summary: 3–5 sentences explaining the psychological frame.
-- interpretive_narrative: 3–7 paragraphs (400–700+ words) integrating symbols,
-  emotions, and context into a cohesive, reflective interpretation.
-- key_symbols: 3–7 symbols with explanations + possible meanings + confidence.
-- emotional_profile: primary emotions (0–1 intensities).
-- emotional_arc: beginning → middle → end.
-- narrative_pattern: overarching psychological pattern.
-- symbol_relations: how symbols interact.
-- reflection_prompts: 3–6 thoughtful questions.
-- cautions: gentle reminders to avoid literal interpretation.
+{
+  "micronarrative": "...",
+  "summary": "...",
+  "interpretive_narrative": "...",
+  "key_symbols": [...],
+  "emotional_profile": {...},
+  "emotional_arc": [...],
+  "narrative_pattern": {...},
+  "symbol_relations": [...],
+  "reflection_prompts": [...],
+  "cautions": [...]
+}
 
-Your tone: warm, reflective, insightful, psychologically deep.
-Avoid fortune-telling or absolutes. Use phrases like “may reflect” or “could suggest.”
+Formatting / richness:
+- "micronarrative": 2–4 sentences retelling the dream vividly but concisely.
+- "summary": 3–5 sentences explaining the main psychological themes.
+- "interpretive_narrative": your main canvas. Write 3–7 short paragraphs
+  (around 400–700 words) weaving symbols, emotions, and life_context into a
+  cohesive psychological story.
+- "key_symbols": 3–7 key symbols with 2–3 possible meanings and a confidence
+  value between 0 and 1.
+- "emotional_profile": 3–5 primary emotions with intensities 0–1 and an overall tone.
+- "reflection_prompts": 3–6 thoughtful, gentle questions inviting self-reflection.
+Keep JSON structure strict, but allow prose fields to be rich and textured.
 """
 
 
 # ----------------------------------------------------
-# LLM Call (timeout + silent fallback)
+# LLM Call (mini only, timeout)
 # ----------------------------------------------------
 
 def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
-    msgs = [
+    messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": json.dumps(payload)}
+        {"role": "user", "content": json.dumps(payload)},
     ]
 
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=msgs,
-            response_format={"type": "json_object"},
-            temperature=0.7,
-            timeout=8,
-        )
-        return json.loads(response.choices[0].message.content)
-
-    except Exception:
-        # Silent fallback
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=msgs,
-            response_format={"type": "json_object"},
-            temperature=0.7,
-            timeout=8,
-        )
-        return json.loads(response.choices[0].message.content)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        response_format={"type": "json_object"},
+        temperature=0.7,
+        timeout=8,
+    )
+    return json.loads(response.choices[0].message.content)
 
 
 # ----------------------------------------------------
@@ -265,8 +280,11 @@ def call_model(payload: Dict[str, Any]) -> Dict[str, Any]:
 # ----------------------------------------------------
 
 def analyze_dream(
-    dream_text: str, title: str = "", felt_during: str = "",
-    felt_after: str = "", life_context: str = ""
+    dream_text: str,
+    title: str = "",
+    felt_during: str = "",
+    felt_after: str = "",
+    life_context: str = "",
 ) -> Dict[str, Any]:
 
     detected = detect_keywords(dream_text)
@@ -287,24 +305,36 @@ def analyze_dream(
     try:
         data = call_model(payload)
     except Exception:
-        data = {"summary": "Model error.", "detected_keywords": detected}
+        data = {
+            "micronarrative": "",
+            "summary": "There was an error contacting the model.",
+            "interpretive_narrative": "",
+            "key_symbols": [],
+            "emotional_profile": {"primary_emotions": [], "overall_tone": "unknown"},
+            "emotional_arc": [],
+            "narrative_pattern": {},
+            "symbol_relations": [],
+            "reflection_prompts": [],
+            "cautions": ["Model call failed."],
+        }
 
-    profile = data.get("emotional_profile", {})
-    tone = profile.get("overall_tone", "unknown")
+    profile = data.get("emotional_profile", {}) or {}
+    primary = profile.get("primary_emotions", []) or []
+    tone = profile.get("overall_tone", "unknown") or "unknown"
 
     return {
-        "micronarrative": data.get("micronarrative", ""),
-        "summary": data.get("summary", ""),
-        "interpretive_narrative": data.get("interpretive_narrative", ""),
-        "key_symbols": data.get("key_symbols", []),
-        "emotional_profile_primary": profile.get("primary_emotions", []),
+        "micronarrative": data.get("micronarrative", "") or "",
+        "summary": data.get("summary", "") or "",
+        "interpretive_narrative": data.get("interpretive_narrative", "") or "",
+        "key_symbols": data.get("key_symbols", []) or [],
+        "emotional_profile_primary": primary,
         "emotional_profile_tone": tone,
-        "emotional_arc": data.get("emotional_arc", []),
-        "narrative_pattern": data.get("narrative_pattern", {}),
-        "symbol_relations": data.get("symbol_relations", []),
-        "reflection_prompts": data.get("reflection_prompts", []),
-        "cautions": data.get("cautions", []),
-        "detected_keywords": detected
+        "emotional_arc": data.get("emotional_arc", []) or [],
+        "narrative_pattern": data.get("narrative_pattern", {}) or {},
+        "symbol_relations": data.get("symbol_relations", []) or [],
+        "reflection_prompts": data.get("reflection_prompts", []) or [],
+        "cautions": data.get("cautions", []) or [],
+        "detected_keywords": detected,
     }
 
 
