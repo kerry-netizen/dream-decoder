@@ -23,208 +23,234 @@
     "themes": ["disgust", "survival", "hidden problems"],
     "notes": "Rats can symbolize anxiety about contamination, betrayal, or something unwanted creeping into awareness."
   },
+
   "wolf": {
     "themes": ["instinct", "pack dynamics", "threat"],
-    "notes": "Wolves may echo primal instincts, leadership, or fear of being hunted by a group or situation."
+    "notes": "Wolves may represent primal instincts, leadership, or fear of being 'hunted' by a group or situation."
   },
+
   "bear": {
     "themes": ["raw power", "hibernation", "territory"],
     "notes": "Bears can represent powerful emotion, a need for rest, or defending your boundaries."
   },
+
   "lion": {
     "themes": ["courage", "authority", "pride"],
     "notes": "Lions often relate to personal power, pride, or confronting something dominant in your life."
   },
+
   "tiger": {
     "themes": ["repressed anger", "wild energy", "fear"],
     "notes": "Tigers may point to intense emotion you’re wary of, especially anger or passion."
   },
+
   "bird": {
     "themes": ["freedom", "perspective", "messages"],
-    "notes": "Birds can symbolize the desire to rise above problems, or to see life from a broader perspective."
+    "notes": "Birds can symbolize the desire to rise above problems, or to see life from a broader vantage point."
   },
+
   "fish": {
     "themes": ["unconscious content", "emotional currents", "intuition"],
-    "notes": "Fish often relate to feelings or intuitions swimming just below the surface of awareness."
+    "notes": "Fish relate to feelings or intuitions swimming just below the surface."
   },
+
   "shark": {
     "themes": ["predatory threat", "fear", "hidden danger"],
-    "notes": "Sharks may represent perceived threats, anxiety about being attacked, or ruthless competition."
+    "notes": "Sharks may represent perceived threats or ruthless competition."
   },
+
   "horse": {
     "themes": ["vitality", "drive", "freedom"],
-    "notes": "Horses often reflect energy, sexual vitality, or the need to move forward with power."
+    "notes": "Horses reflect energy, sexual vitality, or the need to move forward with power."
   },
+
   "unicorn": {
     "themes": ["idealism", "purity", "impossible desire"],
-    "notes": "Unicorns point to fantasy, ideal love, or a wish for something magical that may not exist in daily life."
+    "notes": "Unicorns point to fantasy, ideal love, or longing for magic."
   },
+
   "baby": {
     "themes": ["new beginnings", "vulnerability", "responsibility"],
-    "notes": "Babies often symbolize new projects, relationships, or parts of yourself that need care and protection."
+    "notes": "Babies symbolize new projects or vulnerable aspects of yourself."
   },
+
   "child": {
     "themes": ["innocence", "potential", "past self"],
-    "notes": "Children in dreams may reflect your own younger self, or something still developing in you."
+    "notes": "Children often reflect younger versions of yourself or something still developing."
   },
+
   "mother": {
     "themes": ["nurture", "care", "control"],
-    "notes": "Mothers can represent support, emotional holding, or sometimes smothering and control."
+    "notes": "Mothers can represent support, emotional holding, or smothering."
   },
+
   "father": {
     "themes": ["authority", "structure", "judgment"],
-    "notes": "Fathers often relate to rules, expectations, or the way you judge and guide yourself."
+    "notes": "Fathers often relate to rules, expectations, or self-criticism."
   },
+
   "stranger": {
     "themes": ["unknown self", "new possibility", "uncertainty"],
-    "notes": "Strangers may stand in for parts of yourself you don’t yet know, or unfamiliar situations."
+    "notes": "Strangers stand in for parts of yourself you don’t yet know."
   },
+
+  "guide": {
+    "themes": ["intuition", "inner wisdom", "transition"],
+    "notes": "A guide figure often symbolizes your own inner compass or a readiness for change."
+  },
+
+  "faceless guide": {
+    "themes": ["mystery", "inner truth", "identity in flux"],
+    "notes": "A faceless guide reflects the sense that guidance is present but unclear."
+  },
+
   "intruder": {
     "themes": ["boundary violation", "fear", "unwanted influence"],
-    "notes": "Intruders often mirror anxiety about privacy, safety, or someone crossing a line."
+    "notes": "Intruders mirror anxiety about privacy, safety, or feeling invaded."
   },
+
   "house": {
     "themes": ["self", "psyche", "life structure"],
-    "notes": "A house frequently represents your inner life or life situation, with rooms reflecting different aspects."
+    "notes": "A house represents your inner world or life situation."
   },
+
   "childhood home": {
     "themes": ["past influences", "family patterns", "nostalgia"],
-    "notes": "A childhood home often points to early experiences or long-standing emotional patterns."
+    "notes": "Points to old emotional patterns resurfacing."
   },
+
   "school": {
     "themes": ["evaluation", "learning", "social comparison"],
-    "notes": "Schools can symbolize feeling tested, judged, or needing to prove yourself."
+    "notes": "Often appears when feeling tested or unprepared."
   },
-  "office": {
-    "themes": ["work life", "responsibility", "performance"],
-    "notes": "Offices echo concerns about productivity, status, or obligation."
-  },
+
   "hospital": {
     "themes": ["healing", "vulnerability", "crisis"],
-    "notes": "Hospitals often signal a need for healing—physical, emotional, or psychological."
+    "notes": "Represents something needing attention or repair."
   },
+
   "forest": {
     "themes": ["unknown", "mystery", "inner exploration"],
-    "notes": "Forests can represent entering the depths of your own psyche or facing what’s not yet understood."
+    "notes": "Represents entering the depths of your inner life."
   },
+
   "ocean": {
     "themes": ["deep emotion", "vastness", "the unconscious"],
-    "notes": "Oceans frequently symbolize the emotional depths or overwhelming feelings."
+    "notes": "Symbolizes emotional depths or something overwhelming."
   },
+
   "river": {
     "themes": ["life flow", "transition", "direction"],
-    "notes": "Rivers can reflect the direction your life is taking and how easily you’re moving with or against it."
+    "notes": "Reflects how your life is moving."
   },
+
   "lake": {
     "themes": ["still emotion", "reflection", "containment"],
-    "notes": "Lakes often point to contained feelings, reflection, or emotional stillness."
+    "notes": "Indicates contained feelings or reflection."
   },
+
   "mountain": {
     "themes": ["challenge", "aspiration", "perspective"],
-    "notes": "Mountains can symbolize big goals, obstacles, or the desire to see things clearly from above."
+    "notes": "Represents big goals or obstacles."
   },
+
   "car": {
     "themes": ["agency", "direction", "control"],
-    "notes": "Cars often represent how you feel about the direction of your life and who is in control."
+    "notes": "Reflects how in control you feel of your life direction."
   },
+
   "train": {
     "themes": ["life path", "collective journey", "momentum"],
-    "notes": "Trains can suggest being on a set track, following routines, or going along with group expectations."
+    "notes": "Represents life direction or feeling on a set track."
   },
+
   "plane": {
-    "themes": ["ambition", "big transitions", "risk"],
-    "notes": "Planes may symbolize major life transitions or big risks that take you far from your comfort zone."
+    "themes": ["ambition", "transition", "risk"],
+    "notes": "Symbolizes big life changes or risk taking."
   },
+
   "stairs": {
     "themes": ["progress", "regression", "movement between levels"],
-    "notes": "Stairs often reflect moving up or down in insight, status, or emotional depth."
+    "notes": "Reflects insight or emotional shifts."
   },
+
   "door": {
     "themes": ["opportunity", "threshold", "choice"],
-    "notes": "Doors can mark transitions, opportunities, or areas of your life you’re about to enter or leave."
+    "notes": "Represents transitions and new phases."
   },
+
   "window": {
     "themes": ["perspective", "distance", "longing"],
-    "notes": "Windows often indicate how you see a situation, or feeling separated from what you observe."
+    "notes": "Shows how you see a situation."
   },
+
   "bridge": {
-    "themes": ["transition", "connection", "risk of crossing"],
-    "notes": "Bridges are classic symbols of moving from one life state to another."
+    "themes": ["transition", "connection", "risk"],
+    "notes": "Crossing from one life stage to another."
   },
-  "storm": {
-    "themes": ["emotional turmoil", "conflict", "release"],
-    "notes": "Storms can mirror intense feelings, conflict, or the buildup and release of tension."
-  },
-  "tornado": {
-    "themes": ["chaos", "sudden change", "overwhelm"],
-    "notes": "Tornadoes often signal feeling swept up in events or emotions you can’t control."
-  },
+
   "fire": {
     "themes": ["passion", "destruction", "purification"],
-    "notes": "Fire can represent anger, transformation, or burning away what no longer serves you."
+    "notes": "A burning bridge signals irreversible change."
   },
-  "flood": {
-    "themes": ["emotional overwhelm", "loss of control", "cleansing"],
-    "notes": "Floods often depict feelings rising faster than you can handle them."
+
+  "museum": {
+    "themes": ["memory", "life review", "reflection"],
+    "notes": "A museum represents curated memories and unresolved moments."
   },
-  "exam": {
-    "themes": ["evaluation", "self-judgment", "performance anxiety"],
-    "notes": "Exam dreams are classic for fearing being tested or exposed as unprepared."
+
+  "letter": {
+    "themes": ["communication", "unread messages", "unfinished business"],
+    "notes": "Unopened letters reflect unresolved communication."
   },
-  "teeth falling out": {
-    "themes": ["vulnerability", "loss of power", "appearance anxiety"],
-    "notes": "Teeth dreams often reflect concerns about aging, power, or how you’re perceived."
+
+  "starlight": {
+    "themes": ["guidance", "hope", "cosmic perspective"],
+    "notes": "Starlight symbolizes insight breaking through darkness."
   },
-  "flying": {
-    "themes": ["freedom", "escape", "perspective"],
-    "notes": "Flying dreams can feel liberating, signaling a wish to rise above constraints."
+
+  "constellation": {
+    "themes": ["connection", "pattern recognition", "destiny"],
+    "notes": "Seeing patterns among disparate memories or events."
   },
-  "falling": {
-    "themes": ["loss of control", "fear of failure", "surrender"],
-    "notes": "Falling often relates to anxiety about losing status, safety, or certainty."
+
+  "glass": {
+    "themes": ["transparency", "fragility", "clarity"],
+    "notes": "Glass suggests vulnerability or seeing things clearly."
   },
-  "naked in public": {
-    "themes": ["exposure", "shame", "vulnerability"],
-    "notes": "These dreams frequently reflect fear of being seen too clearly or judged."
+
+  "cracked glass": {
+    "themes": ["breakthrough", "danger", "fragility"],
+    "notes": "A cracked floor or case suggests instability or a breakthrough moment."
   },
-  "chase": {
-    "themes": ["avoidance", "fear", "unresolved issues"],
-    "notes": "Being chased typically points to something you’re trying not to face directly."
+
+  "alarm": {
+    "themes": ["urgency", "warning", "awakening"],
+    "notes": "Signals rising internal pressure or awareness."
   },
-  "death": {
-    "themes": ["change", "ending", "transition"],
-    "notes": "Dream death rarely predicts real death; it more often reflects endings or major change."
+
+  "shadow": {
+    "themes": ["hidden self", "denied feelings"],
+    "notes": "Points toward parts of yourself you’re not fully facing."
   },
-  "funeral": {
-    "themes": ["closure", "mourning", "letting go"],
-    "notes": "Funerals can represent saying goodbye to a role, relationship, or part of yourself."
-  },
-  "wedding": {
-    "themes": ["union", "commitment", "integration"],
-    "notes": "Weddings may echo commitments you’re making, or the union of different parts of your life."
-  },
-  "pregnancy": {
-    "themes": ["potential", "growth", "creative process"],
-    "notes": "Pregnancy dreams often signal something new developing within you, not just literal pregnancy."
-  },
-  "blood": {
-    "themes": ["life force", "injury", "sacrifice"],
-    "notes": "Blood can signify strong emotion, energetic drain, or a sense that something vital is at stake."
-  },
+
   "mirror": {
     "themes": ["self-image", "identity", "self-reflection"],
-    "notes": "Mirrors invite you to look at how you see yourself—or how you fear you might be seen."
+    "notes": "Mirrors symbolize introspection and identity work."
   },
-  "phone": {
-    "themes": ["communication", "connection", "missed messages"],
-    "notes": "Phones can reflect how well you feel heard and able to reach others—or not."
+
+  "falling": {
+    "themes": ["loss of control", "fear of failure"],
+    "notes": "Falling or tilting suggests instability or inner imbalance."
   },
-  "lost": {
-    "themes": ["confusion", "search for direction", "identity"],
-    "notes": "Feeling lost in a dream often maps onto uncertainty about your path or role in waking life."
+
+  "gravity shift": {
+    "themes": ["change", "imbalance", "transition"],
+    "notes": "A tilting world reflects shifting perspectives."
   },
-  "trapped": {
-    "themes": ["stuckness", "constraint", "pressure"],
-    "notes": "Being trapped usually echoes situations where you feel constrained or unable to choose freely."
+
+  "galaxy face": {
+    "themes": ["cosmic identity", "mystery", "inner truth"],
+    "notes": "A face made of swirling stars represents identity in flux."
   }
 }
