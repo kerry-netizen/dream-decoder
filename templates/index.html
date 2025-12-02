@@ -1,85 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Dream Decoder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <title>Dream Decoder</title>
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            background: #0f0f16;
+            font-family: "Inter", sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #151521;
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+            border: 1px solid #232333;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background: #1f1f2b;
+            border: 1px solid #33334c;
+            color: #e6e6ff;
+            font-size: 15px;
+            outline: none;
+            resize: none;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #7a5df9;
+            box-shadow: 0 0 0 2px rgba(122, 93, 249, 0.35);
+        }
+
+        /* MAIN DREAM BOX — LARGE + AUTOEXPAND */
+        #dream_text {
+            min-height: 220px;
+            line-height: 1.4;
+            overflow-y: hidden;
+        }
+
+        /* SMALL CONTEXT BOX */
+        #life_context {
+            min-height: 70px;
+        }
+
+        /* BUTTON */
+        button {
+            width: 100%;
+            margin-top: 28px;
+            padding: 15px;
+            background: linear-gradient(90deg, #7a5df9, #9855ff);
+            border: none;
+            color: white;
+            font-size: 17px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        /* PLACEHOLDER TEXT */
+        ::placeholder {
+            color: #77778f;
+        }
+
+        /* DROP SHADOW TOP TITLE */
+        .title {
+            font-size: 26px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        /* OPTIONAL SMALL DECORATION */
+        .moon {
+            position: fixed;
+            top: 18px;
+            right: 20px;
+            font-size: 22px;
+            opacity: 0.7;
+        }
+    </style>
+
+    <script>
+        // Auto-expand main dream box as user types
+        function autoExpand(el) {
+            el.style.height = "auto";
+            el.style.height = (el.scrollHeight) + "px";
+        }
+    </script>
 </head>
-<body class="dd-body dd-dark">
 
-  <div class="dd-app">
+<body>
+<div class="moon">🌙</div>
 
-    <header class="dd-header">
-      <div class="dd-logo">Dream Decoder</div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
-          🌙
-        </button>
-      </div>
-    </header>
+<div class="container">
+    <div class="title">Decode a Dream</div>
 
-    <main class="dd-main">
-      <section class="dd-input-card">
-        <h1 class="dd-title">Decode a Dream</h1>
-        <p class="dd-label" style="margin-bottom: 0.75rem;">
-          Paste a recent dream and get a reflective, narrative interpretation.
-          Avoid real names or highly identifying details.
-        </p>
+    <p style="margin-top:-10px; margin-bottom:25px; line-height:1.4; color:#bcbce0;">
+        Paste a recent dream and get a reflective, narrative interpretation.<br>
+        Avoid real names or highly identifying details.
+    </p>
 
-        {% if error %}
-          <p style="color:#ff8a8a; margin-bottom:0.75rem;">
-            {{ error }}
-          </p>
-        {% endif %}
+    <form method="POST" action="/">
+        
+        <!-- Dream title -->
+        <label>Dream title (optional)</label>
+        <input type="text" name="dream_title" placeholder="e.g., The Observatory Below the Sea">
 
-        <!-- You can post to either index or decode; both are allowed now -->
-        <form method="post" action="{{ url_for('index') }}">
-          <label for="dream_title" class="dd-label">Dream title (optional)</label>
-          <input type="text" id="dream_title" name="dream_title" class="dd-input" />
+        <!-- MAIN DREAM BOX -->
+        <label>Your dream</label>
+        <textarea 
+            id="dream_text" 
+            name="dream_text" 
+            placeholder="Tell me everything you remember..."
+            oninput="autoExpand(this)"
+        ></textarea>
 
-          <label for="dream_text" class="dd-label">Your dream</label>
-          <textarea id="dream_text" name="dream_text" maxlength="5000" required class="dd-input dd-textarea"></textarea>
-
-          <label for="felt_during" class="dd-label">How did you feel during the dream? (optional)</label>
-          <select id="felt_during" name="felt_during" class="dd-input">
+        <!-- Felt during -->
+        <label>How did you feel during the dream? (optional)</label>
+        <select name="felt_during">
             <option value="">Select one</option>
-            <option value="anxious">Anxious</option>
-            <option value="afraid">Afraid</option>
-            <option value="confused">Confused</option>
+            <option value="calm">Calm</option>
             <option value="curious">Curious</option>
+            <option value="anxious">Anxious</option>
+            <option value="fearful">Fearful</option>
+            <option value="confused">Confused</option>
             <option value="excited">Excited</option>
-            <option value="peaceful">Peaceful</option>
-            <option value="angry">Angry</option>
-            <option value="sad">Sad</option>
-          </select>
+            <option value="helpless">Helpless</option>
+        </select>
 
-          <label for="felt_after" class="dd-label">How did you feel after waking? (optional)</label>
-          <select id="felt_after" name="felt_after" class="dd-input">
+        <!-- Felt after -->
+        <label>How did you feel after waking? (optional)</label>
+        <select name="felt_after">
             <option value="">Select one</option>
-            <option value="relieved">Relieved</option>
-            <option value="still anxious">Still anxious</option>
-            <option value="tired">Tired</option>
-            <option value="refreshed">Refreshed</option>
+            <option value="calm">Calm</option>
             <option value="thoughtful">Thoughtful</option>
             <option value="unsettled">Unsettled</option>
-          </select>
+            <option value="stressed">Stressed</option>
+            <option value="relieved">Relieved</option>
+            <option value="tired">Tired</option>
+        </select>
 
-          <label for="life_context" class="dd-label">
-            Anything in your life you think might be connected? (optional)
-          </label>
-          <textarea id="life_context" name="life_context" maxlength="1000"
-                    class="dd-input dd-textarea"></textarea>
+        <!-- Context -->
+        <label>Anything in your life you think might be connected? (optional)</label>
+        <textarea 
+            id="life_context" 
+            name="life_context" 
+            placeholder="Recent stresses, decisions, events..."
+        ></textarea>
 
-          <button type="submit" class="dd-primary-button" style="margin-top: 1rem;">
-            Decode my dream
-          </button>
-        </form>
-      </section>
-    </main>
-  </div>
+        <button type="submit">Decode my dream</button>
+    </form>
+</div>
 
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
