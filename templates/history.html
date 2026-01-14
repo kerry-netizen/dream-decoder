@@ -40,7 +40,7 @@
           <ul style="list-style: none; padding: 0; margin: 0;">
             {% for rec in records %}
               <li style="margin-bottom: 0.75rem;">
-                <a href="{{ url_for('history_detail', idx=rec.idx) }}"
+                <a href="{{ url_for('history_detail', dream_id=rec.id) }}"
                    style="text-decoration: none; color: #e7eaf0;">
                   <div style="font-size: 0.95rem; font-weight: 500;">
                     {{ rec.title }}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meta Analysis – Dream Decoder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body class="dd-body dd-dark">
+
+  <div class="dd-app">
+
+    <!-- Top bar -->
+    <header class="dd-header">
+      <div class="dd-logo">Dream Decoder</div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="Back to Home">
+          🏠
+        </a>
+        <a href="{{ url_for('history') }}" class="dd-icon-button" aria-label="Dream History">
+          🕒
+        </a>
+        <a href="{{ url_for('threads') }}" class="dd-icon-button" aria-label="Dream Threads">
+          🧵
+        </a>
+        <a href="{{ url_for('logout') }}" class="dd-icon-button" aria-label="Logout">
+          🚪
+        </a>
+        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
+          🌙
+        </button>
+      </div>
+    </header>
+
+    <main class="dd-main">
+      <section class="dd-input-card">
+        <h1 class="dd-title">Meta-Analysis</h1>
+
+        <p class="dd-label" style="margin-bottom: 1.5rem;">
+          High-level patterns and insights across your entire dream journal ({{ dream_count }} dreams).
+        </p>
+
+        {% if meta %}
+          <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+
+            <!-- Overall Theme -->
+            {% if meta.full_analysis.overall_theme %}
+              <div style="margin-bottom: 25px;">
+                <h2 style="font-size: 1.2rem; margin: 0 0 10px 0; color: #7a5df9;">Overall Theme</h2>
+                <p style="font-size: 1rem; line-height: 1.6; color: #e7eaf0; margin: 0;">
+                  {{ meta.full_analysis.overall_theme }}
+                </p>
+              </div>
+            {% endif %}
+
+            <!-- Key Insights -->
+            {% if meta.full_analysis.key_insights and meta.full_analysis.key_insights|length > 0 %}
+              <div style="margin-bottom: 25px;">
+                <h2 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #7a5df9;">Key Insights</h2>
+                <ul style="margin: 0; padding-left: 20px; color: #e7eaf0;">
+                  {% for insight in meta.full_analysis.key_insights %}
+                    <li style="margin-bottom: 8px; line-height: 1.5;">{{ insight }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            <!-- Emotional Trajectory -->
+            {% if meta.full_analysis.emotional_trajectory %}
+              <div style="margin-bottom: 25px;">
+                <h2 style="font-size: 1.2rem; margin: 0 0 10px 0; color: #7a5df9;">Emotional Trajectory</h2>
+                <p style="font-size: 0.95rem; line-height: 1.6; color: #e7eaf0; margin: 0;">
+                  {{ meta.full_analysis.emotional_trajectory }}
+                </p>
+              </div>
+            {% endif %}
+
+            <!-- Symbolic Vocabulary -->
+            {% if meta.full_analysis.symbolic_vocabulary and meta.full_analysis.symbolic_vocabulary|length > 0 %}
+              <div style="margin-bottom: 25px;">
+                <h2 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #7a5df9;">Your Symbolic Language</h2>
+                <ul style="margin: 0; padding-left: 20px; color: #e7eaf0;">
+                  {% for symbol_meaning in meta.full_analysis.symbolic_vocabulary %}
+                    <li style="margin-bottom: 8px; line-height: 1.5;">{{ symbol_meaning }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            <!-- Psychological Themes -->
+            {% if meta.full_analysis.psychological_themes and meta.full_analysis.psychological_themes|length > 0 %}
+              <div style="margin-bottom: 25px;">
+                <h2 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #7a5df9;">Psychological Themes</h2>
+                <div style="margin-top: 6px;">
+                  {% for theme in meta.full_analysis.psychological_themes %}
+                    <span style="display: inline-block; background: #2d2d3d; padding: 6px 14px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px; font-size: 0.9rem; color: #bcbce0;">
+                      {{ theme }}
+                    </span>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Areas of Focus -->
+            {% if meta.full_analysis.areas_of_focus %}
+              <div style="margin-bottom: 25px;">
+                <h2 style="font-size: 1.2rem; margin: 0 0 10px 0; color: #7a5df9;">What Your Dreams Are Working Through</h2>
+                <p style="font-size: 0.95rem; line-height: 1.6; color: #e7eaf0; margin: 0;">
+                  {{ meta.full_analysis.areas_of_focus }}
+                </p>
+              </div>
+            {% endif %}
+
+            <!-- Integration Suggestions -->
+            {% if meta.full_analysis.integration_suggestions and meta.full_analysis.integration_suggestions|length > 0 %}
+              <div style="margin-bottom: 0;">
+                <h2 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #7a5df9;">Integration Suggestions</h2>
+                <ul style="margin: 0; padding-left: 20px; color: #e7eaf0;">
+                  {% for suggestion in meta.full_analysis.integration_suggestions %}
+                    <li style="margin-bottom: 8px; line-height: 1.5;">{{ suggestion }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+          </div>
+
+          <!-- Top Recurring Symbols -->
+          {% if meta.top_symbols and meta.top_symbols|length > 0 %}
+            <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 24px;">
+              <h2 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #7a5df9;">Most Frequent Symbols</h2>
+              <div style="margin-top: 10px;">
+                {% for symbol in meta.top_symbols[:15] %}
+                  <span style="display: inline-block; background: #2d2d3d; padding: 6px 12px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px; font-size: 0.85rem; color: #bcbce0;">
+                    {{ symbol }}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div style="margin-top: 20px; text-align: center; font-size: 0.85rem; color: #787894;">
+            Analysis generated on {{ meta.analysis_date[:10] }}
+          </div>
+
+        {% elif dream_count < 5 %}
+          <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 30px; text-align: center;">
+            <p class="dd-label" style="margin: 0;">
+              Meta-analysis requires at least 5 dreams. You currently have {{ dream_count }} dream(s).
+              Keep recording your dreams to unlock this feature!
+            </p>
+          </div>
+        {% else %}
+          <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 30px; text-align: center;">
+            <p class="dd-label" style="margin: 0 0 15px 0;">
+              Meta-analysis is being generated for your {{ dream_count }} dreams.
+            </p>
+            <a href="{{ url_for('meta_analysis_view') }}" style="color: #7a5df9; text-decoration: none; font-weight: 500;">
+              Refresh to check status
+            </a>
+          </div>
+        {% endif %}
+
+      </section>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+</html>

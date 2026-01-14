@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login - Dream Decoder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            background: #0f0f16;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .auth-container {
+            max-width: 420px;
+            width: 100%;
+            background: #151521;
+            padding: 40px 30px;
+            border-radius: 14px;
+            border: 1px solid #232333;
+            box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #bcbce0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1.3px solid #3c3c55;
+            background: #1f1f2b;
+            color: #e6e6ff;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #7a5df9;
+            box-shadow: 0 0 0 2px rgba(122, 93, 249, 0.35);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 30px;
+            padding: 16px;
+            background: linear-gradient(90deg, #7a5df9, #9855ff);
+            border: none;
+            color: white;
+            font-size: 17px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #bcbce0;
+        }
+
+        .link a {
+            color: #7a5df9;
+            text-decoration: none;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+        }
+
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .flash.error {
+            background: #2d1a1a;
+            color: #ff9f9f;
+            border: 1px solid #4d2a2a;
+        }
+
+        .flash.success {
+            background: #1a2d1a;
+            color: #9fff9f;
+            border: 1px solid #2a4d2a;
+        }
+
+        .flash.info {
+            background: #1a1a2d;
+            color: #9f9fff;
+            border: 1px solid #2a2a4d;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="auth-container">
+    <div class="title">Dream Decoder</div>
+    <div class="subtitle">Log in to your dream journal</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autofocus />
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+
+        <button type="submit">Log In</button>
+    </form>
+
+    <div class="link">
+        Don't have an account? <a href="{{ url_for('register') }}">Sign up</a>
+    </div>
+</div>
+
+</body>
+</html>
