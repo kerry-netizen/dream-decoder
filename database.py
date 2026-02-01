@@ -12,8 +12,12 @@ from typing import Optional, List, Dict, Any
 import json
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "dreams.db")
+# Use persistent disk on Render if available, otherwise local directory
+if os.path.exists("/var/data"):
+    DB_PATH = "/var/data/dreams.db"
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DB_PATH = os.path.join(BASE_DIR, "dreams.db")
 
 
 def get_db():
