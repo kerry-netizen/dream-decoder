@@ -241,17 +241,6 @@
         <div class="label">Summary</div>
         <p class="summary-text">{{ analysis.summary }}</p>
 
-        {% if analysis.micronarrative %}
-        <button class="toggle-btn" onclick="toggleSection('micro-block','micro-chevron')">
-            <span id="micro-chevron" class="chevron">▸</span>
-            Show dream retelling
-        </button>
-        <div id="micro-block" style="display:none; margin-top:8px;">
-            <div style="font-size:13px; font-weight:600; margin-bottom:4px;">Micronarrative</div>
-            <p class="muted">{{ analysis.micronarrative }}</p>
-        </div>
-        {% endif %}
-
         <button class="btn-primary" onclick="toggleSection('deep-block','deep-chevron')">
             <span id="deep-chevron" class="chevron">▸</span>
             Show full interpretation & details
@@ -345,6 +334,27 @@
         </div>
         {% endif %}
         </div><!-- end deep-block -->
+
+        {% if analysis.micronarrative or analysis.dream_text %}
+        <button class="toggle-btn" onclick="toggleSection('micro-block','micro-chevron')" style="margin-top:14px;">
+            <span id="micro-chevron" class="chevron">▸</span>
+            Show dream retelling
+        </button>
+        <div id="micro-block" style="display:none; margin-top:8px;">
+            {% if analysis.micronarrative %}
+            <div style="font-size:13px; font-weight:600; margin-bottom:4px;">Micronarrative</div>
+            <p class="muted">{{ analysis.micronarrative }}</p>
+            {% endif %}
+            {% if analysis.dream_text %}
+            <div style="font-size:13px; font-weight:600; margin-bottom:4px; margin-top:12px;">Full Dream</div>
+            <p class="muted" style="white-space:pre-wrap;">{{ analysis.dream_text }}</p>
+            {% endif %}
+            {% if analysis.life_context %}
+            <div style="font-size:13px; font-weight:600; margin-bottom:4px; margin-top:12px;">Life Context</div>
+            <p class="muted" style="white-space:pre-wrap;">{{ analysis.life_context }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
     </div><!-- end summary section -->
 
     <!-- KEY SYMBOLS -->
