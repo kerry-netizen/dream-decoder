@@ -150,7 +150,43 @@
             el.style.height = "auto";
             el.style.height = el.scrollHeight + "px";
         }
+
+        function showLoading(form) {
+            const btn = form.querySelector('button[type="submit"]');
+            const dreamText = form.querySelector('#dream_text').value.trim();
+
+            if (!dreamText) {
+                return true; // Let form validation handle it
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Analyzing your dream...';
+            return true;
+        }
     </script>
+
+    <style>
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 
 <body>
@@ -177,7 +213,7 @@
     <div class="error">{{ error }}</div>
     {% endif %}
 
-    <form method="POST" action="/">
+    <form method="POST" action="/" onsubmit="return showLoading(this)">
 
         <label>Dream title (optional)</label>
         <input type="text" name="dream_title" placeholder="e.g., The Observatory Below the Sea">
