@@ -173,6 +173,22 @@ def api_usage():
     return render_template("admin/api_usage.html", stats=stats)
 
 
+@admin_bp.route("/beta-notes", methods=["GET", "POST"])
+@admin_required
+def beta_notes():
+    """Edit beta notes displayed on disclaimer page."""
+    if request.method == "POST":
+        notes = request.form.get("beta_notes", "").strip()
+        db.set_beta_notes(notes)
+        admin_user = session.get("admin_user", "unknown")
+        db.log_admin_action("update_beta_notes", "Updated beta notes", admin_user)
+        flash("Beta notes updated.", "success")
+        return redirect(url_for("admin.beta_notes"))
+
+    current_notes = db.get_beta_notes() or ""
+    return render_template("admin/beta_notes.html", beta_notes=current_notes)
+
+
 @admin_bp.route("/health")
 @admin_required
 def health():

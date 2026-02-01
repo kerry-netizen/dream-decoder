@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Disclaimer - Dream Ferret</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            background: #0f0f16;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #7a5df9;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            background: #151521;
+            padding: 30px;
+            border-radius: 14px;
+            border: 1px solid #232333;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0 0 20px 0;
+            color: #e6e6ff;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            color: #7a5df9;
+        }
+
+        .disclaimer-text {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #bcbce0;
+        }
+
+        .beta-notes {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #a5acb8;
+            white-space: pre-wrap;
+        }
+
+        .no-notes {
+            color: #787894;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <a href="{{ url_for('login') }}" class="back-link">&larr; Back to Login</a>
+
+    <div class="card">
+        <h1>Disclaimer</h1>
+        <p class="disclaimer-text">
+            DreamFerret is an early beta project. Features may change or break, and data-handling practices are still evolving. This is a personal journaling and exploration tool, not a medical or therapeutic service. Please do not enter information you would consider highly sensitive. Reasonable steps are taken to protect user data, but this is a beta system and no guarantees are made. Use is at your own discretion. Mississippi law applies, with any disputes governed exclusively in Union County, Mississippi.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Beta Notes</h2>
+        {% if beta_notes %}
+            <p class="beta-notes">{{ beta_notes }}</p>
+        {% else %}
+            <p class="no-notes">No beta notes at this time.</p>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

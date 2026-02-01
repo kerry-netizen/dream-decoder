@@ -141,6 +141,15 @@ def init_db():
         )
     """)
 
+    # Site settings (beta notes, etc.)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS site_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT,
+            updated_at TEXT
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -877,3 +886,40 @@ def delete_user_and_data(user_id: int) -> bool:
         deleted = False
     conn.close()
     return deleted
+
+
+# ----------------------------------------------------
+# Site Settings
+# ----------------------------------------------------
+
+def get_setting(key: str) -> Optional[str]:
+    """Get a site setting value."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM site_settings WHERE key = ?", (key,))
+    row = cursor.fetchone()
+    conn.close()
+    return row["value"] if row else None
+
+
+def set_setting(key: str, value: str) -> None:
+    """Set a site setting value."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        """INSERT OR REPLACE INTO site_settings (key, value, updated_at)
+        VALUES (?, ?, ?)""",
+        (key, value, datetime.utcnow().isoformat())
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_beta_notes() -> Optional[str]:
+    """Get beta notes."""
+    return get_setting("beta_notes")
+
+
+def set_beta_notes(notes: str) -> None:
+    """Set beta notes."""
+    set_setting("beta_notes", notes)

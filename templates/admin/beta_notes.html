@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Beta Notes - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #232333;
+        }
+        h1 { margin: 0; font-size: 24px; }
+        nav a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav a:hover { color: #7a5df9; }
+        nav a.active { color: #7a5df9; font-weight: 600; }
+        .card {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .card h2 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            color: #e6e6ff;
+        }
+        .card p {
+            margin: 0 0 20px 0;
+            font-size: 14px;
+            color: #9a9ac7;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1.3px solid #3c3c55;
+            background: #1f1f2b;
+            color: #e6e6ff;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        textarea:focus {
+            border-color: #7a5df9;
+            box-shadow: 0 0 0 2px rgba(122, 93, 249, 0.35);
+        }
+        button {
+            margin-top: 16px;
+            padding: 12px 24px;
+            background: linear-gradient(90deg, #7a5df9, #9855ff);
+            border: none;
+            color: white;
+            font-size: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .flash.success {
+            background: #1a2d1a;
+            color: #9fff9f;
+            border: 1px solid #2a4d2a;
+        }
+        .flash.error {
+            background: #2d1a1a;
+            color: #ff9f9f;
+            border: 1px solid #4d2a2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Beta Notes</h1>
+            <nav>
+                <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin.users') }}">Users</a>
+                <a href="{{ url_for('admin.errors') }}">Errors</a>
+                <a href="{{ url_for('admin.api_usage') }}">API Usage</a>
+                <a href="{{ url_for('admin.health') }}">Health</a>
+                <a href="{{ url_for('admin.beta_notes') }}" class="active">Beta Notes</a>
+                <a href="{{ url_for('admin.logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2>Edit Beta Notes</h2>
+            <p>These notes appear on the public disclaimer page beneath the static disclaimer text.</p>
+
+            <form method="POST">
+                <textarea name="beta_notes" placeholder="Enter beta notes here...">{{ beta_notes }}</textarea>
+                <br>
+                <button type="submit">Save Notes</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

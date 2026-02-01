@@ -458,6 +458,13 @@ def register():
     return render_template("register.html")
 
 
+@app.route("/disclaimer")
+def disclaimer():
+    """Display disclaimer and beta notes page."""
+    beta_notes = db.get_beta_notes()
+    return render_template("disclaimer.html", beta_notes=beta_notes)
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
