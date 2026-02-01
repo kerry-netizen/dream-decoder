@@ -95,9 +95,16 @@
           {% endfor %}
         {% else %}
           <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 30px; text-align: center;">
-            <p class="dd-label" style="margin: 0;">
-              No threads detected yet. Threads are automatically identified when you have 5+ dreams.
-            </p>
+            {% if dream_count and dream_count >= 5 %}
+              <p class="dd-label" style="margin: 0;">
+                No distinct threads were detected across your {{ dream_count }} dreams. As you log more dreams with recurring themes, threads will appear here.
+              </p>
+            {% else %}
+              <p class="dd-label" style="margin: 0;">
+                No threads detected yet. Threads are automatically identified when you have 5+ dreams.
+                {% if dream_count %}You currently have {{ dream_count }} dream(s).{% endif %}
+              </p>
+            {% endif %}
           </div>
         {% endif %}
 

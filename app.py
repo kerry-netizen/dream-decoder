@@ -643,12 +643,52 @@ def search():
 @login_required
 def threads():
     """Display detected dream threads."""
-    threads = db.get_user_threads(current_user.id)
+    user_threads = db.get_user_threads(current_user.id)
+    dream_count = db.get_user_dream_count(current_user.id)
+
+    # Generate threads if none exist but user has 5+ dreams
+    if not user_threads and dream_count >= 5:
+        try:
+            dreams = db.get_user_dreams(current_user.id)
+            detected_threads, meta_analysis = thread_analyzer.analyze_dream_threads(dreams)
+
+            # Save threads
+            for thread in detected_threads:
+                db.save_dream_thread(
+                    user_id=current_user.id,
+                    thread_name=thread.get("thread_name", "Unnamed Thread"),
+                    description=thread.get("description", ""),
+                    recurring_symbols=thread.get("recurring_symbols", []),
+                    emotional_pattern=thread.get("emotional_pattern", ""),
+                    narrative_arc=thread.get("narrative_arc", ""),
+                    dream_ids=thread.get("dream_ids", [])
+                )
+
+            # Also save meta-analysis if we generated it
+            if meta_analysis and not db.get_latest_meta_analysis(current_user.id):
+                db.save_meta_analysis(
+                    user_id=current_user.id,
+                    total_dreams=dream_count,
+                    top_symbols=[s["symbol"] for s in meta_analysis.get("recurring_patterns", {}).get("recurring_symbols", [])[:10]],
+                    emotional_trends=meta_analysis.get("recurring_patterns", {}).get("emotional_patterns", {}),
+                    narrative_patterns=meta_analysis.get("psychological_themes", []),
+                    insights=meta_analysis.get("overall_theme", ""),
+                    full_analysis=meta_analysis
+                )
+
+            # Refresh threads from database
+            user_threads = db.get_user_threads(current_user.id)
+
+        except Exception as e:
+            print(f"Thread generation error: {e}")
+            import traceback
+            traceback.print_exc()
+            flash("Unable to generate threads at this time.", "error")
 
     # Clear notification flag
     session.pop("new_threads_available", None)
 
-    return render_template("threads.html", threads=threads)
+    return render_template("threads.html", threads=user_threads, dream_count=dream_count)
 
 
 @app.route("/meta-analysis")
