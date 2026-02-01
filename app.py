@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from typing import List, Dict, Any
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from openai import OpenAI
 
@@ -47,6 +47,16 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.login_message = None  # Disable default flash - subtitle already says "Log in"
+
+
+@app.route('/favicon.ico')
+def favicon():
+    """Serve favicon to prevent 404 errors."""
+    return send_from_directory(
+        os.path.join(app.root_path, 'static', 'assets'),
+        'Dream-Ferret-Logo1.png',
+        mimetype='image/png'
+    )
 
 client = OpenAI()  # Uses OPENAI_API_KEY
 
