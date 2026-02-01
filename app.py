@@ -785,11 +785,11 @@ def refresh_analysis():
     last_refresh = db.get_last_refresh_time(current_user.id)
     if last_refresh:
         try:
-            last_refresh_dt = datetime.fromisoformat(last_refresh.replace('Z', '+00:00'))
-            now = datetime.now(last_refresh_dt.tzinfo) if last_refresh_dt.tzinfo else datetime.now()
+            last_refresh_dt = datetime.fromisoformat(last_refresh)
+            now = datetime.utcnow()  # Compare UTC to UTC
             elapsed = (now - last_refresh_dt).total_seconds() / 60
             if elapsed < COOLDOWN_MINUTES:
-                remaining = int(COOLDOWN_MINUTES - elapsed)
+                remaining = int(COOLDOWN_MINUTES - elapsed) + 1  # Round up
                 flash(f"Please wait {remaining} more minute{'s' if remaining != 1 else ''} before refreshing again.", "error")
                 return redirect(request.referrer or url_for("threads"))
         except (ValueError, AttributeError):
