@@ -537,3 +537,56 @@ def get_last_refresh_time(user_id: int) -> Optional[str]:
     if result:
         return result["analysis_date"]
     return None
+
+
+def find_similar_dreams(user_id: int, new_symbols: List[str], exclude_dream_id: int = None, limit: int = 3) -> List[Dict[str, Any]]:
+    """
+    Find past dreams with similar symbols/motifs.
+    Returns list of {id, title, shared_symbols, match_count}.
+    """
+    if not new_symbols:
+        return []
+
+    new_symbols_lower = set(s.lower() for s in new_symbols)
+    dreams = get_user_dreams(user_id)
+    similar = []
+
+    for dream in dreams:
+        if exclude_dream_id and dream["id"] == exclude_dream_id:
+            continue
+
+        analysis = dream.get("analysis", {})
+        if not analysis:
+            continue
+
+        # Get symbols from past dream
+        past_symbols = []
+        past_symbols.extend(analysis.get("detected_keywords", []))
+        for sym in analysis.get("key_symbols", []):
+            if isinstance(sym, dict) and "symbol" in sym:
+                past_symbols.append(sym["symbol"])
+            elif isinstance(sym, str):
+                past_symbols.append(sym)
+
+        past_symbols_lower = set(s.lower() for s in past_symbols)
+
+        # Find overlap
+        shared = new_symbols_lower & past_symbols_lower
+        if shared:
+            title = dream.get("title", "").strip()
+            if not title:
+                text = dream.get("dream_text", "")
+                title = text[:40] + "..." if len(text) > 40 else text
+                if not title:
+                    title = "Untitled Dream"
+
+            similar.append({
+                "id": dream["id"],
+                "title": title,
+                "shared_symbols": list(shared),
+                "match_count": len(shared)
+            })
+
+    # Sort by match count descending, take top N
+    similar.sort(key=lambda x: x["match_count"], reverse=True)
+    return similar[:limit]

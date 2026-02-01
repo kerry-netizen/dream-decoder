@@ -438,6 +438,30 @@
     </div>
     {% endif %}
 
+    <!-- SIMILAR PAST DREAMS -->
+    {% if similar_dreams and similar_dreams|length > 0 %}
+    <div class="section">
+        <div class="label">Similar to past dreams</div>
+        <p class="muted" style="margin-bottom: 12px;">These dreams share common themes or symbols:</p>
+
+        {% for dream in similar_dreams %}
+        <a href="{{ url_for('history_detail', dream_id=dream.id) }}" style="text-decoration: none; display: block;">
+            <div class="symbol-card" style="cursor: pointer; transition: 0.2s; border-color: #3a3a5a;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div class="symbol-title" style="color: #9f9fff;">{{ dream.title }}</div>
+                    <span style="font-size: 11px; color: #787894;">{{ dream.match_count }} shared</span>
+                </div>
+                <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
+                    {% for symbol in dream.shared_symbols %}
+                    <span class="chip" style="font-size: 11px; padding: 2px 6px;">{{ symbol }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="section" style="margin-top:20px; display: flex; justify-content: space-between; align-items: center;">
         <a class="back-link" href="{{ url_for('index') }}">← Decode another dream</a>
 

@@ -548,7 +548,14 @@ def handle_decode():
     analysis["dream_text"] = dream_text
     analysis["life_context"] = life_context
 
-    return render_template("result.html", analysis=analysis)
+    # Find similar past dreams based on shared symbols
+    new_symbols = analysis.get("detected_keywords", [])
+    for sym in analysis.get("key_symbols", []):
+        if isinstance(sym, dict) and "symbol" in sym:
+            new_symbols.append(sym["symbol"])
+    similar_dreams = db.find_similar_dreams(current_user.id, new_symbols, exclude_dream_id=dream_id)
+
+    return render_template("result.html", analysis=analysis, similar_dreams=similar_dreams)
 
 
 @app.route("/history")
