@@ -212,29 +212,9 @@
             <span id="deep-chevron" class="chevron">▸</span>
             Show full interpretation & details
         </button>
-    </div>
 
-    <!-- KEY SYMBOLS -->
-    {% if analysis.key_symbols %}
-    <div class="section">
-        <div class="label">Key symbols</div>
-
-        {% for sym in analysis.key_symbols %}
-        <div class="symbol-card">
-            <div class="symbol-title">{{ sym.symbol|capitalize }}</div>
-            {% if sym.description %}
-            <p class="muted">{{ sym.description }}</p>
-            {% else %}
-            <p class="muted">An important element in the dream’s emotional landscape.</p>
-            {% endif %}
-        </div>
-        {% endfor %}
-
-    </div>
-    {% endif %}
-
-    <!-- DEEP BLOCK (COLLAPSED) -->
-    <div id="deep-block" style="display:none;">
+        <!-- DEEP BLOCK (COLLAPSED) - directly below button -->
+        <div id="deep-block" style="display:none; margin-top:16px;">
 
         {% if analysis.interpretive_narrative %}
         <div class="section">
@@ -332,7 +312,27 @@
             </ul>
         </div>
         {% endif %}
+        </div><!-- end deep-block -->
+    </div><!-- end summary section -->
+
+    <!-- KEY SYMBOLS -->
+    {% if analysis.key_symbols %}
+    <div class="section">
+        <div class="label">Key symbols</div>
+
+        {% for sym in analysis.key_symbols %}
+        <div class="symbol-card">
+            <div class="symbol-title">{{ sym.symbol|capitalize }}</div>
+            {% if sym.description %}
+            <p class="muted">{{ sym.description }}</p>
+            {% else %}
+            <p class="muted">An important element in the dream's emotional landscape.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
     </div>
+    {% endif %}
 
     <div class="section" style="margin-top:20px;">
         <a class="back-link" href="{{ url_for('index') }}">← Decode another dream</a>
