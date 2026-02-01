@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from typing import List, Dict, Any
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from openai import OpenAI
 
@@ -640,6 +640,158 @@ def update_dream_title(dream_id):
         flash("Could not update title.", "error")
 
     return redirect(url_for("history_detail", dream_id=dream_id))
+
+
+@app.route("/export/dream/<int:dream_id>")
+@login_required
+def export_dream(dream_id):
+    """Export a single dream as text file."""
+    dream = db.get_dream_by_id(dream_id, current_user.id)
+
+    if not dream:
+        flash("Dream not found.", "error")
+        return redirect(url_for("history"))
+
+    analysis = dream.get("analysis", {})
+    title = dream.get("title", "Untitled Dream")
+    timestamp = dream.get("timestamp", "")
+
+    # Build text content
+    lines = [
+        "=" * 60,
+        f"DREAM: {title}",
+        f"Date: {timestamp[:10] if timestamp else 'Unknown'}",
+        "=" * 60,
+        "",
+        "DREAM TEXT:",
+        "-" * 40,
+        dream.get("dream_text", ""),
+        "",
+    ]
+
+    if dream.get("life_context"):
+        lines.extend([
+            "LIFE CONTEXT:",
+            "-" * 40,
+            dream.get("life_context", ""),
+            "",
+        ])
+
+    lines.extend([
+        "SUMMARY:",
+        "-" * 40,
+        analysis.get("summary", "No summary available."),
+        "",
+    ])
+
+    if analysis.get("detected_keywords"):
+        lines.extend([
+            "DETECTED MOTIFS:",
+            "-" * 40,
+            ", ".join(analysis.get("detected_keywords", [])),
+            "",
+        ])
+
+    if analysis.get("key_symbols"):
+        lines.append("KEY SYMBOLS:")
+        lines.append("-" * 40)
+        for sym in analysis.get("key_symbols", []):
+            if isinstance(sym, dict):
+                lines.append(f"• {sym.get('symbol', 'Unknown')}: {sym.get('description', '')}")
+        lines.append("")
+
+    if analysis.get("interpretive_narrative"):
+        lines.extend([
+            "FULL INTERPRETATION:",
+            "-" * 40,
+            analysis.get("interpretive_narrative", ""),
+            "",
+        ])
+
+    if analysis.get("reflection_prompts"):
+        lines.append("REFLECTION PROMPTS:")
+        lines.append("-" * 40)
+        for prompt in analysis.get("reflection_prompts", []):
+            lines.append(f"• {prompt}")
+        lines.append("")
+
+    lines.extend([
+        "=" * 60,
+        "Exported from Dream Decoder",
+        "=" * 60,
+    ])
+
+    content = "\n".join(lines)
+    filename = f"dream_{dream_id}_{title[:20].replace(' ', '_')}.txt"
+
+    return Response(
+        content,
+        mimetype="text/plain",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@app.route("/export/journal")
+@login_required
+def export_journal():
+    """Export all dreams as a single text file."""
+    dreams = db.get_user_dreams(current_user.id)
+
+    if not dreams:
+        flash("No dreams to export.", "error")
+        return redirect(url_for("history"))
+
+    lines = [
+        "=" * 60,
+        "DREAM JOURNAL EXPORT",
+        f"Total Dreams: {len(dreams)}",
+        f"Exported: {datetime.now().strftime('%B %d, %Y')}",
+        "=" * 60,
+        "",
+    ]
+
+    for i, dream in enumerate(dreams, 1):
+        analysis = dream.get("analysis", {})
+        title = dream.get("title", "Untitled Dream")
+        timestamp = dream.get("timestamp", "")
+
+        lines.extend([
+            f"{'='*60}",
+            f"DREAM #{i}: {title}",
+            f"Date: {timestamp[:10] if timestamp else 'Unknown'}",
+            "-" * 40,
+            "",
+            dream.get("dream_text", ""),
+            "",
+        ])
+
+        if analysis.get("summary"):
+            lines.extend([
+                "Summary:",
+                analysis.get("summary", ""),
+                "",
+            ])
+
+        if analysis.get("detected_keywords"):
+            lines.append(f"Motifs: {', '.join(analysis.get('detected_keywords', []))}")
+            lines.append("")
+
+        lines.append("")
+
+    lines.extend([
+        "=" * 60,
+        "Exported from Dream Decoder",
+        "=" * 60,
+    ])
+
+    content = "\n".join(lines)
+    filename = f"dream_journal_{datetime.now().strftime('%Y%m%d')}.txt"
+
+    return Response(
+        content,
+        mimetype="text/plain",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 
 @app.route("/search")

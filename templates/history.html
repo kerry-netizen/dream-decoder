@@ -33,9 +33,14 @@
         <h1 class="dd-title">Dream History</h1>
 
         {% if records and records|length > 0 %}
-          <p class="dd-label" style="margin-bottom: 0.75rem;">
-            These are dreams that have been logged on this server.
-          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <p class="dd-label" style="margin: 0;">
+              {{ records|length }} dream{{ 's' if records|length != 1 else '' }} logged
+            </p>
+            <a href="{{ url_for('export_journal') }}" class="dd-button" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none;">
+              📄 Export All
+            </a>
+          </div>
 
           <ul style="list-style: none; padding: 0; margin: 0;">
             {% for rec in records %}
