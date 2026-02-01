@@ -164,8 +164,38 @@
                     <span class="health-label">OpenAI API</span>
                     <span class="health-value status-ok">Configured</span>
                 </div>
+                <div class="health-item">
+                    <span class="health-label">Encryption</span>
+                    <span class="health-value status-ok">Enabled</span>
+                </div>
+            </div>
+
+            <div class="health-card">
+                <h2>Data Migration</h2>
+                <p style="font-size: 13px; color: #9a9ac7; margin-bottom: 16px;">
+                    Encrypt any unencrypted dream content. Safe to run multiple times.
+                </p>
+                <form method="POST" action="{{ url_for('admin.migrate_encryption') }}" style="margin: 0;">
+                    <button type="submit" style="background: #7a5df9; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                        Run Encryption Migration
+                    </button>
+                </form>
             </div>
         </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div style="margin-top: 20px;">
+                {% for category, message in messages %}
+                    <div style="padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; font-size: 14px;
+                        {% if category == 'success' %}background: #1a2d1a; color: #9fff9f; border: 1px solid #2a4d2a;
+                        {% else %}background: #2d1a1a; color: #ff9f9f; border: 1px solid #4d2a2a;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
     </div>
 </body>
 </html>

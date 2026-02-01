@@ -216,3 +216,18 @@ def health():
     health_info["db_path"] = db_path
 
     return render_template("admin/health.html", health=health_info)
+
+
+@admin_bp.route("/migrate-encryption", methods=["POST"])
+@admin_required
+def migrate_encryption():
+    """Migrate existing dreams to encrypted format."""
+    try:
+        count = db.migrate_encrypt_dreams()
+        admin_user = session.get("admin_user", "unknown")
+        db.log_admin_action("migrate_encryption", f"Encrypted {count} dreams", admin_user)
+        flash(f"Successfully encrypted {count} dreams.", "success")
+    except Exception as e:
+        flash(f"Migration failed: {str(e)}", "error")
+
+    return redirect(url_for("admin.health"))

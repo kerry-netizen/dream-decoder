@@ -11,6 +11,8 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 import json
 
+from encryption import encrypt, decrypt
+
 
 # Use persistent disk on Render if available, otherwise local directory
 if os.path.exists("/var/data"):
@@ -255,9 +257,17 @@ def save_dream(
     life_context: str,
     analysis: Dict[str, Any]
 ) -> int:
-    """Save a dream and its analysis. Returns dream ID."""
+    """Save a dream and its analysis. Returns dream ID.
+
+    User-entered content (dream_text, life_context) is encrypted at rest.
+    Title and analysis are stored unencrypted for search/display.
+    """
     conn = get_db()
     cursor = conn.cursor()
+
+    # Encrypt user-entered content
+    encrypted_dream_text = encrypt(dream_text)
+    encrypted_life_context = encrypt(life_context) if life_context else life_context
 
     cursor.execute(
         """INSERT INTO dreams
@@ -266,10 +276,10 @@ def save_dream(
         (
             user_id,
             title,
-            dream_text,
+            encrypted_dream_text,
             felt_during,
             felt_after,
-            life_context,
+            encrypted_life_context,
             datetime.utcnow().isoformat(),
             json.dumps(analysis, ensure_ascii=False)
         )
@@ -283,7 +293,10 @@ def save_dream(
 
 
 def get_user_dreams(user_id: int, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-    """Get all dreams for a user, ordered by most recent first."""
+    """Get all dreams for a user, ordered by most recent first.
+
+    Decrypts user-entered content (dream_text, life_context) on read.
+    """
     conn = get_db()
     cursor = conn.cursor()
 
@@ -301,10 +314,10 @@ def get_user_dreams(user_id: int, limit: Optional[int] = None) -> List[Dict[str,
             "id": dream["id"],
             "user_id": dream["user_id"],
             "title": dream["title"],
-            "dream_text": dream["dream_text"],
+            "dream_text": decrypt(dream["dream_text"]),
             "felt_during": dream["felt_during"],
             "felt_after": dream["felt_after"],
-            "life_context": dream["life_context"],
+            "life_context": decrypt(dream["life_context"]) if dream["life_context"] else dream["life_context"],
             "timestamp": dream["timestamp"],
             "analysis": json.loads(dream["analysis_json"]),
         })
@@ -313,7 +326,10 @@ def get_user_dreams(user_id: int, limit: Optional[int] = None) -> List[Dict[str,
 
 
 def get_dream_by_id(dream_id: int, user_id: int) -> Optional[Dict[str, Any]]:
-    """Get a specific dream. Verifies user owns the dream."""
+    """Get a specific dream. Verifies user owns the dream.
+
+    Decrypts user-entered content on read.
+    """
     conn = get_db()
     cursor = conn.cursor()
 
@@ -329,10 +345,10 @@ def get_dream_by_id(dream_id: int, user_id: int) -> Optional[Dict[str, Any]]:
             "id": dream["id"],
             "user_id": dream["user_id"],
             "title": dream["title"],
-            "dream_text": dream["dream_text"],
+            "dream_text": decrypt(dream["dream_text"]),
             "felt_during": dream["felt_during"],
             "felt_after": dream["felt_after"],
-            "life_context": dream["life_context"],
+            "life_context": decrypt(dream["life_context"]) if dream["life_context"] else dream["life_context"],
             "timestamp": dream["timestamp"],
             "analysis": json.loads(dream["analysis_json"]),
         }
@@ -341,40 +357,51 @@ def get_dream_by_id(dream_id: int, user_id: int) -> Optional[Dict[str, Any]]:
 
 
 def search_user_dreams(user_id: int, query: str) -> List[Dict[str, Any]]:
-    """Search through user's dreams."""
+    """Search through user's dreams.
+
+    Searches title and analysis_json in SQL, then decrypts and searches
+    dream_text and life_context in Python for encrypted content.
+    """
     conn = get_db()
     cursor = conn.cursor()
 
-    # SQLite full-text search on title, dream_text, life_context, and analysis
+    # Get all user dreams - we need to decrypt to search encrypted content
     cursor.execute(
-        """SELECT * FROM dreams
-        WHERE user_id = ?
-        AND (
-            title LIKE ? OR
-            dream_text LIKE ? OR
-            life_context LIKE ? OR
-            analysis_json LIKE ?
-        )
-        ORDER BY timestamp DESC""",
-        (user_id, f"%{query}%", f"%{query}%", f"%{query}%", f"%{query}%")
+        "SELECT * FROM dreams WHERE user_id = ? ORDER BY timestamp DESC",
+        (user_id,)
     )
 
     dreams = cursor.fetchall()
     conn.close()
 
+    query_lower = query.lower()
     result = []
+
     for dream in dreams:
-        result.append({
-            "id": dream["id"],
-            "user_id": dream["user_id"],
-            "title": dream["title"],
-            "dream_text": dream["dream_text"],
-            "felt_during": dream["felt_during"],
-            "felt_after": dream["felt_after"],
-            "life_context": dream["life_context"],
-            "timestamp": dream["timestamp"],
-            "analysis": json.loads(dream["analysis_json"]),
-        })
+        # Decrypt content for searching
+        dream_text = decrypt(dream["dream_text"])
+        life_context = decrypt(dream["life_context"]) if dream["life_context"] else ""
+
+        # Check if query matches any searchable field
+        matches = (
+            (dream["title"] and query_lower in dream["title"].lower()) or
+            (dream_text and query_lower in dream_text.lower()) or
+            (life_context and query_lower in life_context.lower()) or
+            (query_lower in dream["analysis_json"].lower())
+        )
+
+        if matches:
+            result.append({
+                "id": dream["id"],
+                "user_id": dream["user_id"],
+                "title": dream["title"],
+                "dream_text": dream_text,
+                "felt_during": dream["felt_during"],
+                "felt_after": dream["felt_after"],
+                "life_context": life_context,
+                "timestamp": dream["timestamp"],
+                "analysis": json.loads(dream["analysis_json"]),
+            })
 
     return result
 
@@ -923,3 +950,55 @@ def get_beta_notes() -> Optional[str]:
 def set_beta_notes(notes: str) -> None:
     """Set beta notes."""
     set_setting("beta_notes", notes)
+
+
+# ----------------------------------------------------
+# Encryption Migration
+# ----------------------------------------------------
+
+def migrate_encrypt_dreams() -> int:
+    """
+    Migrate existing unencrypted dreams to encrypted format.
+    Only encrypts dreams that aren't already encrypted.
+    Returns count of migrated dreams.
+    """
+    from encryption import encrypt, is_encrypted
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Get all dreams
+    cursor.execute("SELECT id, dream_text, life_context FROM dreams")
+    dreams = cursor.fetchall()
+
+    migrated = 0
+    for dream in dreams:
+        dream_id = dream["id"]
+        dream_text = dream["dream_text"]
+        life_context = dream["life_context"]
+
+        needs_update = False
+        new_dream_text = dream_text
+        new_life_context = life_context
+
+        # Check if dream_text needs encryption
+        if dream_text and not is_encrypted(dream_text):
+            new_dream_text = encrypt(dream_text)
+            needs_update = True
+
+        # Check if life_context needs encryption
+        if life_context and not is_encrypted(life_context):
+            new_life_context = encrypt(life_context)
+            needs_update = True
+
+        if needs_update:
+            cursor.execute(
+                "UPDATE dreams SET dream_text = ?, life_context = ? WHERE id = ?",
+                (new_dream_text, new_life_context, dream_id)
+            )
+            migrated += 1
+
+    conn.commit()
+    conn.close()
+
+    return migrated
