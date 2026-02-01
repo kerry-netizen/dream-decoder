@@ -2,11 +2,7 @@
 
 ## Next Up
 
-### 1. Edit dream title
-- Allow renaming after submission
-- Simple inline edit or modal
-
-### 7. "Refresh Analysis" button on threads/meta page
+### 1. "Refresh Analysis" button on threads/meta page
 - Manual trigger for re-analysis instead of waiting for milestones
 
 ---
@@ -27,6 +23,7 @@
 
 ## Completed
 
+- [x] Edit dream title - inline edit on result page (Feb 1, 2026)
 - [x] Delete dream functionality (Feb 1, 2026)
 - [x] Loading spinner on dream submit (Feb 1, 2026)
 - [x] Date formatting - friendly dates across all pages (Feb 1, 2026)

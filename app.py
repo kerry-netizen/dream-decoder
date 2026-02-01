@@ -769,6 +769,58 @@ def meta_analysis_view():
     return render_template("meta_analysis.html", meta=meta, dream_count=dream_count)
 
 
+@app.route("/refresh-analysis", methods=["POST"])
+@login_required
+def refresh_analysis():
+    """Force regeneration of threads and meta-analysis."""
+    dream_count = db.get_user_dream_count(current_user.id)
+
+    if dream_count < 5:
+        flash("You need at least 5 dreams to generate analysis.", "error")
+        return redirect(request.referrer or url_for("index"))
+
+    try:
+        # Clear existing cached analysis
+        db.clear_user_threads(current_user.id)
+        db.clear_user_meta_analysis(current_user.id)
+
+        # Regenerate
+        dreams = db.get_user_dreams(current_user.id)
+        detected_threads, meta_analysis = thread_analyzer.analyze_dream_threads(dreams)
+
+        # Save threads
+        for thread in detected_threads:
+            db.save_dream_thread(
+                user_id=current_user.id,
+                thread_name=thread.get("thread_name", "Unnamed Thread"),
+                description=thread.get("description", ""),
+                recurring_symbols=thread.get("recurring_symbols", []),
+                emotional_pattern=thread.get("emotional_pattern", ""),
+                narrative_arc=thread.get("narrative_arc", ""),
+                dream_ids=thread.get("dream_ids", [])
+            )
+
+        # Save meta-analysis
+        if meta_analysis:
+            db.save_meta_analysis(
+                user_id=current_user.id,
+                total_dreams=dream_count,
+                top_symbols=[s["symbol"] for s in meta_analysis.get("recurring_patterns", {}).get("recurring_symbols", [])[:10]],
+                emotional_trends=meta_analysis.get("recurring_patterns", {}).get("emotional_patterns", {}),
+                narrative_patterns=meta_analysis.get("psychological_themes", []),
+                insights=meta_analysis.get("overall_theme", ""),
+                full_analysis=meta_analysis
+            )
+
+        flash("Analysis refreshed successfully!", "success")
+
+    except Exception as e:
+        print(f"Refresh analysis error: {e}")
+        flash("Unable to refresh analysis at this time.", "error")
+
+    return redirect(request.referrer or url_for("threads"))
+
+
 # ----------------------------------------------------
 # Initialize database on startup
 # ----------------------------------------------------

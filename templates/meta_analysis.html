@@ -37,9 +37,17 @@
       <section class="dd-input-card">
         <h1 class="dd-title">Meta-Analysis</h1>
 
-        <p class="dd-label" style="margin-bottom: 1.5rem;">
+        <p class="dd-label" style="margin-bottom: 1rem;">
           High-level patterns and insights across your entire dream journal ({{ dream_count }} dreams).
         </p>
+
+        {% if dream_count >= 5 %}
+        <form method="POST" action="{{ url_for('refresh_analysis') }}" style="margin-bottom: 1.5rem; text-align: center;">
+          <button type="submit" class="dd-button" style="padding: 8px 16px; font-size: 0.9rem;" onclick="this.disabled=true; this.innerHTML='<span class=\'spinner\'></span> Refreshing...'; this.form.submit();">
+            🔄 Refresh Analysis
+          </button>
+        </form>
+        {% endif %}
 
         {% if meta %}
           <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 24px; margin-bottom: 20px;">
