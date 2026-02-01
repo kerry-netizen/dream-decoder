@@ -165,6 +165,17 @@ def review_error(error_id):
     return redirect(url_for("admin.errors"))
 
 
+@admin_bp.route("/errors/review-all", methods=["POST"])
+@admin_required
+def review_all_errors():
+    """Mark all unreviewed errors as reviewed."""
+    count = db.mark_all_errors_reviewed()
+    admin_user = session.get("admin_user", "unknown")
+    db.log_admin_action("review_all_errors", f"Marked {count} errors as reviewed", admin_user)
+    flash(f"Marked {count} error(s) as reviewed.", "success")
+    return redirect(url_for("admin.errors"))
+
+
 @admin_bp.route("/api-usage")
 @admin_required
 def api_usage():

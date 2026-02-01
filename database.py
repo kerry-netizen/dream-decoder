@@ -716,6 +716,17 @@ def mark_error_reviewed(error_id: int) -> None:
     conn.close()
 
 
+def mark_all_errors_reviewed() -> int:
+    """Mark all unreviewed errors as reviewed. Returns count of updated rows."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE error_logs SET reviewed = 1 WHERE reviewed = 0")
+    count = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return count
+
+
 def log_api_usage(user_id: int, endpoint: str, tokens_prompt: int, tokens_completion: int, model: str, duration_ms: int) -> None:
     """Log an API call."""
     conn = get_db()

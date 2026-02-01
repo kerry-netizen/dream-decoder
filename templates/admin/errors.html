@@ -161,6 +161,48 @@
         {% else %}
         <p style="color: #787894;">No errors found.</p>
         {% endfor %}
+
+        {% if errors and not include_reviewed %}
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #232333; text-align: center;">
+            <button onclick="showMarkAllModal()" class="btn" style="background: #3a2525; color: #ff9f9f; border: 1px solid #5a3535; padding: 10px 20px; font-size: 14px;">
+                Mark All Reviewed
+            </button>
+        </div>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div style="margin-top: 20px;">
+                {% for category, message in messages %}
+                    <div style="padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; font-size: 14px;
+                        {% if category == 'success' %}background: #1a2d1a; color: #9fff9f; border: 1px solid #2a4d2a;
+                        {% else %}background: #2d1a1a; color: #ff9f9f; border: 1px solid #4d2a2a;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Mark All Reviewed Confirmation Modal -->
+    <div id="mark-all-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 24px; max-width: 320px; text-align: center;">
+            <h3 style="margin: 0 0 12px 0; color: #e6e6ff; font-size: 18px;">Mark All Reviewed?</h3>
+            <p style="margin: 0 0 20px 0; color: #a5acb8; font-size: 14px;">
+                This will mark all {{ errors|length }} error(s) as reviewed.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button onclick="hideMarkAllModal()" style="padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; background: #2d2d3d; color: #bcbce0;">
+                    Cancel
+                </button>
+                <form method="POST" action="{{ url_for('admin.review_all_errors') }}" style="margin: 0;">
+                    <button type="submit" style="padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; background: #cc6666; color: white;">
+                        Mark All
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -168,6 +210,19 @@
             const el = document.getElementById('traceback-' + id);
             el.classList.toggle('show');
         }
+
+        function showMarkAllModal() {
+            document.getElementById('mark-all-modal').style.display = 'flex';
+        }
+
+        function hideMarkAllModal() {
+            document.getElementById('mark-all-modal').style.display = 'none';
+        }
+
+        // Close modal on overlay click
+        document.getElementById('mark-all-modal').addEventListener('click', function(e) {
+            if (e.target === this) hideMarkAllModal();
+        });
     </script>
 </body>
 </html>
