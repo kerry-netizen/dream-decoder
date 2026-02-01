@@ -692,7 +692,11 @@ def threads():
     # Clear notification flag
     session.pop("new_threads_available", None)
 
-    return render_template("threads.html", threads=user_threads, dream_count=dream_count)
+    # Build dream_id -> title mapping for display
+    dreams = db.get_user_dreams(current_user.id)
+    dream_map = {d["id"]: d.get("title") or f"Dream #{d['id']}" for d in dreams}
+
+    return render_template("threads.html", threads=user_threads, dream_count=dream_count, dream_map=dream_map)
 
 
 @app.route("/meta-analysis")

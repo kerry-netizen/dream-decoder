@@ -84,12 +84,20 @@
               {% endif %}
 
               <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #2d2d3d;">
-                <span style="font-size: 0.85rem; color: #787894;">
-                  Appears in {{ thread.dream_ids|length }} dream(s)
-                </span>
-                <span style="margin-left: 10px; font-size: 0.85rem; color: #787894;">
+                <div style="font-size: 0.85rem; color: #787894; margin-bottom: 8px;">
+                  Appears in {{ thread.dream_ids|length }} dream(s):
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  {% for dream_id in thread.dream_ids %}
+                    <a href="{{ url_for('history_detail', dream_id=dream_id) }}"
+                       style="display: inline-block; background: #2d2d3d; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; color: #bcbce0; text-decoration: none;">
+                      {{ dream_map.get(dream_id, 'Dream #' ~ dream_id) }}
+                    </a>
+                  {% endfor %}
+                </div>
+                <div style="margin-top: 8px; font-size: 0.8rem; color: #787894;">
                   Detected: {{ thread.created_at|friendly_date }}
-                </span>
+                </div>
               </div>
             </div>
           {% endfor %}

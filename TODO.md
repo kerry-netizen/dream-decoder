@@ -15,7 +15,11 @@
 - "Appears in 4 dream(s)" should show dream titles as clickable links
 - Requires passing dream data to threads template
 
-### 4. Loading indicator on dream submit
+### 4. Add icon menu to result page
+- Result page is missing the top navigation icons (history, threads, meta, logout)
+- Should match the header on other pages
+
+### 5. Loading indicator on dream submit
 - Add spinner or "Analyzing your dream..." when form submits
 - Prevents confusion during AI processing delay
 
