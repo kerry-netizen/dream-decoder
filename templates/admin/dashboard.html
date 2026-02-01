@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Dream Decoder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #232333;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        nav a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav a:hover {
+            color: #7a5df9;
+        }
+        nav a.active {
+            color: #7a5df9;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #9a9ac7;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #7a5df9;
+        }
+        .stat-sub {
+            font-size: 13px;
+            color: #787894;
+            margin-top: 8px;
+        }
+        .section {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #bcbce0;
+        }
+        .chart-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 100px;
+        }
+        .chart-bar {
+            flex: 1;
+            background: #7a5df9;
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            position: relative;
+        }
+        .chart-bar:hover::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #232333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .chart-labels {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .chart-labels span {
+            flex: 1;
+            text-align: center;
+            font-size: 10px;
+            color: #787894;
+        }
+        .alert-badge {
+            background: #cc6666;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Dashboard</h1>
+            <nav>
+                <a href="{{ url_for('admin.dashboard') }}" class="active">Dashboard</a>
+                <a href="{{ url_for('admin.users') }}">Users</a>
+                <a href="{{ url_for('admin.errors') }}">
+                    Errors
+                    {% if stats.unreviewed_errors > 0 %}
+                    <span class="alert-badge">{{ stats.unreviewed_errors }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('admin.api_usage') }}">API Usage</a>
+                <a href="{{ url_for('admin.health') }}">Health</a>
+                <a href="{{ url_for('admin.logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <!-- At-a-Glance Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">{{ stats.total_users }}</div>
+                <div class="stat-sub">+{{ stats.signups_today }} today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Dreams</div>
+                <div class="stat-value">{{ stats.total_dreams }}</div>
+                <div class="stat-sub">+{{ stats.dreams_today }} today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Dreams This Week</div>
+                <div class="stat-value">{{ stats.dreams_week }}</div>
+                <div class="stat-sub">{{ stats.dreams_month }} this month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Signups This Week</div>
+                <div class="stat-value">{{ stats.signups_week }}</div>
+                <div class="stat-sub">{{ stats.signups_month }} this month</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="section">
+            <h2>Dreams Per Day (Last 14 Days)</h2>
+            {% if stats.dreams_by_day %}
+            {% set max_dreams = stats.dreams_by_day|map(attribute='count')|max if stats.dreams_by_day else 1 %}
+            <div class="chart-row">
+                {% for day in stats.dreams_by_day %}
+                <div class="chart-bar"
+                     style="height: {{ (day.count / max_dreams * 100) if max_dreams > 0 else 0 }}%"
+                     data-label="{{ day.day }}: {{ day.count }}"></div>
+                {% endfor %}
+            </div>
+            <div class="chart-labels">
+                {% for day in stats.dreams_by_day %}
+                <span>{{ day.day[5:] }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: #787894; font-size: 14px;">No data yet</p>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h2>Signups Per Day (Last 14 Days)</h2>
+            {% if stats.signups_by_day %}
+            {% set max_signups = stats.signups_by_day|map(attribute='count')|max if stats.signups_by_day else 1 %}
+            <div class="chart-row">
+                {% for day in stats.signups_by_day %}
+                <div class="chart-bar"
+                     style="height: {{ (day.count / max_signups * 100) if max_signups > 0 else 0 }}%; background: #5df99a;"
+                     data-label="{{ day.day }}: {{ day.count }}"></div>
+                {% endfor %}
+            </div>
+            <div class="chart-labels">
+                {% for day in stats.signups_by_day %}
+                <span>{{ day.day[5:] }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: #787894; font-size: 14px;">No data yet</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

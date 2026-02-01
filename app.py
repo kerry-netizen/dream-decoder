@@ -16,9 +16,13 @@ from openai import OpenAI
 # Import our new modules
 import database as db
 import thread_analyzer
+from admin import admin_bp
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
+
+# Register admin blueprint
+app.register_blueprint(admin_bp)
 
 
 # ----------------------------------------------------
@@ -271,7 +275,11 @@ Do NOT generate empty placeholder fields.
 # LLM CALL
 # ----------------------------------------------------
 
-def call_model(payload):
+def call_model(payload, user_id=None, endpoint="dream_analysis"):
+    """Call OpenAI API and track usage."""
+    import time
+    start_time = time.time()
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": json.dumps(payload)}
@@ -283,6 +291,20 @@ def call_model(payload):
         temperature=0.7,
         timeout=30,
     )
+
+    # Track API usage
+    duration_ms = int((time.time() - start_time) * 1000)
+    usage = response.usage
+    if usage and user_id:
+        db.log_api_usage(
+            user_id=user_id,
+            endpoint=endpoint,
+            tokens_prompt=usage.prompt_tokens,
+            tokens_completion=usage.completion_tokens,
+            model="gpt-4o-mini",
+            duration_ms=duration_ms
+        )
+
     return json.loads(response.choices[0].message.content)
 
 
@@ -334,7 +356,7 @@ def normalize_emotional_arc(raw):
 # Main analysis
 # ----------------------------------------------------
 
-def analyze_dream(dream_text, title="", life_context=""):
+def analyze_dream(dream_text, title="", life_context="", user_id=None):
     detected = detect_keywords(dream_text)
     candidates = simple_candidate_symbols(dream_text)
     priority = build_priority_symbols(candidates)
@@ -349,10 +371,19 @@ def analyze_dream(dream_text, title="", life_context=""):
     }
 
     try:
-        data = call_model(payload)
+        data = call_model(payload, user_id=user_id, endpoint="dream_analysis")
     except Exception as e:
+        import traceback
         err = f"{type(e).__name__}: {e}"
         print("MODEL ERROR:", err, flush=True)
+        # Log the error
+        db.log_error(
+            error_type=type(e).__name__,
+            message=str(e),
+            traceback_str=traceback.format_exc(),
+            route="/analyze",
+            user_id=user_id
+        )
         data = {
             "micronarrative": "",
             "summary": f"There was an error contacting the model: {err}",
@@ -491,7 +522,8 @@ def handle_decode():
     analysis = analyze_dream(
         dream_text=dream_text,
         title=dream_title,
-        life_context=life_context
+        life_context=life_context,
+        user_id=current_user.id
     )
 
     # Save to database
@@ -1012,6 +1044,36 @@ def initialize_database():
 def health_check():
     """Health check endpoint for monitoring."""
     return {"status": "healthy", "service": "dream-decoder"}, 200
+
+
+# ----------------------------------------------------
+# Global Error Handler
+# ----------------------------------------------------
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Log unhandled exceptions."""
+    import traceback
+
+    # Get user_id if logged in
+    user_id = None
+    try:
+        if current_user and current_user.is_authenticated:
+            user_id = current_user.id
+    except:
+        pass
+
+    # Log the error
+    db.log_error(
+        error_type=type(e).__name__,
+        message=str(e),
+        traceback_str=traceback.format_exc(),
+        route=request.path if request else "unknown",
+        user_id=user_id
+    )
+
+    # Re-raise for Flask to handle
+    raise e
 
 
 if __name__ == "__main__":

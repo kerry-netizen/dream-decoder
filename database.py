@@ -91,6 +91,56 @@ def init_db():
         )
     """)
 
+    # Admin: Error logs
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS error_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            error_type TEXT,
+            message TEXT,
+            traceback TEXT,
+            route TEXT,
+            user_id INTEGER,
+            reviewed INTEGER DEFAULT 0
+        )
+    """)
+
+    # Admin: API usage tracking
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS api_usage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            user_id INTEGER,
+            endpoint TEXT,
+            tokens_prompt INTEGER DEFAULT 0,
+            tokens_completion INTEGER DEFAULT 0,
+            model TEXT,
+            duration_ms INTEGER DEFAULT 0
+        )
+    """)
+
+    # Admin: Action log
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admin_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            action TEXT,
+            details TEXT,
+            admin_user TEXT
+        )
+    """)
+
+    # Admin: Login attempts (brute force protection)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS login_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            ip_address TEXT,
+            username TEXT,
+            success INTEGER DEFAULT 0
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -590,3 +640,240 @@ def find_similar_dreams(user_id: int, new_symbols: List[str], exclude_dream_id: 
     # Sort by match count descending, take top N
     similar.sort(key=lambda x: x["match_count"], reverse=True)
     return similar[:limit]
+
+
+# ----------------------------------------------------
+# Admin Functions
+# ----------------------------------------------------
+
+def log_error(error_type: str, message: str, traceback_str: str, route: str, user_id: int = None) -> None:
+    """Log an error to the database."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO error_logs (timestamp, error_type, message, traceback, route, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (datetime.utcnow().isoformat(), error_type, message, traceback_str, route, user_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_error_logs(limit: int = 100, include_reviewed: bool = False) -> List[Dict[str, Any]]:
+    """Get recent error logs."""
+    conn = get_db()
+    cursor = conn.cursor()
+    if include_reviewed:
+        cursor.execute("SELECT * FROM error_logs ORDER BY timestamp DESC LIMIT ?", (limit,))
+    else:
+        cursor.execute("SELECT * FROM error_logs WHERE reviewed = 0 ORDER BY timestamp DESC LIMIT ?", (limit,))
+    errors = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return errors
+
+
+def mark_error_reviewed(error_id: int) -> None:
+    """Mark an error as reviewed."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE error_logs SET reviewed = 1 WHERE id = ?", (error_id,))
+    conn.commit()
+    conn.close()
+
+
+def log_api_usage(user_id: int, endpoint: str, tokens_prompt: int, tokens_completion: int, model: str, duration_ms: int) -> None:
+    """Log an API call."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO api_usage (timestamp, user_id, endpoint, tokens_prompt, tokens_completion, model, duration_ms) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (datetime.utcnow().isoformat(), user_id, endpoint, tokens_prompt, tokens_completion, model, duration_ms)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_api_usage_stats() -> Dict[str, Any]:
+    """Get API usage statistics."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Total calls and tokens
+    cursor.execute("SELECT COUNT(*) as calls, SUM(tokens_prompt) as prompt, SUM(tokens_completion) as completion FROM api_usage")
+    totals = dict(cursor.fetchone())
+
+    # Today
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    cursor.execute(
+        "SELECT COUNT(*) as calls, SUM(tokens_prompt) as prompt, SUM(tokens_completion) as completion FROM api_usage WHERE timestamp LIKE ?",
+        (f"{today}%",)
+    )
+    today_stats = dict(cursor.fetchone())
+
+    # This week (last 7 days)
+    cursor.execute(
+        "SELECT COUNT(*) as calls, SUM(tokens_prompt) as prompt, SUM(tokens_completion) as completion FROM api_usage WHERE timestamp >= date('now', '-7 days')"
+    )
+    week_stats = dict(cursor.fetchone())
+
+    # Slowest 10 calls
+    cursor.execute("SELECT * FROM api_usage ORDER BY duration_ms DESC LIMIT 10")
+    slowest = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+    return {
+        "totals": totals,
+        "today": today_stats,
+        "week": week_stats,
+        "slowest": slowest
+    }
+
+
+def log_login_attempt(ip_address: str, username: str, success: bool) -> None:
+    """Log a login attempt."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO login_attempts (timestamp, ip_address, username, success) VALUES (?, ?, ?, ?)",
+        (datetime.utcnow().isoformat(), ip_address, username, 1 if success else 0)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_failed_login_count(ip_address: str, minutes: int = 15) -> int:
+    """Get count of failed login attempts from an IP in the last N minutes."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        """SELECT COUNT(*) FROM login_attempts
+           WHERE ip_address = ? AND success = 0
+           AND timestamp >= datetime('now', ?)""",
+        (ip_address, f"-{minutes} minutes")
+    )
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count
+
+
+def log_admin_action(action: str, details: str, admin_user: str) -> None:
+    """Log an admin action."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO admin_logs (timestamp, action, details, admin_user) VALUES (?, ?, ?, ?)",
+        (datetime.utcnow().isoformat(), action, details, admin_user)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_admin_stats() -> Dict[str, Any]:
+    """Get admin dashboard statistics."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Total users
+    cursor.execute("SELECT COUNT(*) FROM users")
+    total_users = cursor.fetchone()[0]
+
+    # Total dreams
+    cursor.execute("SELECT COUNT(*) FROM dreams")
+    total_dreams = cursor.fetchone()[0]
+
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
+    # Dreams today
+    cursor.execute("SELECT COUNT(*) FROM dreams WHERE timestamp LIKE ?", (f"{today}%",))
+    dreams_today = cursor.fetchone()[0]
+
+    # Dreams this week
+    cursor.execute("SELECT COUNT(*) FROM dreams WHERE timestamp >= date('now', '-7 days')")
+    dreams_week = cursor.fetchone()[0]
+
+    # Dreams this month
+    cursor.execute("SELECT COUNT(*) FROM dreams WHERE timestamp >= date('now', '-30 days')")
+    dreams_month = cursor.fetchone()[0]
+
+    # Signups today
+    cursor.execute("SELECT COUNT(*) FROM users WHERE created_at LIKE ?", (f"{today}%",))
+    signups_today = cursor.fetchone()[0]
+
+    # Signups this week
+    cursor.execute("SELECT COUNT(*) FROM users WHERE created_at >= date('now', '-7 days')")
+    signups_week = cursor.fetchone()[0]
+
+    # Signups this month
+    cursor.execute("SELECT COUNT(*) FROM users WHERE created_at >= date('now', '-30 days')")
+    signups_month = cursor.fetchone()[0]
+
+    # Dreams per day (last 14 days)
+    cursor.execute("""
+        SELECT date(timestamp) as day, COUNT(*) as count
+        FROM dreams
+        WHERE timestamp >= date('now', '-14 days')
+        GROUP BY date(timestamp)
+        ORDER BY day
+    """)
+    dreams_by_day = [dict(row) for row in cursor.fetchall()]
+
+    # Signups per day (last 14 days)
+    cursor.execute("""
+        SELECT date(created_at) as day, COUNT(*) as count
+        FROM users
+        WHERE created_at >= date('now', '-14 days')
+        GROUP BY date(created_at)
+        ORDER BY day
+    """)
+    signups_by_day = [dict(row) for row in cursor.fetchall()]
+
+    # Unreviewed errors count
+    cursor.execute("SELECT COUNT(*) FROM error_logs WHERE reviewed = 0")
+    unreviewed_errors = cursor.fetchone()[0]
+
+    conn.close()
+
+    return {
+        "total_users": total_users,
+        "total_dreams": total_dreams,
+        "dreams_today": dreams_today,
+        "dreams_week": dreams_week,
+        "dreams_month": dreams_month,
+        "signups_today": signups_today,
+        "signups_week": signups_week,
+        "signups_month": signups_month,
+        "dreams_by_day": dreams_by_day,
+        "signups_by_day": signups_by_day,
+        "unreviewed_errors": unreviewed_errors
+    }
+
+
+def get_all_users() -> List[Dict[str, Any]]:
+    """Get all users with dream counts."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT u.id, u.username, u.created_at, u.last_login,
+               (SELECT COUNT(*) FROM dreams WHERE user_id = u.id) as dream_count
+        FROM users u
+        ORDER BY u.created_at DESC
+    """)
+    users = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return users
+
+
+def delete_user_and_data(user_id: int) -> bool:
+    """Delete a user and all their data."""
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM dreams WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM dream_threads WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM meta_analysis WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+        deleted = cursor.rowcount > 0
+    except Exception:
+        deleted = False
+    conn.close()
+    return deleted

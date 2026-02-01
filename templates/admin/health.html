@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>System Health - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #232333;
+        }
+        h1 { margin: 0; font-size: 24px; }
+        nav a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav a:hover { color: #7a5df9; }
+        nav a.active { color: #7a5df9; font-weight: 600; }
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .health-card {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .health-card h2 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #bcbce0;
+        }
+        .health-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #232333;
+            font-size: 14px;
+        }
+        .health-item:last-child {
+            border-bottom: none;
+        }
+        .health-label {
+            color: #9a9ac7;
+        }
+        .health-value {
+            color: #e6e6ff;
+            font-weight: 500;
+        }
+        .disk-bar {
+            height: 8px;
+            background: #232333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        .disk-bar-fill {
+            height: 100%;
+            background: #7a5df9;
+            border-radius: 4px;
+        }
+        .disk-bar-fill.warning {
+            background: #ffaa66;
+        }
+        .disk-bar-fill.critical {
+            background: #cc6666;
+        }
+        .status-ok {
+            color: #5df99a;
+        }
+        .status-warning {
+            color: #ffaa66;
+        }
+        .status-critical {
+            color: #cc6666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>System Health</h1>
+            <nav>
+                <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin.users') }}">Users</a>
+                <a href="{{ url_for('admin.errors') }}">Errors</a>
+                <a href="{{ url_for('admin.api_usage') }}">API Usage</a>
+                <a href="{{ url_for('admin.health') }}" class="active">Health</a>
+                <a href="{{ url_for('admin.logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <div class="health-grid">
+            <div class="health-card">
+                <h2>Database</h2>
+                <div class="health-item">
+                    <span class="health-label">Status</span>
+                    <span class="health-value status-ok">Online</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">Size</span>
+                    <span class="health-value">{{ health.db_size_mb }} MB</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">Location</span>
+                    <span class="health-value" style="font-size: 12px;">{{ health.db_path }}</span>
+                </div>
+            </div>
+
+            {% if health.disk_total_gb %}
+            <div class="health-card">
+                <h2>Disk Usage (/var/data)</h2>
+                <div class="health-item">
+                    <span class="health-label">Total</span>
+                    <span class="health-value">{{ health.disk_total_gb }} GB</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">Used</span>
+                    <span class="health-value">{{ health.disk_used_gb }} GB ({{ health.disk_percent }}%)</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">Free</span>
+                    <span class="health-value">{{ health.disk_free_gb }} GB</span>
+                </div>
+                <div class="disk-bar">
+                    <div class="disk-bar-fill {{ 'critical' if health.disk_percent > 90 else ('warning' if health.disk_percent > 75 else '') }}"
+                         style="width: {{ health.disk_percent }}%"></div>
+                </div>
+            </div>
+            {% else %}
+            <div class="health-card">
+                <h2>Disk Usage</h2>
+                <div class="health-item">
+                    <span class="health-label">Status</span>
+                    <span class="health-value">Running locally (no persistent disk)</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="health-card">
+                <h2>Environment</h2>
+                <div class="health-item">
+                    <span class="health-label">Admin User</span>
+                    <span class="health-value">Configured</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">OpenAI API</span>
+                    <span class="health-value status-ok">Configured</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

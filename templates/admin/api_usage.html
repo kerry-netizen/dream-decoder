@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API Usage - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #232333;
+        }
+        h1 { margin: 0; font-size: 24px; }
+        nav a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav a:hover { color: #7a5df9; }
+        nav a.active { color: #7a5df9; font-weight: 600; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #9a9ac7;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #7a5df9;
+        }
+        .stat-sub {
+            font-size: 13px;
+            color: #787894;
+            margin-top: 8px;
+        }
+        .section {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #bcbce0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #232333;
+            font-size: 13px;
+        }
+        th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9a9ac7;
+        }
+        .slow-warning {
+            color: #ffaa66;
+        }
+        .slow-critical {
+            color: #cc6666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>API Usage</h1>
+            <nav>
+                <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin.users') }}">Users</a>
+                <a href="{{ url_for('admin.errors') }}">Errors</a>
+                <a href="{{ url_for('admin.api_usage') }}" class="active">API Usage</a>
+                <a href="{{ url_for('admin.health') }}">Health</a>
+                <a href="{{ url_for('admin.logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total API Calls</div>
+                <div class="stat-value">{{ stats.totals.calls or 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Calls Today</div>
+                <div class="stat-value">{{ stats.today.calls or 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Calls This Week</div>
+                <div class="stat-value">{{ stats.week.calls or 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Tokens</div>
+                <div class="stat-value">{{ '{:,}'.format((stats.totals.prompt or 0) + (stats.totals.completion or 0)) }}</div>
+                <div class="stat-sub">
+                    ~${{ '%.2f'|format(((stats.totals.prompt or 0) * 0.00015 + (stats.totals.completion or 0) * 0.0006) / 1000) }} estimated
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Token Breakdown</h2>
+            <table>
+                <tr>
+                    <th>Period</th>
+                    <th>Prompt Tokens</th>
+                    <th>Completion Tokens</th>
+                    <th>Est. Cost</th>
+                </tr>
+                <tr>
+                    <td>Today</td>
+                    <td>{{ '{:,}'.format(stats.today.prompt or 0) }}</td>
+                    <td>{{ '{:,}'.format(stats.today.completion or 0) }}</td>
+                    <td>${{ '%.4f'|format(((stats.today.prompt or 0) * 0.00015 + (stats.today.completion or 0) * 0.0006) / 1000) }}</td>
+                </tr>
+                <tr>
+                    <td>This Week</td>
+                    <td>{{ '{:,}'.format(stats.week.prompt or 0) }}</td>
+                    <td>{{ '{:,}'.format(stats.week.completion or 0) }}</td>
+                    <td>${{ '%.4f'|format(((stats.week.prompt or 0) * 0.00015 + (stats.week.completion or 0) * 0.0006) / 1000) }}</td>
+                </tr>
+                <tr>
+                    <td><strong>All Time</strong></td>
+                    <td>{{ '{:,}'.format(stats.totals.prompt or 0) }}</td>
+                    <td>{{ '{:,}'.format(stats.totals.completion or 0) }}</td>
+                    <td>${{ '%.4f'|format(((stats.totals.prompt or 0) * 0.00015 + (stats.totals.completion or 0) * 0.0006) / 1000) }}</td>
+                </tr>
+            </table>
+            <p style="font-size: 11px; color: #787894; margin-top: 12px;">
+                Cost estimates based on GPT-4o-mini rates ($0.150/1M input, $0.600/1M output)
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>10 Slowest API Calls</h2>
+            {% if stats.slowest %}
+            <table>
+                <tr>
+                    <th>Time</th>
+                    <th>User ID</th>
+                    <th>Endpoint</th>
+                    <th>Duration</th>
+                    <th>Tokens</th>
+                </tr>
+                {% for call in stats.slowest %}
+                <tr>
+                    <td>{{ call.timestamp[:16] if call.timestamp else 'N/A' }}</td>
+                    <td>{{ call.user_id or 'N/A' }}</td>
+                    <td>{{ call.endpoint or 'N/A' }}</td>
+                    <td class="{{ 'slow-critical' if call.duration_ms > 30000 else ('slow-warning' if call.duration_ms > 15000 else '') }}">
+                        {{ '%.1f'|format(call.duration_ms / 1000) }}s
+                    </td>
+                    <td>{{ (call.tokens_prompt or 0) + (call.tokens_completion or 0) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p style="color: #787894;">No API calls recorded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

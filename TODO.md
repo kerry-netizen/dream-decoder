@@ -1,25 +1,10 @@
 # Dream Decoder - Planned Improvements
 
-## Next Up
-
-### 1. Refresh cooldown + UI tweaks
-- Add cooldown period to prevent token spamming on refresh (threads & meta pages)
-- Move "You've logged X dreams" to right of "Decode a Dream" title to save vertical space
-
-### 2. "Similar to past dreams" on new analysis
-- Note connections to previous dreams after analysis
-
----
-
-## Lower Priority (Polish)
-
-### 3. Export to PDF/text
-- Download dream journal or individual analyses
-
----
-
 ## Completed
 
+- [x] Export to text - single dream and full journal (Feb 1, 2026)
+- [x] "Similar to past dreams" on new analysis (Feb 1, 2026)
+- [x] Refresh cooldown (5 min) + move dream count to title row (Feb 1, 2026)
 - [x] Dream count on home page (Feb 1, 2026)
 - [x] Refresh Analysis button on threads/meta pages (Feb 1, 2026)
 - [x] Edit dream title - inline edit on result page (Feb 1, 2026)

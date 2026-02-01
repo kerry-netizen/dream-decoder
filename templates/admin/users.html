@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #232333;
+        }
+        h1 { margin: 0; font-size: 24px; }
+        nav a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav a:hover { color: #7a5df9; }
+        nav a.active { color: #7a5df9; font-weight: 600; }
+        .search-bar {
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #3c3c55;
+            background: #1f1f2b;
+            color: #e6e6ff;
+            font-size: 14px;
+            width: 300px;
+        }
+        .search-bar input:focus {
+            outline: none;
+            border-color: #7a5df9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #151521;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #232333;
+        }
+        th {
+            background: #1a1a28;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9a9ac7;
+        }
+        tr:hover {
+            background: #1a1a28;
+        }
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-view {
+            background: #2a2a3a;
+            color: #bcbce0;
+        }
+        .btn-delete {
+            background: #3a2525;
+            color: #cc6666;
+            border: 1px solid #5a3a3a;
+        }
+        .btn-delete:hover {
+            background: #4a2525;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>User Management</h1>
+            <nav>
+                <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin.users') }}" class="active">Users</a>
+                <a href="{{ url_for('admin.errors') }}">Errors</a>
+                <a href="{{ url_for('admin.api_usage') }}">API Usage</a>
+                <a href="{{ url_for('admin.health') }}">Health</a>
+                <a href="{{ url_for('admin.logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <div class="search-bar">
+            <form method="GET">
+                <input type="text" name="search" placeholder="Search users..."
+                       value="{{ search or '' }}">
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Signed Up</th>
+                    <th>Last Login</th>
+                    <th>Dreams</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.created_at[:10] if user.created_at else 'N/A' }}</td>
+                    <td>{{ user.last_login[:10] if user.last_login else 'Never' }}</td>
+                    <td>{{ user.dream_count }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" class="btn btn-view">View</a>
+                        <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}"
+                              style="display: inline;"
+                              onsubmit="return confirm('Delete user {{ user.username }} and all their data? This cannot be undone.');">
+                            <button type="submit" class="btn btn-delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #787894;">No users found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

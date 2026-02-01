@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error Log - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #232333;
+        }
+        h1 { margin: 0; font-size: 24px; }
+        nav a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav a:hover { color: #7a5df9; }
+        nav a.active { color: #7a5df9; font-weight: 600; }
+        .filter-bar {
+            margin-bottom: 20px;
+        }
+        .filter-bar a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-right: 16px;
+            font-size: 14px;
+        }
+        .filter-bar a.active {
+            color: #7a5df9;
+            font-weight: 600;
+        }
+        .error-card {
+            background: #151521;
+            border: 1px solid #3a2525;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .error-card.reviewed {
+            border-color: #232333;
+            opacity: 0.7;
+        }
+        .error-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .error-type {
+            color: #cc6666;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .error-time {
+            color: #787894;
+            font-size: 12px;
+        }
+        .error-message {
+            font-size: 13px;
+            color: #e6e6ff;
+            margin-bottom: 10px;
+        }
+        .error-meta {
+            font-size: 12px;
+            color: #787894;
+            margin-bottom: 10px;
+        }
+        .error-traceback {
+            background: #0a0a12;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #a5acb8;
+            max-height: 150px;
+            overflow: auto;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .error-traceback.show {
+            display: block;
+        }
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+        }
+        .btn-toggle {
+            background: #2a2a3a;
+            color: #bcbce0;
+        }
+        .btn-review {
+            background: #253a25;
+            color: #9fff9f;
+            border: 1px solid #3a5a3a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Error Log</h1>
+            <nav>
+                <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin.users') }}">Users</a>
+                <a href="{{ url_for('admin.errors') }}" class="active">Errors</a>
+                <a href="{{ url_for('admin.api_usage') }}">API Usage</a>
+                <a href="{{ url_for('admin.health') }}">Health</a>
+                <a href="{{ url_for('admin.logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <div class="filter-bar">
+            <a href="{{ url_for('admin.errors') }}" class="{{ 'active' if not include_reviewed else '' }}">Unreviewed</a>
+            <a href="{{ url_for('admin.errors', reviewed=1) }}" class="{{ 'active' if include_reviewed else '' }}">All</a>
+        </div>
+
+        {% for error in errors %}
+        <div class="error-card {{ 'reviewed' if error.reviewed else '' }}">
+            <div class="error-header">
+                <div>
+                    <span class="error-type">{{ error.error_type or 'Unknown Error' }}</span>
+                </div>
+                <span class="error-time">{{ error.timestamp[:19] if error.timestamp else 'N/A' }}</span>
+            </div>
+            <div class="error-message">{{ error.message or 'No message' }}</div>
+            <div class="error-meta">
+                Route: {{ error.route or 'N/A' }} |
+                User ID: {{ error.user_id or 'Anonymous' }}
+            </div>
+
+            {% if error.traceback %}
+            <button class="btn btn-toggle" onclick="toggleTraceback({{ error.id }})">Show Traceback</button>
+            <div id="traceback-{{ error.id }}" class="error-traceback">{{ error.traceback }}</div>
+            {% endif %}
+
+            {% if not error.reviewed %}
+            <form method="POST" action="{{ url_for('admin.review_error', error_id=error.id) }}" style="display: inline; margin-left: 8px;">
+                <button type="submit" class="btn btn-review">Mark Reviewed</button>
+            </form>
+            {% endif %}
+        </div>
+        {% else %}
+        <p style="color: #787894;">No errors found.</p>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleTraceback(id) {
+            const el = document.getElementById('traceback-' + id);
+            el.classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User: {{ user.username }} - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: "Inter", system-ui, sans-serif;
+            color: #e6e6ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #232333;
+        }
+        h1 { margin: 0; font-size: 24px; }
+        nav a {
+            color: #bcbce0;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        nav a:hover { color: #7a5df9; }
+        .back-link {
+            color: #7a5df9;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        .user-info {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .user-info p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .user-info strong {
+            color: #9a9ac7;
+        }
+        .dream-card {
+            background: #151521;
+            border: 1px solid #232333;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .dream-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .dream-text {
+            font-size: 13px;
+            color: #a5acb8;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow: hidden;
+        }
+        .dream-meta {
+            font-size: 12px;
+            color: #787894;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>User: {{ user.username }}</h1>
+            <nav>
+                <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin.users') }}">Users</a>
+                <a href="{{ url_for('admin.errors') }}">Errors</a>
+                <a href="{{ url_for('admin.api_usage') }}">API Usage</a>
+                <a href="{{ url_for('admin.health') }}">Health</a>
+                <a href="{{ url_for('admin.logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <a href="{{ url_for('admin.users') }}" class="back-link">&larr; Back to Users</a>
+
+        <div class="user-info">
+            <p><strong>User ID:</strong> {{ user.id }}</p>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Signed Up:</strong> {{ user.created_at[:10] if user.created_at else 'N/A' }}</p>
+            <p><strong>Last Login:</strong> {{ user.last_login[:10] if user.last_login else 'Never' }}</p>
+            <p><strong>Total Dreams:</strong> {{ user.dream_count }}</p>
+        </div>
+
+        <h2 style="font-size: 18px; margin-bottom: 16px;">Dreams ({{ dreams|length }})</h2>
+
+        {% for dream in dreams %}
+        <div class="dream-card">
+            <div class="dream-title">{{ dream.title or 'Untitled Dream' }}</div>
+            <div class="dream-text">{{ dream.dream_text[:300] }}{% if dream.dream_text|length > 300 %}...{% endif %}</div>
+            <div class="dream-meta">{{ dream.timestamp[:10] if dream.timestamp else 'No date' }}</div>
+        </div>
+        {% else %}
+        <p style="color: #787894;">This user has no dreams.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
