@@ -1,5 +1,5 @@
 """
-Database management for Dream Decoder multi-user system.
+Database management for Dream Ferret multi-user system.
 Uses SQLite for storing users, dreams, and thread analysis.
 """
 
@@ -151,6 +151,15 @@ def init_db():
             updated_at TEXT
         )
     """)
+
+    # Performance indexes
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_dreams_user_id ON dreams(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_dreams_timestamp ON dreams(timestamp DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_dream_threads_user_id ON dream_threads(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_meta_analysis_user_id ON meta_analysis(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_error_logs_timestamp ON error_logs(timestamp DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_error_logs_reviewed ON error_logs(reviewed)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_api_usage_timestamp ON api_usage(timestamp DESC)")
 
     conn.commit()
     conn.close()

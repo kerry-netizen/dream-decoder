@@ -1,5 +1,5 @@
 """
-Admin routes for Dream Decoder.
+Admin routes for Dream Ferret.
 Separate authentication from regular users.
 """
 

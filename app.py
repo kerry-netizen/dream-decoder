@@ -1,6 +1,6 @@
 """
-Dream Decoder - Multi-User Version
-Complete rewrite with user authentication and cross-dream thread analysis.
+Dream Ferret - Multi-User Version
+AI-powered dream journaling with user authentication and cross-dream thread analysis.
 """
 
 import json
@@ -516,7 +516,7 @@ def index():
     if request.method == "POST":
         return handle_decode()
     dream_count = db.get_user_dream_count(current_user.id)
-    return render_template("index.html", dream_count=dream_count)
+    return render_template("index.html", dream_count=dream_count, active_nav="home")
 
 
 @app.route("/decode", methods=["GET", "POST"])
@@ -534,7 +534,7 @@ def handle_decode():
 
     if not dream_text:
         flash("Please enter a dream to decode.", "error")
-        return render_template("index.html")
+        return render_template("index.html", active_nav="home")
 
     # Analyze dream
     analysis = analyze_dream(
@@ -605,7 +605,7 @@ def handle_decode():
             new_symbols.append(sym["symbol"])
     similar_dreams = db.find_similar_dreams(current_user.id, new_symbols, exclude_dream_id=dream_id)
 
-    return render_template("result.html", analysis=analysis, similar_dreams=similar_dreams)
+    return render_template("result.html", analysis=analysis, similar_dreams=similar_dreams, active_nav="home")
 
 
 @app.route("/history")
@@ -632,7 +632,7 @@ def history():
             "timestamp": dream.get("timestamp", ""),
         })
 
-    return render_template("history.html", records=formatted_dreams)
+    return render_template("history.html", records=formatted_dreams, active_nav="history")
 
 
 @app.route("/history/<int:dream_id>")
@@ -652,7 +652,7 @@ def history_detail(dream_id):
     analysis["life_context"] = dream.get("life_context", "")
     analysis["timestamp"] = dream.get("timestamp", "")
 
-    return render_template("result.html", analysis=analysis)
+    return render_template("result.html", analysis=analysis, active_nav="history")
 
 
 @app.route("/history/<int:dream_id>/delete", methods=["POST"])
@@ -851,7 +851,7 @@ def search():
     query = request.args.get("q", "").strip()
 
     if not query:
-        return render_template("search.html", query=None, results=[])
+        return render_template("search.html", query=None, results=[], active_nav="history")
 
     dreams = db.search_user_dreams(current_user.id, query)
 
@@ -883,7 +883,7 @@ def search():
             "snippet": snippet,
         })
 
-    return render_template("search.html", query=query, results=formatted_results)
+    return render_template("search.html", query=query, results=formatted_results, active_nav="history")
 
 
 # ----------------------------------------------------
@@ -943,7 +943,7 @@ def threads():
     dreams = db.get_user_dreams(current_user.id)
     dream_map = {d["id"]: d.get("title") or f"Dream #{d['id']}" for d in dreams}
 
-    return render_template("threads.html", threads=user_threads, dream_count=dream_count, dream_map=dream_map)
+    return render_template("threads.html", threads=user_threads, dream_count=dream_count, dream_map=dream_map, active_nav="threads")
 
 
 @app.route("/meta-analysis")
@@ -976,7 +976,7 @@ def meta_analysis_view():
             print(f"Meta-analysis generation error: {e}")
             flash("Unable to generate meta-analysis at this time.", "error")
 
-    return render_template("meta_analysis.html", meta=meta, dream_count=dream_count)
+    return render_template("meta_analysis.html", meta=meta, dream_count=dream_count, active_nav="meta")
 
 
 @app.route("/refresh-analysis", methods=["POST"])
@@ -1061,17 +1061,34 @@ def initialize_database():
 @app.route("/health")
 def health_check():
     """Health check endpoint for monitoring."""
-    return {"status": "healthy", "service": "dream-decoder"}, 200
+    return {"status": "healthy", "service": "dream-ferret"}, 200
 
 
 # ----------------------------------------------------
-# Global Error Handler
+# Error Handlers
 # ----------------------------------------------------
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """Handle 404 errors with custom page."""
+    return render_template("404.html"), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    """Handle 500 errors with custom page."""
+    return render_template("500.html"), 500
+
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     """Log unhandled exceptions."""
     import traceback
+    from werkzeug.exceptions import HTTPException
+
+    # Don't log HTTP exceptions (404, etc.) - they're handled above
+    if isinstance(e, HTTPException):
+        return e
 
     # Get user_id if logged in
     user_id = None
@@ -1090,8 +1107,8 @@ def handle_exception(e):
         user_id=user_id
     )
 
-    # Re-raise for Flask to handle
-    raise e
+    # Return 500 page
+    return render_template("500.html"), 500
 
 
 if __name__ == "__main__":
