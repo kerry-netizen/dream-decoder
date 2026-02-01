@@ -152,6 +152,14 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        .moon {
+            position: fixed;
+            top: 14px;
+            right: 18px;
+            font-size: 22px;
+            opacity: 0.7;
+        }
     </style>
 
     <script>
@@ -168,6 +176,17 @@
 </head>
 
 <body>
+<div class="moon">🌙</div>
+
+<div style="position: fixed; top: 14px; right: 60px; display: flex; gap: 10px; font-size: 20px;">
+    <a href="{{ url_for('index') }}" style="text-decoration: none; opacity: 0.7;" title="New Dream">🏠</a>
+    <a href="{{ url_for('history') }}" style="text-decoration: none; opacity: 0.7;" title="Dream History">🕒</a>
+    <a href="{{ url_for('search') }}" style="text-decoration: none; opacity: 0.7;" title="Search Dreams">🔍</a>
+    <a href="{{ url_for('threads') }}" style="text-decoration: none; opacity: 0.7;" title="Dream Threads">🧵</a>
+    <a href="{{ url_for('meta_analysis_view') }}" style="text-decoration: none; opacity: 0.7;" title="Meta Analysis">📊</a>
+    <a href="{{ url_for('logout') }}" style="text-decoration: none; opacity: 0.7;" title="Logout">🚪</a>
+</div>
+
 <div class="container">
 
     <!-- HEADER -->
