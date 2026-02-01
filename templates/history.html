@@ -1,72 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Dream History – Dream Decoder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+{% extends "base.html" %}
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
+{% block title %}Dream Ferret - History{% endblock %}
 
-<body class="dd-body dd-dark">
+{% block content %}
+<div class="dd-app">
+  <main class="dd-main">
+    <section class="dd-input-card">
+      <h1 class="dd-title">Dream History</h1>
 
-  <div class="dd-app">
-
-    <!-- Top bar -->
-    <header class="dd-header">
-      <div class="dd-logo">Dream Decoder</div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="Back to Dream Input">
-          ⬅
-        </a>
-        <a href="{{ url_for('search') }}" class="dd-icon-button" aria-label="Search Dreams">
-          🔍
-        </a>
-        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
-          🌙
-        </button>
-      </div>
-    </header>
-
-    <main class="dd-main">
-      <section class="dd-input-card">
-        <h1 class="dd-title">Dream History</h1>
-
-        {% if records and records|length > 0 %}
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <p class="dd-label" style="margin: 0;">
-              {{ records|length }} dream{{ 's' if records|length != 1 else '' }} logged
-            </p>
-            <a href="{{ url_for('export_journal') }}" class="dd-button" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none;">
-              📄 Export All
-            </a>
-          </div>
-
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            {% for rec in records %}
-              <li style="margin-bottom: 0.75rem;">
-                <a href="{{ url_for('history_detail', dream_id=rec.id) }}"
-                   style="text-decoration: none; color: #e7eaf0;">
-                  <div style="font-size: 0.95rem; font-weight: 500;">
-                    {{ rec.title }}
-                  </div>
-                  <div style="font-size: 0.8rem; color: #a5acb8;">
-                    {{ rec.timestamp|friendly_date }}
-                  </div>
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="dd-label">
-            No dreams have been logged yet.
+      {% if records and records|length > 0 %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+          <p class="dd-label" style="margin: 0;">
+            {{ records|length }} dream{{ 's' if records|length != 1 else '' }} logged
           </p>
-        {% endif %}
-      </section>
-    </main>
-  </div>
+          <a href="{{ url_for('export_journal') }}" class="dd-button" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none;">
+            📄 Export All
+          </a>
+        </div>
 
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
-
-</body>
-</html>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          {% for rec in records %}
+            <li style="margin-bottom: 0.75rem;">
+              <a href="{{ url_for('history_detail', dream_id=rec.id) }}"
+                 style="text-decoration: none; color: #e7eaf0; display: block; padding: 10px; background: #1a1a28; border-radius: 8px;">
+                <div style="font-size: 0.95rem; font-weight: 500;">
+                  {{ rec.title }}
+                </div>
+                <div style="font-size: 0.8rem; color: #a5acb8;">
+                  {{ rec.timestamp|friendly_date }}
+                </div>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="dd-label">
+          No dreams have been logged yet.
+        </p>
+      {% endif %}
+    </section>
+  </main>
+</div>
+{% endblock %}

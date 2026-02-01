@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const submitButton = form.querySelector(".dd-primary-button");
       if (submitButton) {
         submitButton.disabled = true;
-        submitButton.textContent = "Decoding your dream…";
+        submitButton.textContent = "Analyzing your dream…";
       }
       if (loadingIndicator) {
         loadingIndicator.style.display = "flex";

@@ -1,210 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dream Decoder</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            background: #0f0f16;
-            font-family: "Inter", system-ui, sans-serif;
-            color: #e6e6ff;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Dream Ferret - New Dream{% endblock %}
 
+{% block head %}
+<style>
+    body {
+        background: #0f0f16;
+        font-family: "Inter", system-ui, sans-serif;
+        color: #e6e6ff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto 80px;
+        background: #151521;
+        padding: 30px 22px 40px;
+        border-radius: 14px;
+        border: 1px solid #232333;
+        box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 600px) {
         .container {
-            max-width: 800px;
-            margin: 40px auto 60px;
-            background: #151521;
-            padding: 30px 22px 40px;
-            border-radius: 14px;
-            border: 1px solid #232333;
-            box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+            margin: 12px 12px 80px;
+            padding: 24px 18px 32px;
         }
+    }
 
-        @media (max-width: 600px) {
-            .container {
-                margin: 28px 12px 60px;
-                padding: 30px 18px 40px;
-            }
-        }
+    .title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
 
-        .title {
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 14px;
-        }
+    .description {
+        font-size: 15px;
+        color: #bcbce0;
+        line-height: 1.55;
+        margin-top: 0;
+        margin-bottom: 24px;
+    }
 
-        .description {
-            font-size: 15px;
-            color: #bcbce0;
-            line-height: 1.55;
-            margin-top: 0;
-            margin-bottom: 24px;
-        }
+    label {
+        display: block;
+        margin-top: 30px;
+        margin-bottom: 12px;
+        font-weight: 500;
+        font-size: 17px;
+    }
 
-        /* Labels */
+    input[type="text"],
+    textarea,
+    select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1.3px solid #3c3c55;
+        background: #1f1f2b;
+        color: #e6e6ff;
+        font-size: 17px;
+        outline: none;
+        box-sizing: border-box;
+        margin-bottom: 14px;
+    }
 
-        label {
-            display: block;
-            margin-top: 30px;
-            margin-bottom: 12px;
-            font-weight: 500;
-            font-size: 17px;
-        }
+    input[type="text"],
+    select {
+        padding: 0 18px;
+        min-height: 56px;
+        line-height: 1.4;
+    }
 
-        /* Base control styling */
+    textarea {
+        padding: 18px;
+        line-height: 1.5;
+        resize: none;
+    }
 
-        input[type="text"],
-        textarea,
-        select {
-            width: 100%;
-            border-radius: 10px;
-            border: 1.3px solid #3c3c55;
-            background: #1f1f2b;
-            color: #e6e6ff;
-            font-size: 17px;
-            outline: none;
-            box-sizing: border-box;
-            margin-bottom: 14px;
-        }
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+        border-color: #7a5df9;
+        box-shadow: 0 0 0 2px rgba(122, 93, 249, 0.35);
+    }
 
-        input[type="text"],
-        select {
-            padding: 0 18px;
-            min-height: 56px;          /* make single-line controls THICK */
-            line-height: 1.4;
-        }
+    #dream_text {
+        min-height: 260px;
+        overflow-y: hidden;
+        background: #1c1c27;
+    }
 
-        textarea {
-            padding: 18px;
-            line-height: 1.5;
-            resize: none;
-        }
+    #life_context {
+        min-height: 110px;
+        background: #1f1f2b;
+    }
 
-        input[type="text"]:focus,
-        textarea:focus,
-        select:focus {
-            border-color: #7a5df9;
-            box-shadow: 0 0 0 2px rgba(122, 93, 249, 0.35);
-        }
+    ::placeholder {
+        color: #787894;
+    }
 
-        /* Main dream textarea */
+    .submit-btn {
+        width: 100%;
+        margin-top: 40px;
+        padding: 18px;
+        background: linear-gradient(90deg, #7a5df9, #9855ff);
+        border: none;
+        color: white;
+        font-size: 18px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s ease;
+    }
 
-        #dream_text {
-            min-height: 260px;
-            overflow-y: hidden;
-            background: #1c1c27;
-        }
+    .submit-btn:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
 
-        /* Context textarea */
+    .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
 
-        #life_context {
-            min-height: 110px;
-            background: #1f1f2b;
-        }
+    .error {
+        margin-top: 10px;
+        color: #ff9f9f;
+        font-size: 14px;
+    }
 
-        ::placeholder {
-            color: #787894;
-        }
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
 
-        /* Submit button */
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
 
-        button {
-            width: 100%;
-            margin-top: 40px;
-            padding: 18px;
-            background: linear-gradient(90deg, #7a5df9, #9855ff);
-            border: none;
-            color: white;
-            font-size: 18px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.2s ease;
-        }
-
-        button:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
-
-        .error {
-            margin-top: 10px;
-            color: #ff9f9f;
-            font-size: 14px;
-        }
-
-        .moon {
-            position: fixed;
-            top: 14px;
-            right: 18px;
-            font-size: 22px;
-            opacity: 0.7;
-        }
-    </style>
-
-    <script>
-        function autoExpand(el) {
-            el.style.height = "auto";
-            el.style.height = el.scrollHeight + "px";
-        }
-
-        function showLoading(form) {
-            const btn = form.querySelector('button[type="submit"]');
-            const dreamText = form.querySelector('#dream_text').value.trim();
-
-            if (!dreamText) {
-                return true; // Let form validation handle it
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Analyzing your dream...';
-            return true;
-        }
-    </script>
-
-    <style>
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 0.8s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-
-<body>
-<div class="moon">🌙</div>
-
-<nav style="position: fixed; top: 10px; right: 50px; display: flex; gap: 4px; font-size: 18px;">
-    <a href="/history" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Dream History">🕒</a>
-    <a href="/search" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Search Dreams">🔍</a>
-    <a href="/threads" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Dream Threads">🧵</a>
-    <a href="/meta-analysis" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Meta Analysis">📊</a>
-    <a href="/logout" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Logout">🚪</a>
-</nav>
-
+{% block content %}
 <div class="container">
 
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
-        <div class="title" style="margin-bottom: 0;">Decode a Dream</div>
+        <div class="title" style="margin-bottom: 0;">Dream Ferret</div>
         {% if dream_count and dream_count > 0 %}
         <div style="font-size: 14px; color: #bcbce0;">
             📖 <strong style="color: #7a5df9;">{{ dream_count }}</strong> dream{{ 's' if dream_count != 1 else '' }} logged
@@ -237,10 +185,30 @@
                   name="life_context"
                   placeholder="Recent stresses, decisions, events..."></textarea>
 
-        <button type="submit">Decode my dream</button>
+        <button type="submit" class="submit-btn">Decode my dream</button>
     </form>
 
 </div>
+{% endblock %}
 
-</body>
-</html>
+{% block scripts %}
+<script>
+    function autoExpand(el) {
+        el.style.height = "auto";
+        el.style.height = el.scrollHeight + "px";
+    }
+
+    function showLoading(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        const dreamText = form.querySelector('#dream_text').value.trim();
+
+        if (!dreamText) {
+            return true;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Analyzing your dream...';
+        return true;
+    }
+</script>
+{% endblock %}

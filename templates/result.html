@@ -1,254 +1,194 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dream Decoder – Result</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            background: #0f0f16;
-            font-family: "Inter", system-ui, sans-serif;
-            color: #e6e6ff;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Dream Ferret - Analysis{% endblock %}
 
+{% block head %}
+<style>
+    body {
+        background: #0f0f16;
+        font-family: "Inter", system-ui, sans-serif;
+        color: #e6e6ff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 20px auto 80px;
+        background: #151521;
+        padding: 26px 22px 34px;
+        border-radius: 14px;
+        border: 1px solid #232333;
+        box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 600px) {
         .container {
-            max-width: 900px;
-            margin: 40px auto 60px;
-            background: #151521;
-            padding: 26px 22px 34px;
-            border-radius: 14px;
-            border: 1px solid #232333;
-            box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+            margin: 12px 12px 80px;
+            padding: 22px 18px 28px;
         }
+    }
 
-        @media (max-width: 600px) {
-            .container {
-                margin: 20px 12px 40px;
-                padding: 22px 18px 28px;
-            }
-        }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { margin: 6px 0 8px; line-height: 1.55; }
 
-        h1 {
-            margin: 0 0 8px;
-            font-size: 24px;
-        }
+    .label {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 11px;
+        color: #9a9ac7;
+        margin-bottom: 6px;
+    }
 
-        p {
-            margin: 6px 0 8px;
-            line-height: 1.55;
-        }
+    .section {
+        margin-top: 20px;
+        padding-top: 13px;
+        border-top: 1px solid #26263a;
+    }
 
-        .label {
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 11px;
-            color: #9a9ac7;
-            margin-bottom: 6px;
-        }
+    .summary-text {
+        font-size: 17px;
+        line-height: 1.55;
+        color: #e2e2ff;
+    }
 
-        .section {
-            margin-top: 20px;
-            padding-top: 13px;
-            border-top: 1px solid #26263a;
-        }
+    .toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        border: 1px solid #32324a;
+        background: #2e2e45;
+        padding: 7px 12px;
+        font-size: 12px;
+        color: #d0cfff;
+        cursor: pointer;
+        margin-top: 10px;
+    }
 
-        .summary-text {
-            font-size: 17px; /* slightly larger */
-            line-height: 1.55;
-            color: #e2e2ff;
-        }
+    .chevron { font-size: 12px; }
 
-        .toggle-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border-radius: 999px;
-            border: 1px solid #32324a;
-            background: #2e2e45; /* soft purple-ish tint */
-            padding: 7px 12px;
-            font-size: 12px;
-            color: #d0cfff;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+    .btn-primary {
+        margin-top: 14px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #7a5df9, #9a55ff);
+        color: white;
+        border: none;
+        font-size: 13px;
+        cursor: pointer;
+    }
 
-        .chevron {
-            font-size: 12px;
-        }
+    .btn-primary:hover { opacity: 0.9; }
 
-        .btn-primary {
-            margin-top: 14px;
-            padding: 9px 14px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #7a5df9, #9a55ff);
-            color: white;
-            border: none;
-            font-size: 13px;
-            cursor: pointer;
-        }
+    .symbol-card {
+        background: #181827;
+        border: 1px solid #26263a;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-top: 10px;
+    }
 
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
+    .symbol-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
 
-        /* Key Symbol Cards (Mode B) */
-        .symbol-card {
-            background: #181827;
-            border: 1px solid #26263a;
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-top: 10px;
-        }
+    .muted {
+        color: #a0a0c6;
+        font-size: 13px;
+    }
 
-        .symbol-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
+    .chip {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #202033;
+        border: 1px solid #343453;
+        font-size: 12px;
+        color: #c8c8ff;
+    }
 
-        .muted {
-            color: #a0a0c6;
-            font-size: 13px;
-        }
+    .tone-pill {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: #1a1a2a;
+        border: 1px solid #323250;
+        font-size: 12px;
+    }
 
-        .chip {
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: #202033;
-            border: 1px solid #343453;
-            font-size: 12px;
-            color: #c8c8ff;
-        }
+    ul.list-plain {
+        padding-left: 18px;
+        margin: 6px 0;
+    }
 
-        .tone-pill {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 999px;
-            background: #1a1a2a;
-            border: 1px solid #323250;
-            font-size: 12px;
-        }
+    ul.list-plain li {
+        margin-bottom: 4px;
+        font-size: 13px;
+    }
 
-        ul.list-plain {
-            padding-left: 18px;
-            margin: 6px 0;
-        }
+    .back-link {
+        display: inline-block;
+        margin-top: 22px;
+        font-size: 13px;
+        color: #9f9fff;
+        text-decoration: none;
+    }
 
-        ul.list-plain li {
-            margin-bottom: 4px;
-            font-size: 13px;
-        }
+    .back-link:hover { text-decoration: underline; }
 
-        .back-link {
-            display: inline-block;
-            margin-top: 22px;
-            font-size: 13px;
-            color: #9f9fff;
-            text-decoration: none;
-        }
+    .delete-btn {
+        background: transparent;
+        border: 1px solid #5a3a3a;
+        color: #cc6666;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
 
-        .back-link:hover {
-            text-decoration: underline;
-        }
+    .delete-btn:hover {
+        background: #3a2525;
+        border-color: #cc6666;
+    }
 
-        .moon {
-            position: fixed;
-            top: 14px;
-            right: 18px;
-            font-size: 22px;
-            opacity: 0.7;
-        }
+    .edit-btn {
+        background: transparent;
+        border: 1px solid #3c3c55;
+        color: #9a9ac7;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+    }
 
-        .delete-btn {
-            background: transparent;
-            border: 1px solid #5a3a3a;
-            color: #cc6666;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+    .edit-btn:hover { background: #2a2a3a; }
 
-        .delete-btn:hover {
-            background: #3a2525;
-            border-color: #cc6666;
-        }
+    .save-btn {
+        background: #3a5a3a;
+        border: 1px solid #5a8a5a;
+        color: #aaffaa;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+    }
 
-        .edit-btn {
-            background: transparent;
-            border: 1px solid #3c3c55;
-            color: #9a9ac7;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-        }
+    .cancel-btn {
+        background: transparent;
+        border: 1px solid #3c3c55;
+        color: #9a9ac7;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
 
-        .edit-btn:hover {
-            background: #2a2a3a;
-        }
-
-        .save-btn {
-            background: #3a5a3a;
-            border: 1px solid #5a8a5a;
-            color: #aaffaa;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .cancel-btn {
-            background: transparent;
-            border: 1px solid #3c3c55;
-            color: #9a9ac7;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-    </style>
-
-    <script>
-        function toggleSection(id, chevronId) {
-            const el = document.getElementById(id);
-            const chev = document.getElementById(chevronId);
-            if (!el) return;
-
-            const isHidden = el.style.display === "none" || el.style.display === "";
-            el.style.display = isHidden ? "block" : "none";
-            chev.textContent = isHidden ? "▾" : "▸";
-        }
-
-        function showTitleEdit() {
-            document.getElementById('title-display').style.display = 'none';
-            document.getElementById('title-form').style.display = 'block';
-            document.querySelector('#title-form input').focus();
-        }
-
-        function hideTitleEdit() {
-            document.getElementById('title-display').style.display = 'flex';
-            document.getElementById('title-form').style.display = 'none';
-        }
-    </script>
-</head>
-
-<body>
-<div class="moon">🌙</div>
-
-<nav style="position: fixed; top: 10px; right: 50px; display: flex; gap: 4px; font-size: 18px;">
-    <a href="{{ url_for('index') }}" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="New Dream">🏠</a>
-    <a href="{{ url_for('history') }}" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Dream History">🕒</a>
-    <a href="{{ url_for('search') }}" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Search Dreams">🔍</a>
-    <a href="{{ url_for('threads') }}" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Dream Threads">🧵</a>
-    <a href="{{ url_for('meta_analysis_view') }}" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Meta Analysis">📊</a>
-    <a href="{{ url_for('logout') }}" style="text-decoration: none; opacity: 0.7; padding: 10px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;" title="Logout">🚪</a>
-</nav>
-
+{% block content %}
 <div class="container">
 
     <!-- HEADER -->
@@ -257,7 +197,7 @@
             <div style="font-size:20px; font-weight:600;">Dream Analysis</div>
             <div style="font-size:13px; color:#a0a0c6;">A reflective, symbolic interpretation based on your dream.</div>
         </div>
-        <a class="back-link" href="{{ url_for('index') }}">← Decode another dream</a>
+        <a class="back-link" href="{{ url_for('index') }}">← New dream</a>
     </div>
 
     <!-- DREAM TITLE (editable) -->
@@ -273,9 +213,9 @@
         {% if analysis.dream_id %}
         <form id="title-form" method="POST" action="{{ url_for('update_dream_title', dream_id=analysis.dream_id) }}"
               style="display:none; margin-top:8px;">
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <input type="text" name="title" value="{{ analysis.dream_title or '' }}"
-                       style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid #3c3c55; background:#1f1f2b; color:#e6e6ff; font-size:14px;">
+                       style="flex:1; min-width:200px; padding:8px 12px; border-radius:6px; border:1px solid #3c3c55; background:#1f1f2b; color:#e6e6ff; font-size:14px;">
                 <button type="submit" class="save-btn">Save</button>
                 <button type="button" onclick="hideTitleEdit()" class="cancel-btn">Cancel</button>
             </div>
@@ -312,13 +252,12 @@
         </div>
         {% endif %}
 
-        <button class="btn-primary"
-                onclick="toggleSection('deep-block','deep-chevron')">
+        <button class="btn-primary" onclick="toggleSection('deep-block','deep-chevron')">
             <span id="deep-chevron" class="chevron">▸</span>
             Show full interpretation & details
         </button>
 
-        <!-- DEEP BLOCK (COLLAPSED) - directly below button -->
+        <!-- DEEP BLOCK (COLLAPSED) -->
         <div id="deep-block" style="display:none; margin-top:16px;">
 
         {% if analysis.interpretive_narrative %}
@@ -331,18 +270,14 @@
         {% if analysis.emotional_profile_primary or analysis.emotional_profile_tone %}
         <div class="section">
             <div class="label">Emotional landscape</div>
-
             {% if analysis.emotional_profile_tone %}
             <div class="tone-pill">Overall tone: {{ analysis.emotional_profile_tone }}</div>
             {% endif %}
-
             {% if analysis.emotional_profile_primary %}
             <div style="margin-top:10px; font-size:13px; font-weight:600;">Primary emotions</div>
             <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
                 {% for e in analysis.emotional_profile_primary %}
-                <div class="chip">
-                    {{ e.name }} – {{ (e.intensity * 100) | round(0) | int }}%
-                </div>
+                <div class="chip">{{ e.name }} – {{ (e.intensity * 100) | round(0) | int }}%</div>
                 {% endfor %}
             </div>
             {% endif %}
@@ -354,10 +289,7 @@
             <div class="label">Emotional arc</div>
             <ul class="list-plain">
                 {% for st in analysis.emotional_arc %}
-                <li>
-                    {% if st.stage %}<strong>{{ st.stage|capitalize }}:</strong> {% endif %}
-                    {{ st.emotion }} – {{ (st.intensity * 100)|round(0)|int }}%
-                </li>
+                <li>{% if st.stage %}<strong>{{ st.stage|capitalize }}:</strong> {% endif %}{{ st.emotion }} – {{ (st.intensity * 100)|round(0)|int }}%</li>
                 {% endfor %}
             </ul>
         </div>
@@ -366,15 +298,10 @@
         {% if analysis.narrative_pattern.pattern_name %}
         <div class="section">
             <div class="label">Narrative pattern</div>
-
-            <div style="font-size:13px; font-weight:600;">
-                {{ analysis.narrative_pattern.pattern_name }}
-            </div>
-
+            <div style="font-size:13px; font-weight:600;">{{ analysis.narrative_pattern.pattern_name }}</div>
             {% if analysis.narrative_pattern.description %}
             <p class="muted">{{ analysis.narrative_pattern.description }}</p>
             {% endif %}
-
             {% if analysis.narrative_pattern.related_themes %}
             <div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
                 {% for t in analysis.narrative_pattern.related_themes %}
@@ -424,7 +351,6 @@
     {% if analysis.key_symbols %}
     <div class="section">
         <div class="label">Key symbols</div>
-
         {% for sym in analysis.key_symbols %}
         <div class="symbol-card">
             <div class="symbol-title">{{ sym.symbol|capitalize }}</div>
@@ -435,7 +361,6 @@
             {% endif %}
         </div>
         {% endfor %}
-
     </div>
     {% endif %}
 
@@ -444,7 +369,6 @@
     <div class="section">
         <div class="label">Similar to past dreams</div>
         <p class="muted" style="margin-bottom: 12px;">These dreams share common themes or symbols:</p>
-
         {% for dream in similar_dreams %}
         <a href="{{ url_for('history_detail', dream_id=dream.id) }}" style="text-decoration: none; display: block;">
             <div class="symbol-card" style="cursor: pointer; transition: 0.2s; border-color: #3a3a5a;">
@@ -463,14 +387,11 @@
     </div>
     {% endif %}
 
-    <div class="section" style="margin-top:20px; display: flex; justify-content: space-between; align-items: center;">
-        <a class="back-link" href="{{ url_for('index') }}">← Decode another dream</a>
-
+    <div class="section" style="margin-top:20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <a class="back-link" href="{{ url_for('index') }}">← New dream</a>
         {% if analysis.dream_id %}
         <div style="display: flex; gap: 10px;">
-            <a href="{{ url_for('export_dream', dream_id=analysis.dream_id) }}" class="edit-btn" style="text-decoration: none; padding: 6px 12px;">
-                📄 Export
-            </a>
+            <a href="{{ url_for('export_dream', dream_id=analysis.dream_id) }}" class="edit-btn" style="text-decoration: none; padding: 6px 12px;">📄 Export</a>
             <form method="POST" action="{{ url_for('delete_dream', dream_id=analysis.dream_id) }}"
                   onsubmit="return confirm('Are you sure you want to delete this dream? This cannot be undone.');"
                   style="margin: 0;">
@@ -481,5 +402,28 @@
     </div>
 
 </div>
-</body>
-</html>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleSection(id, chevronId) {
+        const el = document.getElementById(id);
+        const chev = document.getElementById(chevronId);
+        if (!el) return;
+        const isHidden = el.style.display === "none" || el.style.display === "";
+        el.style.display = isHidden ? "block" : "none";
+        chev.textContent = isHidden ? "▾" : "▸";
+    }
+
+    function showTitleEdit() {
+        document.getElementById('title-display').style.display = 'none';
+        document.getElementById('title-form').style.display = 'block';
+        document.querySelector('#title-form input').focus();
+    }
+
+    function hideTitleEdit() {
+        document.getElementById('title-display').style.display = 'flex';
+        document.getElementById('title-form').style.display = 'none';
+    }
+</script>
+{% endblock %}

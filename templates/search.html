@@ -1,91 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Search Dreams – Dream Decoder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+{% extends "base.html" %}
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
+{% block title %}Dream Ferret - Search{% endblock %}
 
-<body class="dd-body dd-dark">
+{% block content %}
+<div class="dd-app">
+  <main class="dd-main">
+    <section class="dd-input-card">
+      <h1 class="dd-title">Search Dreams</h1>
+      <p class="dd-label" style="margin-bottom: 0.75rem;">
+        Search across titles, raw dream text, context, motifs, and interpretations.
+      </p>
 
-  <div class="dd-app">
-
-    <!-- Top bar -->
-    <header class="dd-header">
-      <div class="dd-logo">Dream Decoder</div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="Back to Dream Input">
-          ⬅
-        </a>
-        <a href="{{ url_for('history') }}" class="dd-icon-button" aria-label="View Dream History">
-          🕒
-        </a>
-        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
-          🌙
+      <form method="get" action="{{ url_for('search') }}" style="margin-bottom: 1.25rem;">
+        <label for="q" class="dd-label">Search query</label>
+        <input type="text" id="q" name="q" class="dd-input"
+               placeholder="e.g. cat, falling, Thanksgiving, anxiety"
+               value="{{ query or '' }}" />
+        <button type="submit" class="dd-primary-button" style="margin-top: 0.75rem;">
+          Search
         </button>
-      </div>
-    </header>
+      </form>
 
-    <main class="dd-main">
-      <section class="dd-input-card">
-        <h1 class="dd-title">Search Dreams</h1>
-        <p class="dd-label" style="margin-bottom: 0.75rem;">
-          Search across titles, raw dream text, context, motifs, and interpretations.
+      {% if query %}
+        <p class="dd-label" style="margin-bottom: 0.5rem;">
+          Results for <strong>"{{ query }}"</strong>:
         </p>
 
-        <form method="get" action="{{ url_for('search') }}" style="margin-bottom: 1.25rem;">
-          <label for="q" class="dd-label">Search query</label>
-          <input type="text" id="q" name="q" class="dd-input"
-                 placeholder="e.g. cat, falling, Thanksgiving, anxiety"
-                 value="{{ query or '' }}" />
-          <button type="submit" class="dd-primary-button" style="margin-top: 0.75rem;">
-            Search
-          </button>
-        </form>
-
-        {% if query %}
-          <p class="dd-label" style="margin-bottom: 0.5rem;">
-            Results for <strong>"{{ query }}"</strong>:
-          </p>
-
-          {% if results and results|length > 0 %}
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              {% for rec in results %}
-                <li style="margin-bottom: 0.9rem;">
-                  <a href="{{ url_for('history_detail', dream_id=rec.id) }}"
-                     style="text-decoration: none; color: #e7eaf0;">
-                    <div style="font-size: 0.95rem; font-weight: 500;">
-                      {{ rec.title }}
+        {% if results and results|length > 0 %}
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for rec in results %}
+              <li style="margin-bottom: 0.9rem;">
+                <a href="{{ url_for('history_detail', dream_id=rec.id) }}"
+                   style="text-decoration: none; color: #e7eaf0;">
+                  <div style="font-size: 0.95rem; font-weight: 500;">
+                    {{ rec.title }}
+                  </div>
+                  <div style="font-size: 0.8rem; color: #a5acb8;">
+                    {{ rec.timestamp|friendly_date }}
+                  </div>
+                  {% if rec.snippet %}
+                    <div style="font-size: 0.8rem; color: #c3c8d4; margin-top: 0.25rem;">
+                      {{ rec.snippet }}
                     </div>
-                    <div style="font-size: 0.8rem; color: #a5acb8;">
-                      {{ rec.timestamp|friendly_date }}
-                    </div>
-                    {% if rec.snippet %}
-                      <div style="font-size: 0.8rem; color: #c3c8d4; margin-top: 0.25rem;">
-                        {{ rec.snippet }}
-                      </div>
-                    {% endif %}
-                  </a>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p class="dd-label" style="margin-top: 0.5rem;">
-              No dreams matched that query.
-            </p>
-          {% endif %}
+                  {% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
         {% else %}
-          <p class="dd-label">
-            Enter a word or phrase to search your dream diary.
+          <p class="dd-label" style="margin-top: 0.5rem;">
+            No dreams matched that query.
           </p>
         {% endif %}
-      </section>
-    </main>
-  </div>
-
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
-
-</body>
-</html>
+      {% else %}
+        <p class="dd-label">
+          Enter a word or phrase to search your dream diary.
+        </p>
+      {% endif %}
+    </section>
+  </main>
+</div>
+{% endblock %}

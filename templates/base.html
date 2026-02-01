@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Dream Ferret{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Universal Bottom Tab Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #151521;
+            border-top: 1px solid #232333;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 1000;
+        }
+        .bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #787894;
+            font-size: 10px;
+            padding: 6px 12px;
+            min-width: 60px;
+            transition: color 0.2s;
+        }
+        .bottom-nav a:hover,
+        .bottom-nav a.active {
+            color: #7a5df9;
+        }
+        .bottom-nav .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .bottom-nav .nav-label {
+            font-weight: 500;
+        }
+        /* Add padding to body to account for fixed nav */
+        body {
+            padding-bottom: 70px;
+        }
+        /* Logout confirmation modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-box {
+            background: #1f1f2b;
+            border: 1px solid #2d2d3d;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 300px;
+            text-align: center;
+        }
+        .modal-box h3 {
+            margin: 0 0 12px 0;
+            color: #e6e6ff;
+            font-size: 18px;
+        }
+        .modal-box p {
+            margin: 0 0 20px 0;
+            color: #a5acb8;
+            font-size: 14px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        .modal-btn-cancel {
+            background: #2d2d3d;
+            color: #bcbce0;
+        }
+        .modal-btn-confirm {
+            background: #cc6666;
+            color: white;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="dd-body dd-dark">
+    {% block content %}{% endblock %}
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="{{ 'active' if active_nav == 'home' else '' }}">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">New</span>
+        </a>
+        <a href="{{ url_for('history') }}" class="{{ 'active' if active_nav == 'history' else '' }}">
+            <span class="nav-icon">📖</span>
+            <span class="nav-label">History</span>
+        </a>
+        <a href="{{ url_for('threads') }}" class="{{ 'active' if active_nav == 'threads' else '' }}">
+            <span class="nav-icon">🧵</span>
+            <span class="nav-label">Threads</span>
+        </a>
+        <a href="{{ url_for('meta_analysis_view') }}" class="{{ 'active' if active_nav == 'meta' else '' }}">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Insights</span>
+        </a>
+        <a href="#" onclick="showLogoutModal(); return false;">
+            <span class="nav-icon">🚪</span>
+            <span class="nav-label">Logout</span>
+        </a>
+    </nav>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Log Out?</h3>
+            <p>Are you sure you want to end your session?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="hideLogoutModal()">Cancel</button>
+                <a href="{{ url_for('logout') }}" class="modal-btn modal-btn-confirm" style="text-decoration: none;">Log Out</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogoutModal() {
+            document.getElementById('logout-modal').classList.add('show');
+        }
+        function hideLogoutModal() {
+            document.getElementById('logout-modal').classList.remove('show');
+        }
+        // Close modal on overlay click
+        document.getElementById('logout-modal').addEventListener('click', function(e) {
+            if (e.target === this) hideLogoutModal();
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

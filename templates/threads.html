@@ -1,134 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Dream Threads – Dream Decoder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
+{% extends "base.html" %}
 
-<body class="dd-body dd-dark">
+{% block title %}Dream Ferret - Threads{% endblock %}
 
-  <div class="dd-app">
+{% block content %}
+<div class="dd-app">
+  <main class="dd-main">
+    <section class="dd-input-card">
+      <h1 class="dd-title">Dream Threads</h1>
 
-    <!-- Top bar -->
-    <header class="dd-header">
-      <div class="dd-logo">Dream Decoder</div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <a href="{{ url_for('index') }}" class="dd-icon-button" aria-label="Back to Home">
-          🏠
-        </a>
-        <a href="{{ url_for('history') }}" class="dd-icon-button" aria-label="Dream History">
-          🕒
-        </a>
-        <a href="{{ url_for('meta_analysis_view') }}" class="dd-icon-button" aria-label="Meta Analysis">
-          📊
-        </a>
-        <a href="{{ url_for('logout') }}" class="dd-icon-button" aria-label="Logout">
-          🚪
-        </a>
-        <button id="theme-toggle" class="dd-icon-button" aria-label="Toggle theme">
-          🌙
+      <p class="dd-label" style="margin-bottom: 1rem;">
+        Recurring patterns and narrative threads detected across your dreams.
+      </p>
+
+      {% if dream_count >= 5 %}
+      <form method="POST" action="{{ url_for('refresh_analysis') }}" style="margin-bottom: 1.5rem; text-align: center;">
+        <button type="submit" class="dd-button" style="padding: 8px 16px; font-size: 0.9rem;" onclick="this.disabled=true; this.innerHTML='<span class=\'spinner\'></span> Refreshing...'; this.form.submit();">
+          🔄 Refresh Analysis
         </button>
-      </div>
-    </header>
+      </form>
+      {% endif %}
 
-    <main class="dd-main">
-      <section class="dd-input-card">
-        <h1 class="dd-title">Dream Threads</h1>
+      {% if threads and threads|length > 0 %}
+        {% for thread in threads %}
+          <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: #7a5df9;">
+              {{ thread.thread_name }}
+            </h2>
 
-        <p class="dd-label" style="margin-bottom: 1rem;">
-          Recurring patterns and narrative threads detected across your dreams.
-        </p>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; color: #e7eaf0;">
+              {{ thread.description }}
+            </p>
 
-        {% if dream_count >= 5 %}
-        <form method="POST" action="{{ url_for('refresh_analysis') }}" style="margin-bottom: 1.5rem; text-align: center;">
-          <button type="submit" class="dd-button" style="padding: 8px 16px; font-size: 0.9rem;" onclick="this.disabled=true; this.innerHTML='<span class=\'spinner\'></span> Refreshing...'; this.form.submit();">
-            🔄 Refresh Analysis
-          </button>
-        </form>
-        {% endif %}
-
-        {% if threads and threads|length > 0 %}
-          {% for thread in threads %}
-            <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-              <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: #7a5df9;">
-                {{ thread.thread_name }}
-              </h2>
-
-              <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; color: #e7eaf0;">
-                {{ thread.description }}
-              </p>
-
-              {% if thread.recurring_symbols and thread.recurring_symbols|length > 0 %}
-                <div style="margin-bottom: 12px;">
-                  <strong style="color: #bcbce0; font-size: 0.9rem;">Recurring Symbols:</strong>
-                  <div style="margin-top: 6px;">
-                    {% for symbol in thread.recurring_symbols %}
-                      <span style="display: inline-block; background: #2d2d3d; padding: 4px 10px; border-radius: 6px; margin-right: 6px; margin-bottom: 6px; font-size: 0.85rem;">
-                        {{ symbol }}
-                      </span>
-                    {% endfor %}
-                  </div>
-                </div>
-              {% endif %}
-
-              {% if thread.emotional_pattern %}
-                <div style="margin-bottom: 12px;">
-                  <strong style="color: #bcbce0; font-size: 0.9rem;">Emotional Pattern:</strong>
-                  <p style="margin: 6px 0 0 0; font-size: 0.9rem; color: #a5acb8;">
-                    {{ thread.emotional_pattern }}
-                  </p>
-                </div>
-              {% endif %}
-
-              {% if thread.narrative_arc %}
-                <div style="margin-bottom: 12px;">
-                  <strong style="color: #bcbce0; font-size: 0.9rem;">Narrative Arc:</strong>
-                  <p style="margin: 6px 0 0 0; font-size: 0.9rem; color: #a5acb8;">
-                    {{ thread.narrative_arc }}
-                  </p>
-                </div>
-              {% endif %}
-
-              <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #2d2d3d;">
-                <div style="font-size: 0.85rem; color: #787894; margin-bottom: 8px;">
-                  Appears in {{ thread.dream_ids|length }} dream(s):
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                  {% for dream_id in thread.dream_ids %}
-                    <a href="{{ url_for('history_detail', dream_id=dream_id) }}"
-                       style="display: inline-block; background: #2d2d3d; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; color: #bcbce0; text-decoration: none;">
-                      {{ dream_map.get(dream_id, 'Dream #' ~ dream_id) }}
-                    </a>
+            {% if thread.recurring_symbols and thread.recurring_symbols|length > 0 %}
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #bcbce0; font-size: 0.9rem;">Recurring Symbols:</strong>
+                <div style="margin-top: 6px;">
+                  {% for symbol in thread.recurring_symbols %}
+                    <span style="display: inline-block; background: #2d2d3d; padding: 4px 10px; border-radius: 6px; margin-right: 6px; margin-bottom: 6px; font-size: 0.85rem;">
+                      {{ symbol }}
+                    </span>
                   {% endfor %}
                 </div>
-                <div style="margin-top: 8px; font-size: 0.8rem; color: #787894;">
-                  Detected: {{ thread.created_at|friendly_date }}
-                </div>
+              </div>
+            {% endif %}
+
+            {% if thread.emotional_pattern %}
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #bcbce0; font-size: 0.9rem;">Emotional Pattern:</strong>
+                <p style="margin: 6px 0 0 0; font-size: 0.9rem; color: #a5acb8;">
+                  {{ thread.emotional_pattern }}
+                </p>
+              </div>
+            {% endif %}
+
+            {% if thread.narrative_arc %}
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #bcbce0; font-size: 0.9rem;">Narrative Arc:</strong>
+                <p style="margin: 6px 0 0 0; font-size: 0.9rem; color: #a5acb8;">
+                  {{ thread.narrative_arc }}
+                </p>
+              </div>
+            {% endif %}
+
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #2d2d3d;">
+              <div style="font-size: 0.85rem; color: #787894; margin-bottom: 8px;">
+                Appears in {{ thread.dream_ids|length }} dream(s):
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                {% for dream_id in thread.dream_ids %}
+                  <a href="{{ url_for('history_detail', dream_id=dream_id) }}"
+                     style="display: inline-block; background: #2d2d3d; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; color: #bcbce0; text-decoration: none;">
+                    {{ dream_map.get(dream_id, 'Dream #' ~ dream_id) }}
+                  </a>
+                {% endfor %}
+              </div>
+              <div style="margin-top: 8px; font-size: 0.8rem; color: #787894;">
+                Detected: {{ thread.created_at|friendly_date }}
               </div>
             </div>
-          {% endfor %}
-        {% else %}
-          <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 30px; text-align: center;">
-            {% if dream_count and dream_count >= 5 %}
-              <p class="dd-label" style="margin: 0;">
-                No distinct threads were detected across your {{ dream_count }} dreams. As you log more dreams with recurring themes, threads will appear here.
-              </p>
-            {% else %}
-              <p class="dd-label" style="margin: 0;">
-                No threads detected yet. Threads are automatically identified when you have 5+ dreams.
-                {% if dream_count %}You currently have {{ dream_count }} dream(s).{% endif %}
-              </p>
-            {% endif %}
           </div>
-        {% endif %}
+        {% endfor %}
+      {% else %}
+        <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 12px; padding: 30px; text-align: center;">
+          {% if dream_count and dream_count >= 5 %}
+            <p class="dd-label" style="margin: 0;">
+              No distinct threads were detected across your {{ dream_count }} dreams. As you log more dreams with recurring themes, threads will appear here.
+            </p>
+          {% else %}
+            <p class="dd-label" style="margin: 0;">
+              No threads detected yet. Threads are automatically identified when you have 5+ dreams.
+              {% if dream_count %}You currently have {{ dream_count }} dream(s).{% endif %}
+            </p>
+          {% endif %}
+        </div>
+      {% endif %}
 
-      </section>
-    </main>
-  </div>
-
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
-
-</body>
-</html>
+    </section>
+  </main>
+</div>
+{% endblock %}

@@ -252,7 +252,7 @@ def build_priority_symbols(candidates):
 # ----------------------------------------------------
 
 SYSTEM_PROMPT = """
-You are Dream Decoder, an evidence-informed, non-mystical interpreter of dreams.
+You are Dream Ferret, an evidence-informed, non-mystical interpreter of dreams.
 
 Return VALID JSON.
 
@@ -749,7 +749,7 @@ def export_dream(dream_id):
 
     lines.extend([
         "=" * 60,
-        "Exported from Dream Decoder",
+        "Exported from Dream Ferret",
         "=" * 60,
     ])
 
@@ -812,7 +812,7 @@ def export_journal():
 
     lines.extend([
         "=" * 60,
-        "Exported from Dream Decoder",
+        "Exported from Dream Ferret",
         "=" * 60,
     ])
 
