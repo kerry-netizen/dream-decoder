@@ -2,12 +2,7 @@
 
 ## Next Up
 
-### 1. Delete a dream
-- Add delete button to dream detail view
-- Confirmation dialog required
-- May need to regenerate threads after deletion
-
-### 6. Edit dream title
+### 1. Edit dream title
 - Allow renaming after submission
 - Simple inline edit or modal
 
@@ -32,6 +27,7 @@
 
 ## Completed
 
+- [x] Delete dream functionality (Feb 1, 2026)
 - [x] Loading spinner on dream submit (Feb 1, 2026)
 - [x] Date formatting - friendly dates across all pages (Feb 1, 2026)
 - [x] Full interpretation placement - now expands below button (Feb 1, 2026)
