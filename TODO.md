@@ -1,70 +1,65 @@
 # Dream Decoder - Planned Improvements
 
-## High Priority (Quick Wins)
+## Next Up
 
-### 1. Clickable dream links in threads
-- The threads page says "Appears in 4 dream(s)" but doesn't link to them
-- Show dream titles and make them clickable to view full analysis
+### 1. Date formatting + hide empty fields (combined)
+- Change "2026-02-01T02:06:13.720834" to "Feb 1, 2026"
+- Apply to: history page, threads page, search results
+- Also hide any empty optional fields while we're in the templates
 
-### 2. Better date formatting
-- Currently shows ugly ISO format: "2026-02-01T02:06:13.720834"
-- Should show friendly format: "Feb 1, 2026" or "2 hours ago"
-- Apply across: history page, threads page, meta-analysis, result page
+### 2. Full interpretation placement fix
+- Move the expanded "full interpretation" content to display directly below the button
+- Currently it appears after key symbols, which is confusing
 
-### 3. Hide empty optional fields
-- "During: — | After: relieved" looks awkward
-- Just don't display fields that are empty
-- Applies to: history list, dream detail view
+### 3. Clickable dream links in threads
+- "Appears in 4 dream(s)" should show dream titles as clickable links
+- Requires passing dream data to threads template
 
-### 4. Remove "felt during/after" fields - DONE
-- Decision: Remove entirely (can add back later if needed)
-- Removed from: input form, database saves, display, AI payload
+### 4. Loading indicator on dream submit
+- Add spinner or "Analyzing your dream..." when form submits
+- Prevents confusion during AI processing delay
 
 ---
 
-## Medium Priority (Usability)
+## Medium Priority
 
 ### 5. Delete a dream
-- Add ability to remove a dream from history
+- Add delete button to dream detail view
 - Confirmation dialog required
-- Should trigger thread re-analysis if dream count drops
+- May need to regenerate threads after deletion
 
 ### 6. Edit dream title
-- Allow renaming a dream after submission
+- Allow renaming after submission
 - Simple inline edit or modal
 
 ### 7. "Refresh Analysis" button on threads/meta page
-- Let users manually trigger re-analysis
-- Instead of waiting for 5th/10th dream milestone
-- Useful after adding several dreams
-
-### 8. Loading indicator
-- When submitting a dream, there's a pause while AI analyzes
-- Add a spinner or "Analyzing your dream..." message
-- Prevents user confusion / double-submits
+- Manual trigger for re-analysis instead of waiting for milestones
 
 ---
 
-## Lower Priority (Engagement & Polish)
+## Lower Priority (Polish)
 
-### 9. Dream count/streak on home page
-- Show "You've logged 5 dreams"
-- Optional: "3-day streak!" for consecutive days
+### 8. Dream count on home page
+- Show "You've logged 6 dreams" on input form
 - Encourages continued use
 
-### 10. "Similar to past dreams" on new analysis
-- After analyzing a new dream, note connections to previous dreams
-- "This dream shares themes with 'The Flooded Library'"
+### 9. "Similar to past dreams" on new analysis
+- Note connections to previous dreams after analysis
 
-### 11. Export to PDF/text
-- Download entire dream journal
-- Or export individual dream analysis
+### 10. Export to PDF/text
+- Download dream journal or individual analyses
+
+---
+
+## Completed
+
+- [x] Remove "felt during/after" fields (Feb 1, 2026)
+- [x] Fix cross-dream analysis - threads/meta now generate on demand (Feb 1, 2026)
+- [x] Setup persistent disk on Render (Feb 1, 2026)
 
 ---
 
 ## Notes
 
-- Started: Feb 1, 2026
-- Last session: Fixed cross-dream analysis (threads + meta-analysis now generate on demand)
 - Test account: kbryson / Sally2026!
 - Deployed on Render with persistent disk at /var/data

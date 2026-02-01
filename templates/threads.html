@@ -88,7 +88,7 @@
                   Appears in {{ thread.dream_ids|length }} dream(s)
                 </span>
                 <span style="margin-left: 10px; font-size: 0.85rem; color: #787894;">
-                  Detected: {{ thread.created_at[:10] }}
+                  Detected: {{ thread.created_at|friendly_date }}
                 </span>
               </div>
             </div>

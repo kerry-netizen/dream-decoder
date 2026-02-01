@@ -20,6 +20,24 @@ import thread_analyzer
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
+
+# ----------------------------------------------------
+# Jinja Filters
+# ----------------------------------------------------
+
+@app.template_filter('friendly_date')
+def friendly_date_filter(iso_string):
+    """Convert ISO timestamp to friendly format like 'Feb 1, 2026'"""
+    if not iso_string:
+        return ""
+    try:
+        # Parse ISO format (handles both with and without microseconds)
+        dt = datetime.fromisoformat(iso_string.replace('Z', '+00:00'))
+        return dt.strftime("%b %d, %Y")
+    except (ValueError, AttributeError):
+        return iso_string  # Return original if parsing fails
+
+
 # Flask-Login setup
 login_manager = LoginManager()
 login_manager.init_app(app)
