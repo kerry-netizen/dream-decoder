@@ -332,6 +332,43 @@ def get_user_dream_count(user_id: int) -> int:
     return result["count"] if result else 0
 
 
+def delete_dream(dream_id: int, user_id: int) -> bool:
+    """Delete a dream. Returns True if deleted, False if not found or not owned."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Verify ownership and delete
+    cursor.execute(
+        "DELETE FROM dreams WHERE id = ? AND user_id = ?",
+        (dream_id, user_id)
+    )
+    deleted = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+
+    return deleted
+
+
+def clear_user_threads(user_id: int) -> None:
+    """Clear all threads for a user (for regeneration after dream deletion)."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM dream_threads WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+
+def clear_user_meta_analysis(user_id: int) -> None:
+    """Clear meta-analysis for a user (for regeneration after dream deletion)."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM meta_analysis WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+
 # ----------------------------------------------------
 # Thread Management
 # ----------------------------------------------------

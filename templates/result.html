@@ -160,6 +160,22 @@
             font-size: 22px;
             opacity: 0.7;
         }
+
+        .delete-btn {
+            background: transparent;
+            border: 1px solid #5a3a3a;
+            color: #cc6666;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #3a2525;
+            border-color: #cc6666;
+        }
     </style>
 
     <script>
@@ -353,8 +369,16 @@
     </div>
     {% endif %}
 
-    <div class="section" style="margin-top:20px;">
+    <div class="section" style="margin-top:20px; display: flex; justify-content: space-between; align-items: center;">
         <a class="back-link" href="{{ url_for('index') }}">← Decode another dream</a>
+
+        {% if analysis.dream_id %}
+        <form method="POST" action="{{ url_for('delete_dream', dream_id=analysis.dream_id) }}"
+              onsubmit="return confirm('Are you sure you want to delete this dream? This cannot be undone.');"
+              style="margin: 0;">
+            <button type="submit" class="delete-btn">🗑️ Delete</button>
+        </form>
+        {% endif %}
     </div>
 
 </div>

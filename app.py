@@ -597,6 +597,23 @@ def history_detail(dream_id):
     return render_template("result.html", analysis=analysis)
 
 
+@app.route("/history/<int:dream_id>/delete", methods=["POST"])
+@login_required
+def delete_dream(dream_id):
+    """Delete a dream and clear cached threads/meta for regeneration."""
+    deleted = db.delete_dream(dream_id, current_user.id)
+
+    if deleted:
+        # Clear threads and meta-analysis so they regenerate with updated data
+        db.clear_user_threads(current_user.id)
+        db.clear_user_meta_analysis(current_user.id)
+        flash("Dream deleted successfully.", "success")
+    else:
+        flash("Dream not found or you don't have permission to delete it.", "error")
+
+    return redirect(url_for("history"))
+
+
 @app.route("/search")
 @login_required
 def search():
