@@ -780,6 +780,21 @@ def refresh_analysis():
         flash("You need at least 5 dreams to generate analysis.", "error")
         return redirect(request.referrer or url_for("index"))
 
+    # Check cooldown (5 minutes)
+    COOLDOWN_MINUTES = 5
+    last_refresh = db.get_last_refresh_time(current_user.id)
+    if last_refresh:
+        try:
+            last_refresh_dt = datetime.fromisoformat(last_refresh.replace('Z', '+00:00'))
+            now = datetime.now(last_refresh_dt.tzinfo) if last_refresh_dt.tzinfo else datetime.now()
+            elapsed = (now - last_refresh_dt).total_seconds() / 60
+            if elapsed < COOLDOWN_MINUTES:
+                remaining = int(COOLDOWN_MINUTES - elapsed)
+                flash(f"Please wait {remaining} more minute{'s' if remaining != 1 else ''} before refreshing again.", "error")
+                return redirect(request.referrer or url_for("threads"))
+        except (ValueError, AttributeError):
+            pass  # If parsing fails, allow the refresh
+
     try:
         # Clear existing cached analysis
         db.clear_user_threads(current_user.id)

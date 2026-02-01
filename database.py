@@ -520,3 +520,20 @@ def get_latest_meta_analysis(user_id: int) -> Optional[Dict[str, Any]]:
         }
 
     return None
+
+
+def get_last_refresh_time(user_id: int) -> Optional[str]:
+    """Get the last time analysis was refreshed for a user."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT analysis_date FROM meta_analysis WHERE user_id = ? ORDER BY analysis_date DESC LIMIT 1",
+        (user_id,)
+    )
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        return result["analysis_date"]
+    return None

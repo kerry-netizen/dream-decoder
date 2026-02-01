@@ -2,27 +2,26 @@
 
 ## Next Up
 
-### 1. "Refresh Analysis" button on threads/meta page
-- Manual trigger for re-analysis instead of waiting for milestones
+### 1. Refresh cooldown + UI tweaks
+- Add cooldown period to prevent token spamming on refresh (threads & meta pages)
+- Move "You've logged X dreams" to right of "Decode a Dream" title to save vertical space
+
+### 2. "Similar to past dreams" on new analysis
+- Note connections to previous dreams after analysis
 
 ---
 
 ## Lower Priority (Polish)
 
-### 8. Dream count on home page
-- Show "You've logged 6 dreams" on input form
-- Encourages continued use
-
-### 9. "Similar to past dreams" on new analysis
-- Note connections to previous dreams after analysis
-
-### 10. Export to PDF/text
+### 3. Export to PDF/text
 - Download dream journal or individual analyses
 
 ---
 
 ## Completed
 
+- [x] Dream count on home page (Feb 1, 2026)
+- [x] Refresh Analysis button on threads/meta pages (Feb 1, 2026)
 - [x] Edit dream title - inline edit on result page (Feb 1, 2026)
 - [x] Delete dream functionality (Feb 1, 2026)
 - [x] Loading spinner on dream submit (Feb 1, 2026)
