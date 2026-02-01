@@ -25,7 +25,7 @@ def extract_symbols_from_dreams(dreams: List[Dict[str, Any]]) -> Dict[str, int]:
     return dict(symbol_counts)
 
 
-def extract_emotions_from_dreams(dreams: List[Dict[str, Any]]) -> Dict[str, int]:
+def extract_emotions_from_dreams(dreams: List[Dict[str, Any]]) -> Counter:
     """Extract and count emotions from dreams."""
     emotion_counts = Counter()
 
@@ -44,7 +44,7 @@ def extract_emotions_from_dreams(dreams: List[Dict[str, Any]]) -> Dict[str, int]
             if emotion:
                 emotion_counts[emotion] += 1
 
-    return dict(emotion_counts)
+    return emotion_counts  # Return Counter to preserve .most_common()
 
 
 def detect_recurring_patterns(
