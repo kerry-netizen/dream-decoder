@@ -2,15 +2,7 @@
 
 ## Next Up
 
-### 1. Loading indicator on dream submit
-- Add spinner or "Analyzing your dream..." when form submits
-- Prevents confusion during AI processing delay
-
----
-
-## Medium Priority
-
-### 5. Delete a dream
+### 1. Delete a dream
 - Add delete button to dream detail view
 - Confirmation dialog required
 - May need to regenerate threads after deletion
@@ -40,6 +32,7 @@
 
 ## Completed
 
+- [x] Loading spinner on dream submit (Feb 1, 2026)
 - [x] Date formatting - friendly dates across all pages (Feb 1, 2026)
 - [x] Full interpretation placement - now expands below button (Feb 1, 2026)
 - [x] Clickable dream links in threads (Feb 1, 2026)
