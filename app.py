@@ -316,7 +316,7 @@ def normalize_emotional_arc(raw):
 # Main analysis
 # ----------------------------------------------------
 
-def analyze_dream(dream_text, title="", felt_during="", felt_after="", life_context=""):
+def analyze_dream(dream_text, title="", life_context=""):
     detected = detect_keywords(dream_text)
     candidates = simple_candidate_symbols(dream_text)
     priority = build_priority_symbols(candidates)
@@ -324,8 +324,6 @@ def analyze_dream(dream_text, title="", felt_during="", felt_after="", life_cont
     payload = {
         "dream_title": title,
         "dream_text": dream_text,
-        "felt_during": felt_during,
-        "felt_after": felt_after,
         "life_context": life_context,
         "detected_keywords": detected,
         "candidate_symbols": candidates,
@@ -464,8 +462,6 @@ def decode():
 def handle_decode():
     dream_text = request.form.get("dream_text", "").strip()
     dream_title = request.form.get("dream_title", "").strip()
-    felt_during = request.form.get("felt_during", "").strip()
-    felt_after = request.form.get("felt_after", "").strip()
     life_context = request.form.get("life_context", "").strip()
 
     if not dream_text:
@@ -476,8 +472,6 @@ def handle_decode():
     analysis = analyze_dream(
         dream_text=dream_text,
         title=dream_title,
-        felt_during=felt_during,
-        felt_after=felt_after,
         life_context=life_context
     )
 
@@ -486,8 +480,8 @@ def handle_decode():
         user_id=current_user.id,
         title=dream_title,
         dream_text=dream_text,
-        felt_during=felt_during,
-        felt_after=felt_after,
+        felt_during="",
+        felt_after="",
         life_context=life_context,
         analysis=analysis
     )
@@ -533,8 +527,6 @@ def handle_decode():
     analysis["dream_id"] = dream_id
     analysis["dream_title"] = dream_title
     analysis["dream_text"] = dream_text
-    analysis["felt_during"] = felt_during
-    analysis["felt_after"] = felt_after
     analysis["life_context"] = life_context
 
     return render_template("result.html", analysis=analysis)
@@ -562,8 +554,6 @@ def history():
             "id": dream["id"],
             "title": title,
             "timestamp": dream.get("timestamp", ""),
-            "felt_during": dream.get("felt_during", ""),
-            "felt_after": dream.get("felt_after", ""),
         })
 
     return render_template("history.html", records=formatted_dreams)
@@ -583,8 +573,6 @@ def history_detail(dream_id):
     analysis["dream_id"] = dream["id"]
     analysis["dream_title"] = dream.get("title", "")
     analysis["dream_text"] = dream.get("dream_text", "")
-    analysis["felt_during"] = dream.get("felt_during", "")
-    analysis["felt_after"] = dream.get("felt_after", "")
     analysis["life_context"] = dream.get("life_context", "")
     analysis["timestamp"] = dream.get("timestamp", "")
 
@@ -627,8 +615,6 @@ def search():
             "id": dream["id"],
             "title": title,
             "timestamp": dream.get("timestamp", ""),
-            "felt_during": dream.get("felt_during", ""),
-            "felt_after": dream.get("felt_after", ""),
             "snippet": snippet,
         })
 

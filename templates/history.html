@@ -48,12 +48,6 @@
                   <div style="font-size: 0.8rem; color: #a5acb8;">
                     {{ rec.timestamp }}
                   </div>
-                  {% if rec.felt_during or rec.felt_after %}
-                    <div style="font-size: 0.8rem; color: #a5acb8; margin-top: 0.15rem;">
-                      During: {{ rec.felt_during or "—" }} |
-                      After: {{ rec.felt_after or "—" }}
-                    </div>
-                  {% endif %}
                 </a>
               </li>
             {% endfor %}
