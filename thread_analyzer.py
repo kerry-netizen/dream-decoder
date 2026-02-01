@@ -165,7 +165,9 @@ Only identify threads that appear in 2+ dreams. If no clear threads exist, retur
         return result
 
     except Exception as e:
-        print(f"Thread detection error: {e}")
+        print(f"Thread detection error: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
         return {"threads": []}
 
 
@@ -240,7 +242,9 @@ Be reflective, evidence-based, and avoid mysticism. Focus on what the dreams rev
         return result
 
     except Exception as e:
-        print(f"Meta-analysis error: {e}")
+        print(f"Meta-analysis error: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
         return {
             "overall_theme": "Unable to generate meta-analysis",
             "key_insights": [],
