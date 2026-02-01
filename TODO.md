@@ -2,24 +2,7 @@
 
 ## Next Up
 
-### 1. Date formatting + hide empty fields (combined)
-- Change "2026-02-01T02:06:13.720834" to "Feb 1, 2026"
-- Apply to: history page, threads page, search results
-- Also hide any empty optional fields while we're in the templates
-
-### 2. Full interpretation placement fix
-- Move the expanded "full interpretation" content to display directly below the button
-- Currently it appears after key symbols, which is confusing
-
-### 3. Clickable dream links in threads
-- "Appears in 4 dream(s)" should show dream titles as clickable links
-- Requires passing dream data to threads template
-
-### 4. Add icon menu to result page
-- Result page is missing the top navigation icons (history, threads, meta, logout)
-- Should match the header on other pages
-
-### 5. Loading indicator on dream submit
+### 1. Loading indicator on dream submit
 - Add spinner or "Analyzing your dream..." when form submits
 - Prevents confusion during AI processing delay
 
@@ -57,6 +40,10 @@
 
 ## Completed
 
+- [x] Date formatting - friendly dates across all pages (Feb 1, 2026)
+- [x] Full interpretation placement - now expands below button (Feb 1, 2026)
+- [x] Clickable dream links in threads (Feb 1, 2026)
+- [x] Navigation icons on result page (Feb 1, 2026)
 - [x] Remove "felt during/after" fields (Feb 1, 2026)
 - [x] Fix cross-dream analysis - threads/meta now generate on demand (Feb 1, 2026)
 - [x] Setup persistent disk on Render (Feb 1, 2026)
