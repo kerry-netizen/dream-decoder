@@ -176,6 +176,40 @@
             background: #3a2525;
             border-color: #cc6666;
         }
+
+        .edit-btn {
+            background: transparent;
+            border: 1px solid #3c3c55;
+            color: #9a9ac7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            background: #2a2a3a;
+        }
+
+        .save-btn {
+            background: #3a5a3a;
+            border: 1px solid #5a8a5a;
+            color: #aaffaa;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: 1px solid #3c3c55;
+            color: #9a9ac7;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
     </style>
 
     <script>
@@ -187,6 +221,17 @@
             const isHidden = el.style.display === "none" || el.style.display === "";
             el.style.display = isHidden ? "block" : "none";
             chev.textContent = isHidden ? "▾" : "▸";
+        }
+
+        function showTitleEdit() {
+            document.getElementById('title-display').style.display = 'none';
+            document.getElementById('title-form').style.display = 'block';
+            document.querySelector('#title-form input').focus();
+        }
+
+        function hideTitleEdit() {
+            document.getElementById('title-display').style.display = 'flex';
+            document.getElementById('title-form').style.display = 'none';
         }
     </script>
 </head>
@@ -213,6 +258,30 @@
         </div>
         <a class="back-link" href="{{ url_for('index') }}">← Decode another dream</a>
     </div>
+
+    <!-- DREAM TITLE (editable) -->
+    {% if analysis.dream_title or analysis.dream_id %}
+    <div class="section">
+        <div class="label">Dream Title</div>
+        <div id="title-display" style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:16px; font-weight:500;">{{ analysis.dream_title or 'Untitled Dream' }}</span>
+            {% if analysis.dream_id %}
+            <button onclick="showTitleEdit()" class="edit-btn">✏️ Edit</button>
+            {% endif %}
+        </div>
+        {% if analysis.dream_id %}
+        <form id="title-form" method="POST" action="{{ url_for('update_dream_title', dream_id=analysis.dream_id) }}"
+              style="display:none; margin-top:8px;">
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" name="title" value="{{ analysis.dream_title or '' }}"
+                       style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid #3c3c55; background:#1f1f2b; color:#e6e6ff; font-size:14px;">
+                <button type="submit" class="save-btn">Save</button>
+                <button type="button" onclick="hideTitleEdit()" class="cancel-btn">Cancel</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <!-- MOTIFS -->
     {% if analysis.detected_keywords %}

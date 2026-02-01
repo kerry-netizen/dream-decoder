@@ -349,6 +349,22 @@ def delete_dream(dream_id: int, user_id: int) -> bool:
     return deleted
 
 
+def update_dream_title(dream_id: int, user_id: int, new_title: str) -> bool:
+    """Update a dream's title. Returns True if updated, False if not found or not owned."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE dreams SET title = ? WHERE id = ? AND user_id = ?",
+        (new_title, dream_id, user_id)
+    )
+    updated = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+
+    return updated
+
+
 def clear_user_threads(user_id: int) -> None:
     """Clear all threads for a user (for regeneration after dream deletion)."""
     conn = get_db()

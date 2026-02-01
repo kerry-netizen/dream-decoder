@@ -614,6 +614,26 @@ def delete_dream(dream_id):
     return redirect(url_for("history"))
 
 
+@app.route("/history/<int:dream_id>/update-title", methods=["POST"])
+@login_required
+def update_dream_title(dream_id):
+    """Update a dream's title."""
+    new_title = request.form.get("title", "").strip()
+
+    if not new_title:
+        flash("Title cannot be empty.", "error")
+        return redirect(url_for("history_detail", dream_id=dream_id))
+
+    updated = db.update_dream_title(dream_id, current_user.id, new_title)
+
+    if updated:
+        flash("Title updated.", "success")
+    else:
+        flash("Could not update title.", "error")
+
+    return redirect(url_for("history_detail", dream_id=dream_id))
+
+
 @app.route("/search")
 @login_required
 def search():
