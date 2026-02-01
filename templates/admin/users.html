@@ -40,14 +40,21 @@
             background: #1f1f2b;
             color: #e6e6ff;
             font-size: 14px;
-            width: 300px;
+            width: 100%;
+            max-width: 300px;
+            box-sizing: border-box;
         }
         .search-bar input:focus {
             outline: none;
             border-color: #7a5df9;
         }
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
         table {
             width: 100%;
+            min-width: 600px;
             border-collapse: collapse;
             background: #151521;
             border-radius: 12px;
@@ -111,6 +118,7 @@
             </form>
         </div>
 
+        <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
@@ -146,6 +154,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     </div>
 </body>
 </html>

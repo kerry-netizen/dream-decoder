@@ -71,8 +71,13 @@
             font-size: 16px;
             color: #bcbce0;
         }
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
         table {
             width: 100%;
+            min-width: 400px;
             border-collapse: collapse;
         }
         th, td {
@@ -133,6 +138,7 @@
 
         <div class="section">
             <h2>Token Breakdown</h2>
+            <div class="table-wrapper">
             <table>
                 <tr>
                     <th>Period</th>
@@ -159,6 +165,7 @@
                     <td>${{ '%.4f'|format(((stats.totals.prompt or 0) * 0.00015 + (stats.totals.completion or 0) * 0.0006) / 1000) }}</td>
                 </tr>
             </table>
+            </div>
             <p style="font-size: 11px; color: #787894; margin-top: 12px;">
                 Cost estimates based on GPT-4o-mini rates ($0.150/1M input, $0.600/1M output)
             </p>
@@ -167,6 +174,7 @@
         <div class="section">
             <h2>10 Slowest API Calls</h2>
             {% if stats.slowest %}
+            <div class="table-wrapper">
             <table>
                 <tr>
                     <th>Time</th>
@@ -187,6 +195,7 @@
                 </tr>
                 {% endfor %}
             </table>
+            </div>
             {% else %}
             <p style="color: #787894;">No API calls recorded yet.</p>
             {% endif %}
