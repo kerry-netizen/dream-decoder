@@ -209,6 +209,12 @@
         Avoid real names or highly identifying details.
     </p>
 
+    {% if dream_count and dream_count > 0 %}
+    <div style="background: #1f1f2b; border: 1px solid #2d2d3d; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; text-align: center; font-size: 14px; color: #bcbce0;">
+        📖 You've logged <strong style="color: #7a5df9;">{{ dream_count }}</strong> dream{{ 's' if dream_count != 1 else '' }} so far
+    </div>
+    {% endif %}
+
     {% if error %}
     <div class="error">{{ error }}</div>
     {% endif %}

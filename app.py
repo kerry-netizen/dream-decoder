@@ -466,7 +466,8 @@ def logout():
 def index():
     if request.method == "POST":
         return handle_decode()
-    return render_template("index.html")
+    dream_count = db.get_user_dream_count(current_user.id)
+    return render_template("index.html", dream_count=dream_count)
 
 
 @app.route("/decode", methods=["GET", "POST"])
