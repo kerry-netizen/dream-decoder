@@ -436,6 +436,10 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for("index"))
 
+    # Check if coming from /try with a dream to save
+    save_try_dream = request.args.get("save_dream") == "1"
+    has_try_dream = "try_analysis" in session and "try_dream_text" in session
+
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
@@ -443,29 +447,57 @@ def register():
 
         if not username or not password:
             flash("Username and password are required.", "error")
-            return render_template("register.html")
+            return render_template("register.html", save_try_dream=save_try_dream and has_try_dream)
 
         if len(username) < 3:
             flash("Username must be at least 3 characters.", "error")
-            return render_template("register.html")
+            return render_template("register.html", save_try_dream=save_try_dream and has_try_dream)
 
         if len(password) < 6:
             flash("Password must be at least 6 characters.", "error")
-            return render_template("register.html")
+            return render_template("register.html", save_try_dream=save_try_dream and has_try_dream)
 
         if password != password_confirm:
             flash("Passwords do not match.", "error")
-            return render_template("register.html")
+            return render_template("register.html", save_try_dream=save_try_dream and has_try_dream)
 
         user_id = db.create_user(username, password)
         if user_id is None:
             flash("Username already exists. Please choose another.", "error")
-            return render_template("register.html")
+            return render_template("register.html", save_try_dream=save_try_dream and has_try_dream)
 
-        flash("Account created successfully! Please log in.", "success")
+        # Check if we should save the try dream
+        if has_try_dream and request.form.get("save_try_dream") == "1":
+            try:
+                dream_text = session.get("try_dream_text", "")
+                analysis = session.get("try_analysis", {})
+
+                # Save the dream to the new user's account
+                db.save_dream(
+                    user_id=user_id,
+                    title="",  # No title from try flow
+                    dream_text=dream_text,
+                    felt_during="",
+                    felt_after="",
+                    life_context="",
+                    analysis=analysis
+                )
+
+                # Clear the try session data
+                session.pop("try_analysis", None)
+                session.pop("try_dream_text", None)
+                session.pop("last_try_time", None)
+
+                flash("Account created and your dream was saved! Please log in.", "success")
+            except Exception as e:
+                print(f"Error saving try dream: {e}")
+                flash("Account created! (Note: There was an issue saving your dream.)", "warning")
+        else:
+            flash("Account created successfully! Please log in.", "success")
+
         return redirect(url_for("login"))
 
-    return render_template("register.html")
+    return render_template("register.html", save_try_dream=save_try_dream and has_try_dream)
 
 
 @app.route("/disclaimer")
@@ -1062,6 +1094,99 @@ def initialize_database():
 def health_check():
     """Health check endpoint for monitoring."""
     return {"status": "healthy", "service": "dream-ferret"}, 200
+
+
+# ----------------------------------------------------
+# Anonymous "Try It" Feature (Testing Phase)
+# ----------------------------------------------------
+
+# Feature flag - set to True to enable /try route
+TRY_FEATURE_ENABLED = True
+
+# Rate limiting: track last try time in session
+TRY_COOLDOWN_SECONDS = 120  # 2 minutes
+
+
+@app.route("/try", methods=["GET", "POST"])
+def try_dream():
+    """
+    Anonymous dream analysis - no account required.
+    Session-only storage, nothing persisted to database.
+    """
+    if not TRY_FEATURE_ENABLED:
+        flash("This feature is not yet available.", "info")
+        return redirect(url_for("login"))
+
+    # If user is already logged in, redirect to main page
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        # Check rate limiting
+        last_try = session.get("last_try_time")
+        if last_try:
+            elapsed = (datetime.utcnow() - datetime.fromisoformat(last_try)).total_seconds()
+            if elapsed < TRY_COOLDOWN_SECONDS:
+                remaining = int(TRY_COOLDOWN_SECONDS - elapsed)
+                flash(f"We rate limit to prevent abuse. Try again in {remaining} seconds.", "error")
+                return render_template("try.html")
+
+        dream_text = request.form.get("dream_text", "").strip()
+
+        if not dream_text:
+            flash("Please enter a dream to analyze.", "error")
+            return render_template("try.html")
+
+        # Analyze dream (no user_id - anonymous)
+        try:
+            analysis = analyze_dream(
+                dream_text=dream_text,
+                title="",
+                life_context="",
+                user_id=None  # Anonymous - won't track API usage per-user
+            )
+        except Exception as e:
+            import traceback
+            db.log_error(
+                error_type=type(e).__name__,
+                message=str(e),
+                traceback_str=traceback.format_exc(),
+                route="/try",
+                user_id=None
+            )
+            flash("Something went wrong analyzing your dream. Please try again.", "error")
+            return render_template("try.html")
+
+        # Store in session only (not database)
+        session["try_analysis"] = analysis
+        session["try_dream_text"] = dream_text
+        session["last_try_time"] = datetime.utcnow().isoformat()
+
+        # Increment anonymous try counter
+        db.increment_anon_try_counter()
+
+        return redirect(url_for("try_result"))
+
+    return render_template("try.html")
+
+
+@app.route("/try/result")
+def try_result():
+    """Display anonymous try result from session."""
+    if not TRY_FEATURE_ENABLED:
+        return redirect(url_for("login"))
+
+    analysis = session.get("try_analysis")
+    dream_text = session.get("try_dream_text")
+
+    if not analysis:
+        flash("No analysis found. Please try analyzing a dream first.", "info")
+        return redirect(url_for("try_dream"))
+
+    # Add dream text to analysis for display
+    analysis["dream_text"] = dream_text
+
+    return render_template("try_result.html", analysis=analysis)
 
 
 # ----------------------------------------------------

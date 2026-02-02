@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Dream Ferret - Try It{% endblock %}
+
+{% block head %}
+<style>
+    body {
+        background: #0f0f16;
+        font-family: "Inter", system-ui, sans-serif;
+        color: #e6e6ff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 700px;
+        margin: 20px auto 80px;
+        background: #151521;
+        padding: 30px 22px 40px;
+        border-radius: 14px;
+        border: 1px solid #232333;
+        box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            margin: 12px 12px 80px;
+            padding: 24px 18px 32px;
+        }
+    }
+
+    .title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+        color: #9a9ac7;
+        margin-bottom: 6px;
+    }
+
+    .description {
+        font-size: 15px;
+        color: #bcbce0;
+        line-height: 1.55;
+        margin-top: 0;
+        margin-bottom: 24px;
+    }
+
+    .try-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        background: linear-gradient(90deg, #4a3d8a, #5a4d9a);
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #d0cfff;
+        margin-bottom: 16px;
+    }
+
+    label {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 12px;
+        font-weight: 500;
+        font-size: 17px;
+    }
+
+    textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1.3px solid #3c3c55;
+        background: #1c1c27;
+        color: #e6e6ff;
+        font-size: 17px;
+        outline: none;
+        box-sizing: border-box;
+        padding: 18px;
+        line-height: 1.5;
+        resize: none;
+        min-height: 220px;
+        overflow-y: hidden;
+    }
+
+    textarea:focus {
+        border-color: #7a5df9;
+        box-shadow: 0 0 0 2px rgba(122, 93, 249, 0.35);
+    }
+
+    ::placeholder {
+        color: #787894;
+    }
+
+    .submit-btn {
+        width: 100%;
+        margin-top: 30px;
+        padding: 18px;
+        background: linear-gradient(90deg, #7a5df9, #9855ff);
+        border: none;
+        color: white;
+        font-size: 18px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s ease;
+    }
+
+    .submit-btn:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .note {
+        margin-top: 20px;
+        padding: 14px 16px;
+        background: #1a1a2a;
+        border: 1px solid #2a2a3a;
+        border-radius: 10px;
+        font-size: 13px;
+        color: #a0a0c6;
+        line-height: 1.5;
+    }
+
+    .note strong {
+        color: #bcbce0;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 14px;
+        color: #9a9ac7;
+    }
+
+    .login-link a {
+        color: #9f9fff;
+        text-decoration: none;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="try-badge">Try without signing up</div>
+
+    <div class="title">Dream Ferret</div>
+    <div class="subtitle">AI-powered dream exploration</div>
+
+    <p class="description">
+        Curious what your dream might mean? Paste it below for a free analysis.
+        No account needed for this single exploration.
+    </p>
+
+    <form method="POST" action="{{ url_for('try_dream') }}" onsubmit="return showLoading(this)">
+
+        <label>Your dream</label>
+        <textarea id="dream_text"
+                  name="dream_text"
+                  placeholder="Tell me everything you remember..."
+                  oninput="autoExpand(this)"></textarea>
+
+        <button type="submit" class="submit-btn">Analyze my dream</button>
+    </form>
+
+    <div class="note">
+        <strong>This is a one-time exploration.</strong> Your dream is processed but not saved.
+        Want to track patterns over time? <a href="{{ url_for('register') }}" style="color: #9f9fff;">Create a free account</a> &mdash; your data can be exported anytime.
+    </div>
+
+    <div class="login-link">
+        Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function autoExpand(el) {
+        el.style.height = "auto";
+        el.style.height = el.scrollHeight + "px";
+    }
+
+    function showLoading(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        const dreamText = form.querySelector('#dream_text').value.trim();
+
+        if (!dreamText) {
+            return true;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Analyzing your dream...';
+        return true;
+    }
+</script>
+{% endblock %}

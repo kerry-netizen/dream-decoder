@@ -157,6 +157,18 @@
         <label for="password_confirm">Confirm Password</label>
         <input type="password" id="password_confirm" name="password_confirm" required minlength="6" />
 
+        {% if save_try_dream %}
+        <div style="margin-top: 24px; padding: 14px 16px; background: #1a1a2a; border: 1px solid #3a3a5a; border-radius: 10px;">
+            <label style="display: flex; align-items: flex-start; gap: 10px; margin: 0; cursor: pointer;">
+                <input type="checkbox" name="save_try_dream" value="1" checked
+                       style="width: 18px; height: 18px; margin-top: 2px; accent-color: #7a5df9;" />
+                <span style="font-size: 14px; color: #bcbce0; font-weight: normal;">
+                    Save the dream I just analyzed to my new account
+                </span>
+            </label>
+        </div>
+        {% endif %}
+
         <button type="submit">Create Account</button>
     </form>
 

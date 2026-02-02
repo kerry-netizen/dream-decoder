@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Dream Ferret - Your Analysis{% endblock %}
+
+{% block head %}
+<style>
+    body {
+        background: #0f0f16;
+        font-family: "Inter", system-ui, sans-serif;
+        color: #e6e6ff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto 80px;
+        background: #151521;
+        padding: 26px 22px 34px;
+        border-radius: 14px;
+        border: 1px solid #232333;
+        box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            margin: 12px 12px 80px;
+            padding: 22px 18px 28px;
+        }
+    }
+
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { margin: 6px 0 8px; line-height: 1.55; }
+
+    .label {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 11px;
+        color: #9a9ac7;
+        margin-bottom: 6px;
+    }
+
+    .section {
+        margin-top: 20px;
+        padding-top: 13px;
+        border-top: 1px solid #26263a;
+    }
+
+    .summary-text {
+        font-size: 17px;
+        line-height: 1.55;
+        color: #e2e2ff;
+    }
+
+    .toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        border: 1px solid #32324a;
+        background: #2e2e45;
+        padding: 7px 12px;
+        font-size: 12px;
+        color: #d0cfff;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .chevron { font-size: 12px; }
+
+    .btn-primary {
+        margin-top: 14px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #7a5df9, #9a55ff);
+        color: white;
+        border: none;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+
+    .symbol-card {
+        background: #181827;
+        border: 1px solid #26263a;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-top: 10px;
+    }
+
+    .symbol-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .muted {
+        color: #a0a0c6;
+        font-size: 13px;
+    }
+
+    .chip {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #202033;
+        border: 1px solid #343453;
+        font-size: 12px;
+        color: #c8c8ff;
+    }
+
+    .tone-pill {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: #1a1a2a;
+        border: 1px solid #323250;
+        font-size: 12px;
+    }
+
+    ul.list-plain {
+        padding-left: 18px;
+        margin: 6px 0;
+    }
+
+    ul.list-plain li {
+        margin-bottom: 4px;
+        font-size: 13px;
+    }
+
+    .cta-box {
+        margin-top: 28px;
+        padding: 20px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #1f1f35 100%);
+        border: 1px solid #3a3a5a;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .cta-box h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        color: #e6e6ff;
+    }
+
+    .cta-box p {
+        font-size: 14px;
+        color: #a0a0c6;
+        margin-bottom: 16px;
+    }
+
+    .cta-btn {
+        display: inline-block;
+        padding: 12px 28px;
+        background: linear-gradient(90deg, #7a5df9, #9855ff);
+        color: white;
+        text-decoration: none;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 15px;
+        transition: 0.2s;
+    }
+
+    .cta-btn:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 22px;
+        font-size: 13px;
+        color: #9f9fff;
+        text-decoration: none;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    .try-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #2a2a3f;
+        border-radius: 999px;
+        font-size: 11px;
+        color: #9a9ac7;
+        margin-bottom: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="try-badge">Free exploration</div>
+
+    <!-- HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <div>
+            <div style="font-size:20px; font-weight:600;">Your Dream Analysis</div>
+            <div style="font-size:13px; color:#a0a0c6;">A reflective interpretation based on your dream.</div>
+        </div>
+    </div>
+
+    <!-- MOTIFS -->
+    {% if analysis.detected_keywords %}
+    <div class="section">
+        <div class="label">Detected motifs</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            {% for kw in analysis.detected_keywords %}
+            <div class="chip">{{ kw }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- SUMMARY -->
+    <div class="section">
+        <div class="label">Summary</div>
+        <p class="summary-text">{{ analysis.summary }}</p>
+
+        <button class="btn-primary" onclick="toggleSection('deep-block','deep-chevron')">
+            <span id="deep-chevron" class="chevron">&#9656;</span>
+            Show full interpretation
+        </button>
+
+        <!-- DEEP BLOCK (COLLAPSED) -->
+        <div id="deep-block" style="display:none; margin-top:16px;">
+
+        {% if analysis.interpretive_narrative %}
+        <div class="section">
+            <div class="label">Full interpretation</div>
+            <p class="muted" style="white-space:pre-wrap;">{{ analysis.interpretive_narrative }}</p>
+        </div>
+        {% endif %}
+
+        {% if analysis.emotional_profile_primary or analysis.emotional_profile_tone %}
+        <div class="section">
+            <div class="label">Emotional landscape</div>
+            {% if analysis.emotional_profile_tone %}
+            <div class="tone-pill">Overall tone: {{ analysis.emotional_profile_tone }}</div>
+            {% endif %}
+            {% if analysis.emotional_profile_primary %}
+            <div style="margin-top:10px; font-size:13px; font-weight:600;">Primary emotions</div>
+            <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
+                {% for e in analysis.emotional_profile_primary %}
+                <div class="chip">{{ e.name }} &ndash; {{ (e.intensity * 100) | round(0) | int }}%</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if analysis.reflection_prompts %}
+        <div class="section">
+            <div class="label">Reflection prompts</div>
+            <ul class="list-plain">
+                {% for q in analysis.reflection_prompts %}
+                <li>{{ q }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        </div><!-- end deep-block -->
+
+        {% if analysis.dream_text %}
+        <button class="toggle-btn" onclick="toggleSection('dream-block','dream-chevron')" style="margin-top:14px;">
+            <span id="dream-chevron" class="chevron">&#9656;</span>
+            Show original dream
+        </button>
+        <div id="dream-block" style="display:none; margin-top:8px;">
+            <p class="muted" style="white-space:pre-wrap;">{{ analysis.dream_text }}</p>
+        </div>
+        {% endif %}
+    </div><!-- end summary section -->
+
+    <!-- KEY SYMBOLS -->
+    {% if analysis.key_symbols %}
+    <div class="section">
+        <div class="label">Key symbols</div>
+        {% for sym in analysis.key_symbols %}
+        <div class="symbol-card">
+            <div class="symbol-title">{{ sym.symbol|capitalize }}</div>
+            {% if sym.description %}
+            <p class="muted">{{ sym.description }}</p>
+            {% else %}
+            <p class="muted">An important element in the dream's emotional landscape.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- CTA BOX -->
+    <div class="cta-box">
+        <h3>Want to save this dream and track patterns?</h3>
+        <p>
+            Create a free account to save this analysis, discover recurring themes,
+            and get deeper insights as your journal grows.<br>
+            <span style="font-size: 12px; color: #787894;">Your data can be exported anytime.</span>
+        </p>
+        <a href="{{ url_for('register', save_dream=1) }}" class="cta-btn">Save dream &amp; create account</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a class="back-link" href="{{ url_for('try_dream') }}">&#8592; Try another dream</a>
+        <span style="color: #3a3a4a; margin: 0 12px;">|</span>
+        <a class="back-link" href="{{ url_for('login') }}">Log in</a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleSection(id, chevronId) {
+        const el = document.getElementById(id);
+        const chev = document.getElementById(chevronId);
+        if (!el) return;
+        const isHidden = el.style.display === "none" || el.style.display === "";
+        el.style.display = isHidden ? "block" : "none";
+        chev.innerHTML = isHidden ? "&#9662;" : "&#9656;";
+    }
+</script>
+{% endblock %}

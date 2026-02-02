@@ -836,6 +836,11 @@ def get_admin_stats() -> Dict[str, Any]:
     cursor.execute("SELECT COUNT(*) FROM dreams")
     total_dreams = cursor.fetchone()[0]
 
+    # Anonymous try count
+    cursor.execute("SELECT value FROM site_settings WHERE key = 'anon_try_count'")
+    row = cursor.fetchone()
+    anon_tries = int(row["value"]) if row else 0
+
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
     # Dreams today
@@ -891,6 +896,7 @@ def get_admin_stats() -> Dict[str, Any]:
     return {
         "total_users": total_users,
         "total_dreams": total_dreams,
+        "anon_tries": anon_tries,
         "dreams_today": dreams_today,
         "dreams_week": dreams_week,
         "dreams_month": dreams_month,
@@ -970,6 +976,35 @@ def get_beta_notes() -> Optional[str]:
 def set_beta_notes(notes: str) -> None:
     """Set beta notes."""
     set_setting("beta_notes", notes)
+
+
+def increment_anon_try_counter() -> int:
+    """Increment the anonymous try counter. Returns new count."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Get current count
+    cursor.execute("SELECT value FROM site_settings WHERE key = 'anon_try_count'")
+    row = cursor.fetchone()
+    current = int(row["value"]) if row else 0
+    new_count = current + 1
+
+    # Update or insert
+    cursor.execute(
+        """INSERT OR REPLACE INTO site_settings (key, value, updated_at)
+        VALUES ('anon_try_count', ?, ?)""",
+        (str(new_count), datetime.utcnow().isoformat())
+    )
+    conn.commit()
+    conn.close()
+
+    return new_count
+
+
+def get_anon_try_count() -> int:
+    """Get the total anonymous try count."""
+    val = get_setting("anon_try_count")
+    return int(val) if val else 0
 
 
 # ----------------------------------------------------
