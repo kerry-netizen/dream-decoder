@@ -1096,6 +1096,14 @@ def health_check():
     return {"status": "healthy", "service": "dream-ferret"}, 200
 
 
+@app.route("/forge")
+def forge():
+    """Hidden utility page - not indexed, not linked."""
+    response = Response(render_template("forge.html"))
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+
 # ----------------------------------------------------
 # Anonymous "Try It" Feature (Testing Phase)
 # ----------------------------------------------------

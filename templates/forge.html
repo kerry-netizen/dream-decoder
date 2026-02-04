@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>File Forge</title>
+
+  <style>
+    :root { --pad: 12px; --r: 12px; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:#0f1115;
+      color:#e8e8e8;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; padding: var(--pad); }
+    .card {
+      background:#151923;
+      border: 1px solid #242a3a;
+      border-radius: var(--r);
+      padding: var(--pad);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    h1 { font-size: 18px; margin: 0 0 10px; }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 10px 0;
+    }
+    label {
+      font-size: 12px;
+      opacity: .85;
+      display:block;
+      margin-bottom: 4px;
+    }
+    input, select, textarea, button {
+      font: inherit;
+      border-radius: 10px;
+      border: 1px solid #2b3350;
+      background:#0f1422;
+      color:#e8e8e8;
+    }
+    input, select { padding: 10px; }
+    textarea {
+      width: 100%;
+      min-height: 55vh;
+      padding: 12px;
+      line-height: 1.35;
+      resize: vertical;
+    }
+    button { padding: 10px 12px; cursor: pointer; }
+    button.primary { background:#2647ff; border-color:#2647ff; }
+    button.secondary { background:#20304d; border-color:#2b3350; }
+    button.warn { background:#3a1d24; border-color:#6a2b3a; }
+
+    .status { font-size: 12px; opacity:.9; }
+    .ok { color:#b7ffcf; }
+    .bad { color:#ffb7c4; }
+
+    .hidden { display:none; }
+    .err {
+      padding: 18px;
+      border-radius: 12px;
+      background:#1a0f12;
+      border:1px solid #4a2430;
+    }
+    .spacer { flex: 1 1 auto; }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <div id="blocked" class="card err hidden">
+    <strong>Not found.</strong>
+  </div>
+
+  <div id="app" class="card hidden">
+    <h1>File Forge</h1>
+
+    <div class="row">
+      <div style="flex:1 1 240px;">
+        <label>Filename</label>
+        <input id="filename" />
+      </div>
+      <div style="flex:1 1 240px;">
+        <label>File type</label>
+        <select id="mime">
+          <option value="text/plain">text/plain</option>
+          <option value="text/html">text/html</option>
+          <option value="text/css">text/css</option>
+          <option value="text/javascript">text/javascript</option>
+          <option value="application/json">application/json</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="download" class="primary">Download</button>
+      <button id="openTab" class="secondary">Open in New Tab</button>
+      <button id="copy" class="secondary">Copy</button>
+      <button id="reset" class="warn">Reset memory</button>
+      <span class="spacer"></span>
+      <span id="status" class="status"></span>
+    </div>
+
+    <textarea id="text" placeholder="Paste code/text here…"></textarea>
+
+    <div class="status">
+      Autosaves locally. One slot. Overwrite freely.
+      Use browser menu → “Add to Home screen” for fullscreen.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const REQUIRED_KEY = "CHANGE_ME_TO_A_LONG_RANDOM_KEY";
+  const STORAGE_KEY = "fileforge_single_slot_v1";
+
+  const params = new URLSearchParams(location.search);
+  const k = params.get("k");
+
+  const app = document.getElementById("app");
+  const blocked = document.getElementById("blocked");
+  if (!k || k !== REQUIRED_KEY) {
+    blocked.classList.remove("hidden");
+    return;
+  }
+  app.classList.remove("hidden");
+
+  const $ = id => document.getElementById(id);
+  const filenameEl = $("filename");
+  const mimeEl = $("mime");
+  const textEl = $("text");
+  const statusEl = $("status");
+
+  let saveTimer = null;
+  const setStatus = (msg, ok=true) => {
+    statusEl.textContent = msg;
+    statusEl.className = "status " + (ok ? "ok" : "bad");
+  };
+
+  // Restore
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const s = JSON.parse(saved);
+      filenameEl.value = s.filename || "snippet.html";
+      mimeEl.value = s.mime || "text/html";
+      textEl.value = s.text || "";
+      setStatus("Restored.");
+    } catch {}
+  } else {
+    filenameEl.value = "snippet.html";
+    mimeEl.value = "text/html";
+  }
+
+  // Autosave
+  const scheduleSave = () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        filename: filenameEl.value,
+        mime: mimeEl.value,
+        text: textEl.value
+      }));
+      setStatus("Saved locally.");
+    }, 300);
+  };
+
+  filenameEl.addEventListener("input", scheduleSave);
+  mimeEl.addEventListener("change", scheduleSave);
+  textEl.addEventListener("input", scheduleSave);
+
+  // Download
+  $("download").onclick = () => {
+    const blob = new Blob([textEl.value || ""], { type: mimeEl.value });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filenameEl.value || "snippet.txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setStatus("Downloaded.");
+  };
+
+  // Open in new tab
+  $("openTab").onclick = () => {
+    const html = mimeEl.value === "text/html"
+      ? textEl.value
+      : `<pre>${textEl.value.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}</pre>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    setStatus("Opened.");
+  };
+
+  // Copy
+  $("copy").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(textEl.value || "");
+      setStatus("Copied.");
+    } catch {
+      setStatus("Copy failed.", false);
+    }
+  };
+
+  // Reset
+  $("reset").onclick = () => {
+    if (!confirm("Clear local memory?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    filenameEl.value = "snippet.html";
+    mimeEl.value = "text/html";
+    textEl.value = "";
+    setStatus("Cleared.");
+  };
+})();
+</script>
+</body>
+</html>
