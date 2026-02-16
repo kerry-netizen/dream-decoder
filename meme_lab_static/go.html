@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>DreamFerret Meme Lab</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: #eaeaea;
+      background: #0b0c10;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px; }
+    header h1 { margin: 0 0 6px 0; font-size: 22px; }
+    .sub { margin: 0 0 14px 0; opacity: 0.8; }
+    .card {
+      border: 1px solid #222;
+      background: #11131a;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+    .lbl { width: 140px; opacity: 0.9; font-size: 13px; }
+    input[type="password"] { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #2a2a2a; background: #0f1117; color: #fff; }
+    .drop {
+      margin-top: 12px;
+      border: 2px dashed #2c2f3a;
+      border-radius: 12px;
+      padding: 18px;
+      position: relative;
+      text-align: center;
+    }
+    .drop input[type="file"] {
+      opacity: 0;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    .dropHint { opacity: 0.85; }
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #2a2a2a;
+      background: #1a1f2b;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .status { margin-top: 10px; font-size: 13px; opacity: 0.9; min-height: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    .tile {
+      border: 1px solid #222;
+      background: #11131a;
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .tile h3 { margin: 0 0 8px 0; font-size: 14px; opacity: 0.9; }
+    .tile img { width: 100%; border-radius: 10px; border: 1px solid #222; background: #0f1117; }
+    .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .small { padding: 8px 10px; font-size: 13px; }
+    .err { color: #ffb4b4; }
+    .ok { color: #b9ffcc; }
+    .warn { color: #ffe0a0; font-size: 12px; margin-top: 4px; }
+    a.small { text-decoration: none; color: #fff; border: 1px solid #2a2a2a; background: #1a1f2b; border-radius: 10px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>DreamFerret Meme Lab</h1>
+      <p class="sub">Upload &rarr; GO &rarr; pick the best. Variant 3 is always animals.</p>
+    </header>
+
+    <section class="card">
+      <div class="row">
+        <label class="lbl">Shared Password</label>
+        <input id="pw" type="password" placeholder="Enter shared password" />
+      </div>
+
+      <div class="drop" id="drop">
+        <input id="file" type="file" accept="image/*" />
+        <div class="dropHint">Drop image here or click to choose</div>
+      </div>
+
+      <div class="row">
+        <button id="goRoot" disabled>GO!</button>
+        <button id="reset" disabled>Reset</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </section>
+
+    <section id="grid" class="grid"></section>
+  </main>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+
+    const pw = el("pw");
+    const file = el("file");
+    const goRoot = el("goRoot");
+    const reset = el("reset");
+    const status = el("status");
+    const grid = el("grid");
+
+    let currentContainer = null;
+    let currentFile = null;
+
+    file.addEventListener("change", () => {
+      currentFile = file.files?.[0] || null;
+      goRoot.disabled = !currentFile;
+      reset.disabled = !currentFile;
+      setStatus(currentFile ? "Selected: " + currentFile.name : "");
+    });
+
+    reset.addEventListener("click", () => {
+      currentContainer = null;
+      currentFile = null;
+      file.value = "";
+      goRoot.disabled = true;
+      reset.disabled = true;
+      grid.innerHTML = "";
+      setStatus("");
+    });
+
+    goRoot.addEventListener("click", async () => {
+      if (!currentFile) return;
+      goRoot.disabled = true;
+      try {
+        setStatus("Creating container (OCR)…");
+        const container = await createContainer(currentFile);
+        currentContainer = container;
+        setStatus("Generating 3 variants… (this takes a while)");
+        const out = await generate(container.id, "root");
+        render(out);
+        setStatus("Done.", true);
+      } catch (e) {
+        setStatus(String(e?.message || e), false, true);
+      } finally {
+        goRoot.disabled = false;
+      }
+    });
+
+    async function createContainer(imageFile) {
+      const fd = new FormData();
+      fd.append("image", imageFile);
+
+      const resp = await fetch("/api/meme/container/create", {
+        method: "POST",
+        headers: { "x-df-pass": pw.value || "" },
+        body: fd
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      return (await resp.json()).container;
+    }
+
+    async function generate(containerId, parentNodeId) {
+      const resp = await fetch("/api/meme/generate", {
+        method: "POST",
+        headers: {
+          "x-df-pass": pw.value || "",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ containerId, parentNodeId })
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      return await resp.json();
+    }
+
+    function render(out) {
+      grid.innerHTML = "";
+      const imgs = out.images || [];
+      const names = {
+        rebuild: "1) Rebuild",
+        reframe: "2) Reframe",
+        anthro: "3) Animals"
+      };
+
+      imgs.forEach((img) => {
+        const div = document.createElement("div");
+        div.className = "tile";
+
+        const title = document.createElement("h3");
+        title.textContent = names[img.variant] || img.variant;
+        div.appendChild(title);
+
+        if (img.error && !img.url) {
+          const p = document.createElement("div");
+          p.className = "err";
+          p.textContent = img.error;
+          div.appendChild(p);
+          grid.appendChild(div);
+          return;
+        }
+
+        const im = document.createElement("img");
+        im.src = img.url;
+        im.alt = img.variant;
+        div.appendChild(im);
+
+        if (img.warning === "TEXT_FAILED") {
+          const w = document.createElement("div");
+          w.className = "warn";
+          w.textContent = "⚠ Text validation failed after retries — best effort shown";
+          div.appendChild(w);
+        }
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const dl = document.createElement("a");
+        dl.className = "small";
+        dl.textContent = "Download";
+        dl.href = img.url;
+        dl.download = img.variant + ".png";
+
+        const go = document.createElement("button");
+        go.className = "small";
+        go.textContent = "GO! x3 more";
+        go.onclick = async () => {
+          go.disabled = true;
+          try {
+            setStatus("Generating 3 more…");
+            const out2 = await generate(out.container.id, img.node_id);
+            render(out2);
+            setStatus("Done.", true);
+          } catch (e) {
+            setStatus(String(e?.message || e), false, true);
+          }
+        };
+
+        if (img.depth >= 3) {
+          go.disabled = true;
+          go.textContent = "Max depth reached";
+        }
+
+        actions.appendChild(dl);
+        actions.appendChild(go);
+        div.appendChild(actions);
+
+        grid.appendChild(div);
+      });
+    }
+
+    function setStatus(msg, ok, err) {
+      status.className = "status " + (ok ? "ok" : err ? "err" : "");
+      status.textContent = msg;
+    }
+  </script>
+</body>
+</html>

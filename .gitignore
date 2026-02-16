@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 logs/
 .env
+data/meme_images/
+data/meme_containers/
+node_modules/
+Project X/DreamFerret/

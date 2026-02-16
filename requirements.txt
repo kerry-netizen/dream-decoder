@@ -3,3 +3,6 @@ flask-login
 openai>=1.0.0,<2.0.0
 gunicorn
 cryptography
+Pillow
+requests
+easyocr

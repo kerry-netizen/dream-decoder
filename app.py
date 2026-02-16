@@ -17,12 +17,16 @@ from openai import OpenAI
 import database as db
 import thread_analyzer
 from admin import admin_bp
+from meme_lab import meme_lab_bp
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
+
+# Register Meme Lab blueprint (hidden at /go — not linked from main site)
+app.register_blueprint(meme_lab_bp)
 
 
 # ----------------------------------------------------
