@@ -155,7 +155,15 @@
         headers: { "x-df-pass": pw.value || "" },
         body: fd
       });
-      if (!resp.ok) throw new Error(await resp.text());
+      if (!resp.ok) {
+        const ct = resp.headers.get("content-type") || "";
+        const raw = await resp.text();
+        if (ct.includes("json")) {
+          const j = JSON.parse(raw);
+          throw new Error(j.error || raw);
+        }
+        throw new Error(`HTTP ${resp.status}: ${raw.substring(0, 200)}`);
+      }
       return (await resp.json()).container;
     }
 

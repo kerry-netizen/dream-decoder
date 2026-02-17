@@ -245,6 +245,36 @@ def meme_diag():
     return jsonify(info)
 
 
+@meme_lab_bp.route("/api/meme/test-ocr", methods=["POST"])
+def test_ocr():
+    """Debug endpoint: accept an image upload and return OCR results only."""
+    try:
+        f = request.files.get("image")
+        if not f:
+            return jsonify({"error": "No image", "step": "file_check"}), 400
+
+        img_bytes = f.read()
+        step = "read_file"
+
+        squared = _to_square_png(img_bytes, 1024)
+        step = "square_done"
+
+        text_blocks = _extract_text_blocks(squared)
+        step = "ocr_done"
+
+        return jsonify({
+            "step": step,
+            "ocr_backend": OCR_BACKEND,
+            "input_bytes": len(img_bytes),
+            "squared_bytes": len(squared),
+            "text_blocks": text_blocks,
+        })
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(exc), "type": type(exc).__name__}), 500
+
+
 @meme_lab_bp.route("/data/meme_images/<path:filename>")
 def serve_meme_image(filename):
     return send_from_directory(IMG_DIR, filename)

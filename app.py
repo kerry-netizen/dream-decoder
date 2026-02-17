@@ -21,6 +21,7 @@ from meme_lab import meme_lab_bp
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB upload limit
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
