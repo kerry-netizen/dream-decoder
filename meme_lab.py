@@ -137,7 +137,14 @@ def create_container():
         # OCR
         print(f"[MemeLab] Running OCR with backend: {OCR_BACKEND}", flush=True)
         text_blocks = _extract_text_blocks(squared)
-        print(f"[MemeLab] OCR found {len(text_blocks)} text blocks", flush=True)
+        print(f"[MemeLab] OCR found {len(text_blocks)} text blocks: "
+              f"{[b['text'] for b in text_blocks]}", flush=True)
+
+        if not text_blocks:
+            return jsonify({
+                "error": "No text detected in source image. "
+                         "Meme Lab requires readable text in the image."
+            }), 400
 
         container = {
             "id": container_id,
@@ -374,36 +381,48 @@ def _ocr_pytesseract(png_bytes: bytes) -> list:
     img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
 
     # Meme text is usually white/bright on busy backgrounds.
-    # Run OCR on a few preprocessed versions and merge results.
+    # Run OCR on preprocessed versions × multiple PSM modes to maximize detection.
     variants = _preprocess_for_ocr(img)
 
-    all_lines = {}
-    for variant_img in variants:
-        # --psm 6 = assume uniform block of text (better for meme lines)
-        data = pytesseract.image_to_data(variant_img, output_type=Output.DICT,
-                                         config="--psm 6")
-        n = len(data.get("text", []))
-        for i in range(n):
-            txt = (data["text"][i] or "").strip()
-            conf = int(data["conf"][i]) if data["conf"][i] != "-1" else 0
-            if not txt or conf < 60:
-                continue
-            key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
-            vkey = (id(variant_img), *key)
-            if vkey not in all_lines:
-                all_lines[vkey] = {"texts": [], "x0": 9999, "y0": 9999, "x1": 0, "y1": 0, "conf": 0}
-            all_lines[vkey]["texts"].append(txt)
-            all_lines[vkey]["conf"] = max(all_lines[vkey]["conf"], conf)
-            x = data["left"][i]
-            y = data["top"][i]
-            w = data["width"][i]
-            h = data["height"][i]
-            all_lines[vkey]["x0"] = min(all_lines[vkey]["x0"], x)
-            all_lines[vkey]["y0"] = min(all_lines[vkey]["y0"], y)
-            all_lines[vkey]["x1"] = max(all_lines[vkey]["x1"], x + w)
-            all_lines[vkey]["y1"] = max(all_lines[vkey]["y1"], y + h)
+    # PSM modes that work for memes:
+    #   3 = fully automatic (good general fallback)
+    #   6 = uniform block (good for multi-line meme text)
+    #  11 = sparse text (good for single words scattered on image)
+    psm_modes = ["--psm 3", "--psm 6", "--psm 11"]
 
-    # Deduplicate: if same text appears from multiple variants, keep highest conf
+    all_lines = {}
+    run_id = 0
+    for variant_img in variants:
+        for psm in psm_modes:
+            run_id += 1
+            try:
+                data = pytesseract.image_to_data(variant_img, output_type=Output.DICT,
+                                                 config=psm)
+            except Exception as e:
+                print(f"[MemeLab] pytesseract failed with {psm}: {e}", flush=True)
+                continue
+            n = len(data.get("text", []))
+            for i in range(n):
+                txt = (data["text"][i] or "").strip()
+                conf = int(data["conf"][i]) if data["conf"][i] != "-1" else 0
+                if not txt or conf < 50:
+                    continue
+                key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
+                vkey = (run_id, *key)
+                if vkey not in all_lines:
+                    all_lines[vkey] = {"texts": [], "x0": 9999, "y0": 9999, "x1": 0, "y1": 0, "conf": 0}
+                all_lines[vkey]["texts"].append(txt)
+                all_lines[vkey]["conf"] = max(all_lines[vkey]["conf"], conf)
+                x = data["left"][i]
+                y = data["top"][i]
+                w = data["width"][i]
+                h = data["height"][i]
+                all_lines[vkey]["x0"] = min(all_lines[vkey]["x0"], x)
+                all_lines[vkey]["y0"] = min(all_lines[vkey]["y0"], y)
+                all_lines[vkey]["x1"] = max(all_lines[vkey]["x1"], x + w)
+                all_lines[vkey]["y1"] = max(all_lines[vkey]["y1"], y + h)
+
+    # Deduplicate: if same text appears from multiple runs, keep highest conf
     seen_texts = {}
     for ln in all_lines.values():
         text = " ".join(ln["texts"])
@@ -427,7 +446,8 @@ def _ocr_pytesseract(png_bytes: bytes) -> list:
     # Remove fragments that are substrings of longer detected text
     result = _remove_substring_fragments(filtered)
 
-    print(f"[MemeLab] pytesseract found {len(result)} text lines: {[r['text'] for r in result]}", flush=True)
+    print(f"[MemeLab] pytesseract found {len(result)} text lines: "
+          f"{[r['text'] for r in result]} (from {len(all_lines)} raw lines)", flush=True)
     return result
 
 
