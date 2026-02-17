@@ -355,36 +355,90 @@ def _ocr_with_boxes(png_bytes: bytes) -> list:
 
 
 def _ocr_pytesseract(png_bytes: bytes) -> list:
-    img = Image.open(io.BytesIO(png_bytes))
-    data = pytesseract.image_to_data(img, output_type=Output.DICT)
-    n = len(data.get("text", []))
-    # Build lines by grouping on (block_num, par_num, line_num)
-    lines = {}
-    for i in range(n):
-        txt = (data["text"][i] or "").strip()
-        if not txt:
+    img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+
+    # Meme text is usually white/bright on busy backgrounds.
+    # Run OCR on multiple preprocessed versions and merge results.
+    variants = _preprocess_for_ocr(img)
+
+    all_lines = {}
+    for variant_img in variants:
+        data = pytesseract.image_to_data(variant_img, output_type=Output.DICT,
+                                         config="--psm 11")
+        n = len(data.get("text", []))
+        for i in range(n):
+            txt = (data["text"][i] or "").strip()
+            conf = int(data["conf"][i]) if data["conf"][i] != "-1" else 0
+            if not txt or conf < 30:
+                continue
+            key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
+            # Use a variant-specific key to avoid collisions
+            vkey = (id(variant_img), *key)
+            if vkey not in all_lines:
+                all_lines[vkey] = {"texts": [], "x0": 9999, "y0": 9999, "x1": 0, "y1": 0, "conf": 0}
+            all_lines[vkey]["texts"].append(txt)
+            all_lines[vkey]["conf"] = max(all_lines[vkey]["conf"], conf)
+            x = data["left"][i]
+            y = data["top"][i]
+            w = data["width"][i]
+            h = data["height"][i]
+            all_lines[vkey]["x0"] = min(all_lines[vkey]["x0"], x)
+            all_lines[vkey]["y0"] = min(all_lines[vkey]["y0"], y)
+            all_lines[vkey]["x1"] = max(all_lines[vkey]["x1"], x + w)
+            all_lines[vkey]["y1"] = max(all_lines[vkey]["y1"], y + h)
+
+    # Deduplicate: if same text appears from multiple variants, keep highest conf
+    seen_texts = {}
+    for ln in all_lines.values():
+        text = " ".join(ln["texts"])
+        norm = text.upper().strip()
+        if not norm:
             continue
-        key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
-        if key not in lines:
-            lines[key] = {"texts": [], "x0": 9999, "y0": 9999, "x1": 0, "y1": 0}
-        lines[key]["texts"].append(txt)
-        x = data["left"][i]
-        y = data["top"][i]
-        w = data["width"][i]
-        h = data["height"][i]
-        lines[key]["x0"] = min(lines[key]["x0"], x)
-        lines[key]["y0"] = min(lines[key]["y0"], y)
-        lines[key]["x1"] = max(lines[key]["x1"], x + w)
-        lines[key]["y1"] = max(lines[key]["y1"], y + h)
+        if norm not in seen_texts or ln["conf"] > seen_texts[norm]["conf"]:
+            seen_texts[norm] = {
+                "text": text,
+                "bbox": {"x0": ln["x0"], "y0": ln["y0"], "x1": ln["x1"], "y1": ln["y1"]},
+                "conf": ln["conf"],
+            }
 
     result = []
-    for ln in lines.values():
-        text = " ".join(ln["texts"])
-        result.append({
-            "text": text,
-            "bbox": {"x0": ln["x0"], "y0": ln["y0"], "x1": ln["x1"], "y1": ln["y1"]},
-        })
+    for item in seen_texts.values():
+        result.append({"text": item["text"], "bbox": item["bbox"]})
+
+    print(f"[MemeLab] pytesseract found {len(result)} text lines: {[r['text'] for r in result]}", flush=True)
     return result
+
+
+def _preprocess_for_ocr(img):
+    """Create multiple preprocessed versions for better meme text detection."""
+    from PIL import ImageFilter
+    results = []
+
+    # 1) Original (works for dark text on light bg)
+    results.append(img)
+
+    # 2) Grayscale
+    gray = img.convert("L")
+    results.append(gray)
+
+    # 3) Inverted grayscale (white text becomes dark)
+    from PIL import ImageOps
+    inv = ImageOps.invert(gray)
+    results.append(inv)
+
+    # 4) High-contrast binary threshold (catches bold white meme text)
+    bw = gray.point(lambda x: 255 if x > 180 else 0)
+    results.append(bw)
+
+    # 5) Inverted binary (for white-on-dark text)
+    bw_inv = bw.point(lambda x: 255 - x)
+    results.append(bw_inv)
+
+    # 6) Sharpened grayscale
+    sharp = gray.filter(ImageFilter.SHARPEN)
+    results.append(sharp)
+
+    return results
 
 
 def _ocr_easyocr(png_bytes: bytes) -> list:
