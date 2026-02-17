@@ -402,11 +402,14 @@ def _ocr_pytesseract(png_bytes: bytes) -> list:
             }
 
     # Post-filter: reject garbage strings
-    result = []
+    filtered = []
     for item in seen_texts.values():
         if _is_ocr_noise(item["text"]):
             continue
-        result.append({"text": item["text"], "bbox": item["bbox"]})
+        filtered.append({"text": item["text"], "bbox": item["bbox"]})
+
+    # Remove fragments that are substrings of longer detected text
+    result = _remove_substring_fragments(filtered)
 
     print(f"[MemeLab] pytesseract found {len(result)} text lines: {[r['text'] for r in result]}", flush=True)
     return result
@@ -417,30 +420,40 @@ def _is_ocr_noise(text: str) -> bool:
     cleaned = text.strip()
     if not cleaned:
         return True
-    # Too short — single chars or tiny fragments are usually noise
-    if len(cleaned) < 2:
+    # Too short — less than 4 chars (after stripping spaces) is almost always noise
+    no_space = cleaned.replace(" ", "")
+    if len(no_space) < 4:
         return True
     # Count actual letters vs non-letter chars
     letters = sum(1 for c in cleaned if c.isalpha())
-    total = len(cleaned.replace(" ", ""))
+    total = len(no_space)
     if total == 0:
         return True
-    # If less than 50% of non-space chars are letters, it's noise
-    if letters / total < 0.5:
-        return True
-    # If it's just 2-3 chars and not a common word, likely noise
-    if len(cleaned) <= 3 and not cleaned.upper() in {"THE", "A", "AN", "I", "ME", "MY", "NO", "OH",
-                                                       "OK", "GO", "DO", "IF", "IS", "IT", "OF",
-                                                       "ON", "OR", "SO", "TO", "UP", "WE", "HE",
-                                                       "BE", "BY", "IN", "AT", "AM", "AS", "US",
-                                                       "AND", "BUT", "FOR", "NOT", "THE", "YOU",
-                                                       "ALL", "HER", "HIS", "HOW", "ITS", "LET",
-                                                       "MAY", "NEW", "NOW", "OLD", "OUR", "OUT",
-                                                       "OWN", "SAY", "SHE", "TOO", "USE", "LOL",
-                                                       "OMG", "WTF", "RIP", "IDK", "IMO", "TBH",
-                                                       "SMH", "BRO", "SIS", "RN", "FR", "AF"}:
+    # If less than 60% of non-space chars are letters, it's noise
+    if letters / total < 0.6:
         return True
     return False
+
+
+def _remove_substring_fragments(items: list) -> list:
+    """Remove OCR results whose text is a substring of another (longer) result.
+    E.g., if we detect both 'COFFEE TIME?' and 'xi?', drop 'xi?'."""
+    if len(items) <= 1:
+        return items
+    # Sort longest first
+    sorted_items = sorted(items, key=lambda x: len(x["text"]), reverse=True)
+    kept = []
+    for item in sorted_items:
+        norm = item["text"].upper().replace(" ", "")
+        is_fragment = False
+        for already in kept:
+            longer = already["text"].upper().replace(" ", "")
+            if norm in longer:
+                is_fragment = True
+                break
+        if not is_fragment:
+            kept.append(item)
+    return kept
 
 
 def _preprocess_for_ocr(img):
