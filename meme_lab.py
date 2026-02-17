@@ -193,14 +193,30 @@ def generate():
 
         prompts = _build_three_prompts(container)
         variant_names = ["rebuild", "reframe", "anthro"]
-        results = []
 
-        for i, prompt_text in enumerate(prompts):
-            vname = variant_names[i]
-            print(f"[MemeLab] Generating variant {vname} (attempt loop)…", flush=True)
-            img_result = _generate_with_retries(
+        # Generate all 3 variants in parallel
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        def _gen_one(vname, prompt_text):
+            print(f"[MemeLab] Generating variant {vname} (parallel)…", flush=True)
+            return vname, _generate_with_retries(
                 prompt_text, container, vname, MAX_RETRIES
             )
+
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            futures = {
+                pool.submit(_gen_one, vname, prompt): vname
+                for vname, prompt in zip(variant_names, prompts)
+            }
+            parallel_results = {}
+            for future in as_completed(futures):
+                vname, img_result = future.result()
+                parallel_results[vname] = img_result
+
+        # Assemble results in order, attach node IDs
+        results = []
+        for vname in variant_names:
+            img_result = parallel_results[vname]
 
             if not img_result.get("error"):
                 node_id = secrets.token_hex(8)
