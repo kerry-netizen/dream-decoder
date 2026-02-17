@@ -63,6 +63,14 @@ meme_lab_bp = Blueprint(
     static_url_path="/go/static",
 )
 
+@meme_lab_bp.errorhandler(Exception)
+def _handle_meme_error(exc):
+    """Ensure API errors always return JSON, not HTML."""
+    import traceback
+    traceback.print_exc()
+    return jsonify({"error": f"{type(exc).__name__}: {exc}"}), 500
+
+
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_IMAGE_MODEL = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
@@ -103,28 +111,33 @@ def go_page():
 
 @meme_lab_bp.route("/api/meme/container/create", methods=["POST"])
 def create_container():
-    if not _check_password():
-        return jsonify({"error": "Unauthorized"}), 401
-
-    f = request.files.get("image")
-    if not f:
-        return jsonify({"error": "Missing image"}), 400
-
     try:
+        if not _check_password():
+            return jsonify({"error": "Unauthorized"}), 401
+
+        f = request.files.get("image")
+        if not f:
+            return jsonify({"error": "Missing image"}), 400
+
         container_id = "ctr_" + secrets.token_hex(10)
 
         # Read + square to 1024x1024
         img_bytes = f.read()
+        print(f"[MemeLab] Read {len(img_bytes)} bytes from upload", flush=True)
         squared = _to_square_png(img_bytes, 1024)
+        print(f"[MemeLab] Squared image: {len(squared)} bytes", flush=True)
 
         root_filename = f"{container_id}_root.png"
         root_path = os.path.join(IMG_DIR, root_filename)
         with open(root_path, "wb") as out:
             out.write(squared)
         root_image_rel = f"/data/meme_images/{root_filename}"
+        print(f"[MemeLab] Saved root image to {root_path}", flush=True)
 
         # OCR
+        print(f"[MemeLab] Running OCR with backend: {OCR_BACKEND}", flush=True)
         text_blocks = _extract_text_blocks(squared)
+        print(f"[MemeLab] OCR found {len(text_blocks)} text blocks", flush=True)
 
         container = {
             "id": container_id,
@@ -147,43 +160,44 @@ def create_container():
     except Exception as exc:
         import traceback
         traceback.print_exc()
-        return jsonify({"error": "Container creation failed"}), 500
+        return jsonify({"error": f"Container creation failed: {type(exc).__name__}: {exc}"}), 500
 
 
 @meme_lab_bp.route("/api/meme/generate", methods=["POST"])
 def generate():
-    if not _check_password():
-        return jsonify({"error": "Unauthorized"}), 401
-
-    body = request.get_json(silent=True) or {}
-    container_id = body.get("containerId")
-    parent_node_id = body.get("parentNodeId")
-
-    if not container_id or not parent_node_id:
-        return jsonify({"error": "Missing containerId or parentNodeId"}), 400
-
-    container = _load_container(container_id)
-    if not container:
-        return jsonify({"error": "Container not found"}), 404
-
-    parent = None
-    for n in container.get("nodes", []):
-        if n["node_id"] == parent_node_id:
-            parent = n
-            break
-    if not parent:
-        return jsonify({"error": "Parent node not found"}), 404
-
-    if parent["depth"] >= MAX_DEPTH:
-        return jsonify({"error": f"Max depth {MAX_DEPTH} reached"}), 400
-
     try:
+        if not _check_password():
+            return jsonify({"error": "Unauthorized"}), 401
+
+        body = request.get_json(silent=True) or {}
+        container_id = body.get("containerId")
+        parent_node_id = body.get("parentNodeId")
+
+        if not container_id or not parent_node_id:
+            return jsonify({"error": "Missing containerId or parentNodeId"}), 400
+
+        container = _load_container(container_id)
+        if not container:
+            return jsonify({"error": "Container not found"}), 404
+
+        parent = None
+        for n in container.get("nodes", []):
+            if n["node_id"] == parent_node_id:
+                parent = n
+                break
+        if not parent:
+            return jsonify({"error": "Parent node not found"}), 404
+
+        if parent["depth"] >= MAX_DEPTH:
+            return jsonify({"error": f"Max depth {MAX_DEPTH} reached"}), 400
+
         prompts = _build_three_prompts(container)
         variant_names = ["rebuild", "reframe", "anthro"]
         results = []
 
         for i, prompt_text in enumerate(prompts):
             vname = variant_names[i]
+            print(f"[MemeLab] Generating variant {vname} (attempt loop)…", flush=True)
             img_result = _generate_with_retries(
                 prompt_text, container, vname, MAX_RETRIES
             )
@@ -209,7 +223,26 @@ def generate():
     except Exception as exc:
         import traceback
         traceback.print_exc()
-        return jsonify({"error": "Generation failed"}), 500
+        return jsonify({"error": f"Generation failed: {type(exc).__name__}: {exc}"}), 500
+
+
+@meme_lab_bp.route("/api/meme/diag")
+def meme_diag():
+    """Quick diagnostic — check OCR backend + dirs. Remove after debugging."""
+    info = {
+        "ocr_backend": OCR_BACKEND,
+        "img_dir_exists": os.path.isdir(IMG_DIR),
+        "container_dir_exists": os.path.isdir(CONTAINER_DIR),
+        "openai_key_set": bool(OPENAI_API_KEY),
+        "app_password_set": bool(APP_PASSWORD),
+    }
+    if OCR_BACKEND == "pytesseract":
+        try:
+            ver = pytesseract.get_tesseract_version()
+            info["tesseract_version"] = str(ver)
+        except Exception as e:
+            info["tesseract_error"] = str(e)
+    return jsonify(info)
 
 
 @meme_lab_bp.route("/data/meme_images/<path:filename>")
