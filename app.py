@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from typing import List, Dict, Any
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, Response, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response, send_from_directory, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from openai import OpenAI
 
@@ -1243,6 +1243,10 @@ def handle_exception(e):
         route=request.path if request else "unknown",
         user_id=user_id
     )
+
+    # Return JSON for API routes, HTML for everything else
+    if request.path.startswith("/api/"):
+        return jsonify({"error": f"{type(e).__name__}: {e}"}), 500
 
     # Return 500 page
     return render_template("500.html"), 500
