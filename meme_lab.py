@@ -582,15 +582,24 @@ def _extract_text_blocks(png_bytes: bytes) -> list:
 # Validation
 # ---------------------------------------------------------------------------
 
-def _validate_text_and_buckets(required_blocks, out_blocks):
+def _validate_text_and_buckets(required_blocks, out_blocks, variant_name="rebuild"):
+    """Validate generated image text against source requirements.
+
+    - rebuild: enforce exact text AND region bucket match (strict)
+    - reframe/anthro: enforce exact text only, ignore bucket position
+    """
     out_texts = [b["text"] for b in out_blocks]
-    out_pairs = set(f"{b['bucket']}::{b['text']}" for b in out_blocks)
+    strict_buckets = (variant_name == "rebuild")
+
+    if strict_buckets:
+        out_pairs = set(f"{b['bucket']}::{b['text']}" for b in out_blocks)
 
     for req in required_blocks:
         if req["text"] not in out_texts:
             return False, f'Text mismatch/missing: "{req["text"]}"'
-        if f'{req["bucket"]}::{req["text"]}' not in out_pairs:
-            return False, f'Bucket mismatch for: "{req["text"]}" expected {req["bucket"]}'
+        if strict_buckets:
+            if f'{req["bucket"]}::{req["text"]}' not in out_pairs:
+                return False, f'Bucket mismatch for: "{req["text"]}" expected {req["bucket"]}'
     return True, ""
 
 
@@ -708,7 +717,7 @@ def _generate_with_retries(prompt_text, container, variant_name, attempt_limit):
 
             # Validate OCR
             out_blocks = _extract_text_blocks(png)
-            ok, err = _validate_text_and_buckets(container.get("text_blocks", []), out_blocks)
+            ok, err = _validate_text_and_buckets(container.get("text_blocks", []), out_blocks, variant_name)
 
             if not ok:
                 last_error = err
