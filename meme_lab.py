@@ -358,21 +358,21 @@ def _ocr_pytesseract(png_bytes: bytes) -> list:
     img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
 
     # Meme text is usually white/bright on busy backgrounds.
-    # Run OCR on multiple preprocessed versions and merge results.
+    # Run OCR on a few preprocessed versions and merge results.
     variants = _preprocess_for_ocr(img)
 
     all_lines = {}
     for variant_img in variants:
+        # --psm 6 = assume uniform block of text (better for meme lines)
         data = pytesseract.image_to_data(variant_img, output_type=Output.DICT,
-                                         config="--psm 11")
+                                         config="--psm 6")
         n = len(data.get("text", []))
         for i in range(n):
             txt = (data["text"][i] or "").strip()
             conf = int(data["conf"][i]) if data["conf"][i] != "-1" else 0
-            if not txt or conf < 30:
+            if not txt or conf < 60:
                 continue
             key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
-            # Use a variant-specific key to avoid collisions
             vkey = (id(variant_img), *key)
             if vkey not in all_lines:
                 all_lines[vkey] = {"texts": [], "x0": 9999, "y0": 9999, "x1": 0, "y1": 0, "conf": 0}
@@ -401,42 +401,65 @@ def _ocr_pytesseract(png_bytes: bytes) -> list:
                 "conf": ln["conf"],
             }
 
+    # Post-filter: reject garbage strings
     result = []
     for item in seen_texts.values():
+        if _is_ocr_noise(item["text"]):
+            continue
         result.append({"text": item["text"], "bbox": item["bbox"]})
 
     print(f"[MemeLab] pytesseract found {len(result)} text lines: {[r['text'] for r in result]}", flush=True)
     return result
 
 
+def _is_ocr_noise(text: str) -> bool:
+    """Return True if a detected text string looks like OCR noise, not real meme text."""
+    cleaned = text.strip()
+    if not cleaned:
+        return True
+    # Too short — single chars or tiny fragments are usually noise
+    if len(cleaned) < 2:
+        return True
+    # Count actual letters vs non-letter chars
+    letters = sum(1 for c in cleaned if c.isalpha())
+    total = len(cleaned.replace(" ", ""))
+    if total == 0:
+        return True
+    # If less than 50% of non-space chars are letters, it's noise
+    if letters / total < 0.5:
+        return True
+    # If it's just 2-3 chars and not a common word, likely noise
+    if len(cleaned) <= 3 and not cleaned.upper() in {"THE", "A", "AN", "I", "ME", "MY", "NO", "OH",
+                                                       "OK", "GO", "DO", "IF", "IS", "IT", "OF",
+                                                       "ON", "OR", "SO", "TO", "UP", "WE", "HE",
+                                                       "BE", "BY", "IN", "AT", "AM", "AS", "US",
+                                                       "AND", "BUT", "FOR", "NOT", "THE", "YOU",
+                                                       "ALL", "HER", "HIS", "HOW", "ITS", "LET",
+                                                       "MAY", "NEW", "NOW", "OLD", "OUR", "OUT",
+                                                       "OWN", "SAY", "SHE", "TOO", "USE", "LOL",
+                                                       "OMG", "WTF", "RIP", "IDK", "IMO", "TBH",
+                                                       "SMH", "BRO", "SIS", "RN", "FR", "AF"}:
+        return True
+    return False
+
+
 def _preprocess_for_ocr(img):
-    """Create multiple preprocessed versions for better meme text detection."""
-    from PIL import ImageFilter
+    """Create preprocessed versions for better meme text detection.
+    Fewer variants = less noise. Focus on what works for Impact/bold text."""
+    from PIL import ImageOps
+
     results = []
-
-    # 1) Original (works for dark text on light bg)
-    results.append(img)
-
-    # 2) Grayscale
     gray = img.convert("L")
+
+    # 1) Grayscale (baseline)
     results.append(gray)
 
-    # 3) Inverted grayscale (white text becomes dark)
-    from PIL import ImageOps
-    inv = ImageOps.invert(gray)
-    results.append(inv)
+    # 2) Inverted grayscale (white meme text becomes black-on-white)
+    results.append(ImageOps.invert(gray))
 
-    # 4) High-contrast binary threshold (catches bold white meme text)
-    bw = gray.point(lambda x: 255 if x > 180 else 0)
+    # 3) High-contrast binary — isolates bright white text
+    bw = gray.point(lambda x: 255 if x > 200 else 0)
     results.append(bw)
-
-    # 5) Inverted binary (for white-on-dark text)
-    bw_inv = bw.point(lambda x: 255 - x)
-    results.append(bw_inv)
-
-    # 6) Sharpened grayscale
-    sharp = gray.filter(ImageFilter.SHARPEN)
-    results.append(sharp)
 
     return results
 
