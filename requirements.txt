@@ -5,4 +5,4 @@ gunicorn
 cryptography
 Pillow
 requests
-easyocr
+pytesseract
