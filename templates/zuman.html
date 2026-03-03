@@ -6,6 +6,7 @@
   <title>Zuman</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       background: #0d0d14;
       color: #e6e6ff;
@@ -14,37 +15,457 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 24px;
     }
+
     .player {
-      text-align: center;
-      padding: 48px 32px;
+      width: 100%;
+      max-width: 420px;
     }
+
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
     h1 {
-      font-size: 52px;
+      font-size: 48px;
       font-weight: 700;
       letter-spacing: 0.12em;
       color: #c8b8ff;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
+
     .subtitle {
-      font-size: 14px;
-      color: #5a5a7a;
+      font-size: 13px;
+      color: #45455a;
       letter-spacing: 0.08em;
-      margin-bottom: 48px;
     }
-    audio {
-      width: 300px;
-      filter: invert(1) hue-rotate(200deg) brightness(0.85);
+
+    /* Track list */
+    .tracklist {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
     }
+
+    .track {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: #13131f;
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+
+    .track:hover {
+      background: #17172a;
+      border-color: #3a3a60;
+    }
+
+    .track.active {
+      background: #1a1730;
+      border-color: #7a5df9;
+    }
+
+    .track-num {
+      font-size: 13px;
+      color: #45455a;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .track.active .track-num {
+      color: #7a5df9;
+    }
+
+    .track-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .track-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #d4caff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track.active .track-title {
+      color: #a990ff;
+    }
+
+    .track-version {
+      font-size: 12px;
+      color: #45455a;
+      margin-top: 2px;
+    }
+
+    .track-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #2a2a40;
+      border: none;
+      color: #a0a0c0;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .track:hover .track-btn,
+    .track.active .track-btn {
+      background: #7a5df9;
+      color: #fff;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #1e1e30;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #7a5df9;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
+
+    .progress-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #45455a;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      color: #787894;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .ctrl-btn:hover { color: #c8b8ff; }
+
+    .play-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #7a5df9;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover { background: #8f70ff; transform: scale(1.05); }
+    .play-btn:active { transform: scale(0.97); }
+
+    /* Bottom row: play-all + repeat */
+    .bottom-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .play-all-btn {
+      flex: 1;
+      padding: 12px;
+      background: #1a1730;
+      border: 1px solid #3a3060;
+      border-radius: 10px;
+      color: #c8b8ff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      letter-spacing: 0.04em;
+    }
+
+    .play-all-btn:hover {
+      background: #221f40;
+      border-color: #7a5df9;
+    }
+
+    .repeat-btn {
+      padding: 12px 16px;
+      background: #13131f;
+      border: 1px solid #1e1e30;
+      border-radius: 10px;
+      color: #45455a;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .repeat-btn.on {
+      background: #1a1730;
+      border-color: #7a5df9;
+      color: #a990ff;
+    }
+
+    .repeat-btn:hover { border-color: #3a3a60; }
+    .repeat-btn.on:hover { border-color: #9b7fff; }
+
+    .repeat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    audio { display: none; }
   </style>
 </head>
 <body>
-  <div class="player">
+<div class="player">
+
+  <div class="header">
     <h1>ZUMAN</h1>
     <p class="subtitle">dream ferret</p>
-    <audio controls autoplay>
-      <source src="{{ url_for('static', filename='Zuman.mp3') }}" type="audio/mpeg">
-    </audio>
   </div>
+
+  <div class="tracklist">
+    <div class="track" data-index="0">
+      <span class="track-num">1</span>
+      <div class="track-info">
+        <div class="track-title">Zuman</div>
+        <div class="track-version">Murzon version</div>
+      </div>
+      <button class="track-btn" aria-label="Play">▶</button>
+    </div>
+    <div class="track" data-index="1">
+      <span class="track-num">2</span>
+      <div class="track-info">
+        <div class="track-title">Zuman</div>
+        <div class="track-version">Diana version</div>
+      </div>
+      <button class="track-btn" aria-label="Play">▶</button>
+    </div>
+    <div class="track" data-index="2">
+      <span class="track-num">3</span>
+      <div class="track-info">
+        <div class="track-title">Zuman</div>
+        <div class="track-version">Gerald version</div>
+      </div>
+      <button class="track-btn" aria-label="Play">▶</button>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-times">
+      <span id="timeElapsed">0:00</span>
+      <span id="timeDuration">0:00</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn" title="Previous">⏮</button>
+    <button class="play-btn" id="playPauseBtn">▶</button>
+    <button class="ctrl-btn" id="nextBtn" title="Next">⏭</button>
+  </div>
+
+  <div class="bottom-controls">
+    <button class="play-all-btn" id="playAllBtn">▶ Play All</button>
+    <button class="repeat-btn" id="repeatBtn">
+      <span>🔁</span>
+      <span class="repeat-label">REPEAT</span>
+    </button>
+  </div>
+
+  <audio id="audio"></audio>
+</div>
+
+<script>
+const TRACKS = [
+  { src: "{{ url_for('static', filename='Zuman.mp3') }}", title: "Zuman", version: "Murzon version" },
+  { src: "{{ url_for('static', filename='Zuman2.mp3') }}", title: "Zuman", version: "Diana version" },
+  { src: "{{ url_for('static', filename='Zuman3.mp3') }}", title: "Zuman", version: "Gerald version" }
+];
+
+const audio        = document.getElementById('audio');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const prevBtn      = document.getElementById('prevBtn');
+const nextBtn      = document.getElementById('nextBtn');
+const playAllBtn   = document.getElementById('playAllBtn');
+const repeatBtn    = document.getElementById('repeatBtn');
+const progressBar  = document.getElementById('progressBar');
+const progressFill = document.getElementById('progressFill');
+const timeElapsed  = document.getElementById('timeElapsed');
+const timeDuration = document.getElementById('timeDuration');
+const trackEls     = document.querySelectorAll('.track');
+
+let current   = 0;
+let playing   = false;
+let playAll   = false;
+let repeat    = false;
+
+function fmt(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+function loadTrack(idx, autoplay) {
+  current = idx;
+  audio.src = TRACKS[idx].src;
+  trackEls.forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+    const btn = el.querySelector('.track-btn');
+    btn.textContent = (i === idx && playing) ? '⏸' : '▶';
+  });
+  progressFill.style.width = '0%';
+  timeElapsed.textContent = '0:00';
+  timeDuration.textContent = '0:00';
+  if (autoplay) {
+    audio.play();
+    playing = true;
+    playPauseBtn.textContent = '⏸';
+    trackEls[idx].querySelector('.track-btn').textContent = '⏸';
+  } else {
+    playing = false;
+    playPauseBtn.textContent = '▶';
+  }
+}
+
+function togglePlay() {
+  if (!audio.src || audio.src === window.location.href) {
+    loadTrack(0, true);
+    return;
+  }
+  if (playing) {
+    audio.pause();
+    playing = false;
+    playPauseBtn.textContent = '▶';
+    trackEls[current].querySelector('.track-btn').textContent = '▶';
+  } else {
+    audio.play();
+    playing = true;
+    playPauseBtn.textContent = '⏸';
+    trackEls[current].querySelector('.track-btn').textContent = '⏸';
+  }
+}
+
+// Track click
+trackEls.forEach(el => {
+  el.addEventListener('click', () => {
+    const idx = parseInt(el.dataset.index);
+    if (idx === current) {
+      togglePlay();
+    } else {
+      loadTrack(idx, true);
+      playAll = false; // manual pick — disable queue mode until Play All again
+    }
+  });
+});
+
+playPauseBtn.addEventListener('click', togglePlay);
+
+prevBtn.addEventListener('click', () => {
+  const idx = (current - 1 + TRACKS.length) % TRACKS.length;
+  loadTrack(idx, playing);
+});
+
+nextBtn.addEventListener('click', () => {
+  const idx = (current + 1) % TRACKS.length;
+  loadTrack(idx, playing);
+});
+
+playAllBtn.addEventListener('click', () => {
+  playAll = true;
+  loadTrack(0, true);
+});
+
+repeatBtn.addEventListener('click', () => {
+  repeat = !repeat;
+  repeatBtn.classList.toggle('on', repeat);
+});
+
+// Progress
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  progressFill.style.width = pct + '%';
+  timeElapsed.textContent = fmt(audio.currentTime);
+  timeDuration.textContent = fmt(audio.duration);
+});
+
+progressBar.addEventListener('click', e => {
+  if (!audio.duration) return;
+  const rect = progressBar.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+});
+
+// Auto-advance
+audio.addEventListener('ended', () => {
+  const isLast = current === TRACKS.length - 1;
+  if (repeat) {
+    if (isLast && playAll) {
+      loadTrack(0, true);
+    } else if (!isLast && playAll) {
+      loadTrack(current + 1, true);
+    } else {
+      // single track repeat
+      audio.currentTime = 0;
+      audio.play();
+    }
+  } else if (playAll && !isLast) {
+    loadTrack(current + 1, true);
+  } else {
+    playing = false;
+    playPauseBtn.textContent = '▶';
+    trackEls[current].querySelector('.track-btn').textContent = '▶';
+  }
+});
+</script>
 </body>
 </html>
