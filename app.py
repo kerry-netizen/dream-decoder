@@ -1109,6 +1109,12 @@ def forge():
     return response
 
 
+@app.route("/zuman")
+def zuman():
+    """Zuman song page."""
+    return render_template("zuman.html")
+
+
 # ----------------------------------------------------
 # Anonymous "Try It" Feature (Testing Phase)
 # ----------------------------------------------------
