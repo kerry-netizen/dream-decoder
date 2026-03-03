@@ -1121,6 +1121,12 @@ def zuman2():
     return render_template("zuman2.html")
 
 
+@app.route("/zuman3")
+def zuman3():
+    """Zuman 3 song page."""
+    return render_template("zuman3.html")
+
+
 # ----------------------------------------------------
 # Anonymous "Try It" Feature (Testing Phase)
 # ----------------------------------------------------
