@@ -304,6 +304,14 @@
       </div>
       <button class="track-btn" aria-label="Play">▶</button>
     </div>
+    <div class="track" data-index="4">
+      <span class="track-num">5</span>
+      <div class="track-info">
+        <div class="track-title">Zuman</div>
+        <div class="track-version">Ted version</div>
+      </div>
+      <button class="track-btn" aria-label="Play">▶</button>
+    </div>
   </div>
 
   <div class="progress-wrap">
@@ -338,7 +346,8 @@ const TRACKS = [
   { src: "{{ url_for('static', filename='Zuman.mp3') }}", title: "Zuman", version: "Murzon version" },
   { src: "{{ url_for('static', filename='Zuman2.mp3') }}", title: "Zuman", version: "Diana version" },
   { src: "{{ url_for('static', filename='Zuman3.mp3') }}", title: "Zuman", version: "Gerald version" },
-  { src: "{{ url_for('static', filename='Zuman4.mp3') }}", title: "Zuman", version: "Brad version" }
+  { src: "{{ url_for('static', filename='Zuman4.mp3') }}", title: "Zuman", version: "Brad version" },
+  { src: "{{ url_for('static', filename='Zuman5.mp3') }}", title: "Zuman", version: "Ted version" }
 ];
 
 const audio        = document.getElementById('audio');
