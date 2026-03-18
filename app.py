@@ -1115,6 +1115,12 @@ def zuman():
     return render_template("zuman.html")
 
 
+@app.route("/ro")
+def ro():
+    """Romance manuscript page."""
+    return render_template("ro.html")
+
+
 # ----------------------------------------------------
 # Anonymous "Try It" Feature (Testing Phase)
 # ----------------------------------------------------
