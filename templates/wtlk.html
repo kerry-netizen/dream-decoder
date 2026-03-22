@@ -6,42 +6,74 @@
   <title>What the Land Keeps</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --cream: #f7f4ee; --paper: #fffdf8; --ink: #1a1a1a; --gold: #8a6a30; --border: #e0d8ca; --muted: #888; }
-    body { font-family: Georgia, "Times New Roman", serif; background: var(--cream); color: var(--ink); font-size: 1.05rem; line-height: 1.75; }
+    :root { --cream: #f7f4ee; --paper: #fffdf8; --ink: #1a1a1a; --gold: #8a6a30; --border: #e0d8ca; --muted: #888; --bar-h: 52px; }
+    body { font-family: Georgia, "Times New Roman", serif; background: var(--cream); color: var(--ink); font-size: 1.05rem; line-height: 1.75; padding-bottom: var(--bar-h); }
+
+    /* TOP BAR */
     .topbar { position: sticky; top: 0; z-index: 200; background: rgba(247,244,238,0.97); border-bottom: 1px solid var(--border); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(4px); }
     .topbar-title { font-size: 0.88rem; color: var(--muted); font-style: italic; }
     .topbar-back { font-family: system-ui, sans-serif; font-size: 0.8rem; color: var(--gold); text-decoration: none; }
     .topbar-back:hover { text-decoration: underline; }
-    .wrap { max-width: 700px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* CONTENT */
+    .wrap { max-width: 700px; margin: 0 auto; padding: 0 24px 40px; }
     .book-header { text-align: center; padding: 56px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
     .book-header h1 { font-size: 2.2rem; letter-spacing: 0.03em; margin-bottom: 6px; }
     .book-header .byline { color: var(--muted); font-style: italic; }
-    #toc { background: var(--paper); border: 1px solid var(--border); padding: 28px 32px; margin-bottom: 56px; scroll-margin-top: 60px; }
+
+    /* TOC */
+    #toc { background: var(--paper); border: 1px solid var(--border); padding: 28px 32px; margin-bottom: 16px; scroll-margin-top: 60px; }
     #toc h2 { font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-family: system-ui, sans-serif; margin-bottom: 16px; }
-    #toc ol { list-style: none; columns: 2; gap: 0 32px; }
+    #toc ol { list-style: none; columns: 2; gap: 0 32px; margin-bottom: 20px; }
     #toc li { margin: 0; }
     .toc-link { display: block; padding: 7px 0; color: var(--ink); text-decoration: none; font-size: 0.95rem; border-bottom: 1px solid var(--border); transition: color 0.15s; }
     .toc-link:hover { color: var(--gold); }
+    .btn-print-book { display: block; width: 100%; padding: 12px; background: var(--paper); border: 1px solid var(--border); font-family: system-ui, sans-serif; font-size: 0.85rem; color: #444; cursor: pointer; letter-spacing: 0.04em; text-transform: uppercase; transition: border-color 0.2s, color 0.2s; margin-top: 20px; }
+    .btn-print-book:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* CHAPTERS */
     .chapter { margin-bottom: 80px; scroll-margin-top: 60px; }
     .ch-header { padding: 32px 0 20px; border-top: 2px solid var(--ink); margin-bottom: 28px; }
     .ch-label { font-family: system-ui, sans-serif; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-    .ch-header h2 { font-size: 1.7rem; margin-bottom: 14px; }
-    .ch-toolbar { display: flex; gap: 10px; }
-    .ch-btn { font-family: system-ui, sans-serif; font-size: 0.78rem; padding: 5px 12px; border: 1px solid var(--border); background: var(--paper); color: #444; cursor: pointer; text-decoration: none; transition: border-color 0.2s, color 0.2s; }
-    .ch-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .ch-header h2 { font-size: 1.7rem; }
     .ch-body p { margin: 0; text-indent: 1.8em; }
     .ch-body p.first { text-indent: 0; }
     .ch-body .scene-break + p { text-indent: 0; }
     .scene-break { border: none; border-top: 1px solid #ccc4b0; margin: 1.8rem auto; width: 60px; }
-    .ch-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .ch-nav-btn { font-family: system-ui, sans-serif; font-size: 0.82rem; color: var(--gold); text-decoration: none; }
-    .ch-nav-btn:hover { text-decoration: underline; }
+
+    /* FIXED BOTTOM BAR */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+      background: rgba(26,22,18,0.96);
+      border-top: 1px solid #3a3020;
+      backdrop-filter: blur(4px);
+      height: var(--bar-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; gap: 8px;
+    }
+    .bar-btn {
+      font-family: system-ui, sans-serif; font-size: 0.78rem; letter-spacing: 0.04em;
+      color: #c8a96e; background: transparent; border: 1px solid #3a3020;
+      padding: 6px 14px; cursor: pointer; text-decoration: none;
+      white-space: nowrap; transition: border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .bar-btn:hover { border-color: #c8a96e; color: #e8c98e; }
+    .bar-btn:disabled, .bar-btn.disabled { opacity: 0.3; pointer-events: none; }
+    .bar-title {
+      font-family: Georgia, serif; font-size: 0.8rem; color: #888;
+      font-style: italic; text-align: center; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;
+    }
+
+    /* PRINT */
     @media print {
-      .topbar, .ch-toolbar, .ch-footer, #toc, .book-header { display: none !important; }
-      body { font-size: 11pt; line-height: 1.6; background: white; }
+      .topbar, .bottom-bar, #toc, .book-header { display: none !important; }
+      body { font-size: 11pt; line-height: 1.6; background: white; padding-bottom: 0; }
       .wrap { max-width: 100%; padding: 0; }
-      .chapter { display: none !important; }
+      .chapter { display: none !important; margin: 0; }
       .chapter.printing { display: block !important; }
+      .chapter.print-all { display: block !important; }
       .ch-header { border-top: none; padding-top: 0; }
       .ch-body p { text-indent: 1.5em; orphans: 3; widows: 3; }
       .ch-body p.first { text-indent: 0; }
@@ -51,6 +83,7 @@
       #toc ol { columns: 1; }
       .book-header h1 { font-size: 1.6rem; }
       .topbar-title { display: none; }
+      .bar-title { display: none; }
     }
   </style>
 </head>
@@ -83,16 +116,13 @@
       <li><a class="toc-link" href="#chapter-11">11. Dismissed Without Prejudice</a></li>
       <li><a class="toc-link" href="#chapter-12">12. What the Land Keeps</a></li>
     </ol>
+    <button class="btn-print-book" onclick="printBook()">Print Book</button>
   </nav>
 
-    <section class="chapter" id="chapter-1">
+    <section class="chapter" id="chapter-1" data-idx="0">
       <div class="ch-header">
         <div class="ch-label">Chapter 1</div>
         <h2>Old River Road</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(0)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -757,20 +787,11 @@
       <p>She stood there in the porch-light glow and looked at it for another moment.</p>
       <p>Then she tore the docket strip off neatly along the fold, wrote 9:00 in the margin with the pen from beside the phone, and slipped the scrap into her purse with her keys.</p>
       </div>
-      <div class="ch-footer">
-        <span></span>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-2">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-2">
+    <section class="chapter" id="chapter-2" data-idx="1">
       <div class="ch-header">
         <div class="ch-label">Chapter 2</div>
         <h2>Nine O’Clock</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(1)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -1097,20 +1118,11 @@
       <p>He stood a second more, then got in and backed out without another word.</p>
       <p>After he left, Shannon stayed on the porch with the dead bugs in the light globe and the screwdriver beside them until the mosquitoes found her ankles and the dark turned the road to a strip of absence between ditches. Only then did she go in and lock the back door with the same lift-and-pull motion it had always needed.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-1">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-3">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-3">
+    <section class="chapter" id="chapter-3" data-idx="2">
       <div class="ch-header">
         <div class="ch-label">Chapter 3</div>
         <h2>The First Conversation</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(2)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -1248,20 +1260,11 @@
       <p>Emily’s brows lifted. “See? Nobody likes being observed back.”</p>
       <p>Rosie saved them from the next line by arriving with a refill pitcher and a comment about the weather radar. Across the room Colt said something to the road crew men and all three bent over a phone screen. Shannon let it go. Or appeared to.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-2">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-4">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-4">
+    <section class="chapter" id="chapter-4" data-idx="3">
       <div class="ch-header">
         <div class="ch-label">Chapter 4</div>
         <h2>What the Records Said</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(3)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -1746,20 +1749,11 @@
       <p>Emily was already looking back down at the papers. “Don’t confuse being useful with being entitled.”</p>
       <p>Shannon left anyway.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-3">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-5">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-5">
+    <section class="chapter" id="chapter-5" data-idx="4">
       <div class="ch-header">
         <div class="ch-label">Chapter 5</div>
         <h2>The Car, The Yard</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(4)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -1935,20 +1929,11 @@
       <p>He didn’t call after her. She didn’t look back until she’d reached the car.</p>
       <p>He was still standing in the doorway, one shoulder against the frame, the broken-latch photo in his hand.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-4">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-6">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-6">
+    <section class="chapter" id="chapter-6" data-idx="5">
       <div class="ch-header">
         <div class="ch-label">Chapter 6</div>
         <h2>Friday Night</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(5)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -2118,20 +2103,11 @@
       <p>She walked to the car with the envelope under one arm. At the door she looked back once.</p>
       <p>He was still on the porch in the yellow spill from the kitchen light, one hand braced on the post, the full-size plat left behind on the table over his shoulder.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-5">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-7">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-7">
+    <section class="chapter" id="chapter-7" data-idx="6">
       <div class="ch-header">
         <div class="ch-label">Chapter 7</div>
         <h2>State Files Additional Evidence</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(6)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -2257,20 +2233,11 @@
       <p>Beyond him, through the courthouse doors, the square lay washed pale in the afternoon sun after rain. Trucks moved. People got on with things. Somewhere a car horn sounded twice. Ordinary life, broad as ever.</p>
       <p>Shannon took the report and held it in the same hand that still remembered the weight of Eli’s shirt under her fingers.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-6">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-8">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-8">
+    <section class="chapter" id="chapter-8" data-idx="7">
       <div class="ch-header">
         <div class="ch-label">Chapter 8</div>
         <h2>Dale’s Notebook</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(7)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -2595,20 +2562,11 @@
       <p>Then he left.</p>
       <p>She stood in the kitchen listening to his truck start and back down the drive. The new porch light threw a clean yellow square across the yard.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-7">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-9">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-9">
+    <section class="chapter" id="chapter-9" data-idx="8">
       <div class="ch-header">
         <div class="ch-label">Chapter 9</div>
         <h2>Monday</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(8)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -2871,20 +2829,11 @@
       <p>Shannon took out her phone and found Emily’s name. Her thumb hovered over it.</p>
       <p>She slid the phone back into her pocket.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-8">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-10">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-10">
+    <section class="chapter" id="chapter-10" data-idx="9">
       <div class="ch-header">
         <div class="ch-label">Chapter 10</div>
         <h2>The Shoulder</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(9)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -3134,20 +3083,11 @@
       <p>He gave the road yard, the trucks, the men pretending not to hear, one look. “Folks don’t ask enough. They ask useful.”</p>
       <p>Then he climbed into the grader and started it up.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-9">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-11">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-11">
+    <section class="chapter" id="chapter-11" data-idx="10">
       <div class="ch-header">
         <div class="ch-label">Chapter 11</div>
         <h2>Dismissed Without Prejudice</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(10)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -3218,20 +3158,11 @@
       <p>She shook her head. “I think the county told it too clean.”</p>
       <p>Mize considered that and did not answer. He went back to the register.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-10">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <a class="ch-nav-btn" href="#chapter-12">Next &rarr;</a>
-      </div>
     </section>
-    <section class="chapter" id="chapter-12">
+    <section class="chapter" id="chapter-12" data-idx="11">
       <div class="ch-header">
         <div class="ch-label">Chapter 12</div>
         <h2>What the Land Keeps</h2>
-        <div class="ch-toolbar">
-          <a class="ch-btn" href="#toc">&uarr;&nbsp;Contents</a>
-          <button class="ch-btn" onclick="printChapter(11)">Print Chapter</button>
-        </div>
       </div>
       <div class="ch-body">
       <hr class="scene-break">
@@ -3556,25 +3487,101 @@
       <p>She slid the finished sheet into a cardboard tube, pressed the cap on with the heel of her hand, and set it in the outgoing rack. Then she reached for the next one, laying the brass weight down before the corner could curl.</p>
       <p>Outside, a breeze finally moved across the square hard enough to show the flag’s shape.</p>
       </div>
-      <div class="ch-footer">
-        <a class="ch-nav-btn" href="#chapter-11">&larr; Previous</a>
-        <a class="ch-nav-btn" href="#toc">&uarr;&nbsp;Contents</a>
-        <span></span>
-      </div>
     </section>
 
 </div>
 
+<!-- Fixed bottom nav bar -->
+<div class="bottom-bar">
+  <a id="bar-prev" class="bar-btn" href="#toc">&larr; Prev</a>
+  <span id="bar-title" class="bar-title">What the Land Keeps</span>
+  <a id="bar-next" class="bar-btn" href="#" style="margin-right:4px">Next &rarr;</a>
+  <a class="bar-btn" href="#toc">&uarr; Contents</a>
+  <button class="bar-btn" onclick="printChapter()">Print Chapter</button>
+</div>
+
 <script>
 
-function printChapter(idx) {
-  document.querySelectorAll('.chapter').forEach(function(el) { el.classList.remove('printing'); });
-  document.querySelectorAll('.chapter')[idx].classList.add('printing');
+var CHAPTERS = [
+  { idx: 0, id: "chapter-1", title: 'Old River Road', prev: "", next: "#chapter-2" },
+  { idx: 1, id: "chapter-2", title: 'Nine O’Clock', prev: "#chapter-1", next: "#chapter-3" },
+  { idx: 2, id: "chapter-3", title: 'The First Conversation', prev: "#chapter-2", next: "#chapter-4" },
+  { idx: 3, id: "chapter-4", title: 'What the Records Said', prev: "#chapter-3", next: "#chapter-5" },
+  { idx: 4, id: "chapter-5", title: 'The Car, The Yard', prev: "#chapter-4", next: "#chapter-6" },
+  { idx: 5, id: "chapter-6", title: 'Friday Night', prev: "#chapter-5", next: "#chapter-7" },
+  { idx: 6, id: "chapter-7", title: 'State Files Additional Evidence', prev: "#chapter-6", next: "#chapter-8" },
+  { idx: 7, id: "chapter-8", title: 'Dale’s Notebook', prev: "#chapter-7", next: "#chapter-9" },
+  { idx: 8, id: "chapter-9", title: 'Monday', prev: "#chapter-8", next: "#chapter-10" },
+  { idx: 9, id: "chapter-10", title: 'The Shoulder', prev: "#chapter-9", next: "#chapter-11" },
+  { idx: 10, id: "chapter-11", title: 'Dismissed Without Prejudice', prev: "#chapter-10", next: "#chapter-12" },
+  { idx: 11, id: "chapter-12", title: 'What the Land Keeps', prev: "#chapter-11", next: "" }
+];
+
+var currentIdx = -1;
+
+function updateBar(idx) {
+  if (idx === currentIdx) return;
+  currentIdx = idx;
+  var c = CHAPTERS[idx] || null;
+  var prevBtn = document.getElementById('bar-prev');
+  var nextBtn = document.getElementById('bar-next');
+  var titleEl = document.getElementById('bar-title');
+  if (c) {
+    titleEl.textContent = 'Ch. ' + (idx + 1) + '  —  ' + c.title;
+    prevBtn.href = c.prev || '#toc';
+    prevBtn.classList.toggle('disabled', !c.prev);
+    nextBtn.href = c.next || '#';
+    nextBtn.classList.toggle('disabled', !c.next);
+  } else {
+    titleEl.textContent = 'What the Land Keeps';
+    prevBtn.classList.add('disabled');
+    nextBtn.classList.add('disabled');
+  }
+}
+
+function printChapter() {
+  document.querySelectorAll('.chapter').forEach(function(el) {
+    el.classList.remove('printing');
+    el.classList.remove('print-all');
+  });
+  if (currentIdx >= 0) {
+    document.querySelectorAll('.chapter')[currentIdx].classList.add('printing');
+  }
   window.print();
   setTimeout(function() {
     document.querySelectorAll('.chapter').forEach(function(el) { el.classList.remove('printing'); });
   }, 2000);
 }
+
+function printBook() {
+  document.querySelectorAll('.chapter').forEach(function(el) {
+    el.classList.remove('printing');
+    el.classList.add('print-all');
+  });
+  window.print();
+  setTimeout(function() {
+    document.querySelectorAll('.chapter').forEach(function(el) { el.classList.remove('print-all'); });
+  }, 2000);
+}
+
+// IntersectionObserver: track which chapter is most visible
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      var idx = parseInt(entry.target.getAttribute('data-idx'), 10);
+      updateBar(idx);
+    }
+  });
+}, { threshold: 0.05, rootMargin: '-60px 0px -60% 0px' });
+
+document.querySelectorAll('.chapter').forEach(function(el) {
+  observer.observe(el);
+});
+
+// Init bar to no chapter
+updateBar(-1);
+document.getElementById('bar-prev').classList.add('disabled');
+document.getElementById('bar-next').classList.add('disabled');
 
 </script>
 
