@@ -1117,20 +1117,14 @@ def zuman():
 
 @app.route("/ro")
 def ro():
-    """Still Water landing page."""
+    """What the Land Keeps landing page."""
     return render_template("ro_landing.html")
 
 
-@app.route("/ro/v1")
-def ro_v1():
-    """Still Water — Version 1."""
-    return render_template("ro.html")
-
-
-@app.route("/ro/v2")
-def ro_v2():
-    """Still Water — Version 2 (Revised Draft 7)."""
-    return render_template("ro2.html")
+@app.route("/ro/read")
+def ro_read():
+    """What the Land Keeps — full reading page."""
+    return render_template("wtlk.html")
 
 
 # ----------------------------------------------------

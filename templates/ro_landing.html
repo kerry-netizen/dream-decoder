@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Still Water</title>
+  <title>What the Land Keeps</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: Georgia, "Times New Roman", serif;
-      background: #f7f4ee;
-      color: #1e1e1e;
+      background: #1a1612;
+      color: #f0ece4;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -19,96 +19,61 @@
     }
 
     .wrap {
-      max-width: 560px;
+      max-width: 420px;
       width: 100%;
-      background: #fffdf8;
-      border: 1px solid #e7dece;
-      padding: 48px 40px;
+      text-align: center;
     }
 
-    h1 {
-      font-size: 2.4rem;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 1rem;
-      color: #777;
-      margin-bottom: 36px;
-      font-style: italic;
-    }
-
-    h2 {
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #999;
-      margin-bottom: 14px;
-      font-family: system-ui, sans-serif;
-      font-weight: 600;
-    }
-
-    .versions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .version-link {
+    .cover {
+      width: 100%;
+      max-width: 340px;
       display: block;
-      padding: 18px 20px;
-      border: 1px solid #ddd5c8;
-      background: #faf6ef;
-      color: #1e1e1e;
-      text-decoration: none;
-      transition: border-color 0.2s, background 0.2s;
+      margin: 0 auto 36px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.6);
     }
 
-    .version-link:hover {
-      background: #f3ede2;
-      border-color: #b8a88a;
+    .btn-read {
+      display: block;
+      width: 100%;
+      padding: 18px 24px;
+      background: #c8a96e;
+      color: #1a1612;
+      font-family: Georgia, serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
       text-decoration: none;
+      margin-bottom: 12px;
+      transition: background 0.2s;
+    }
+    .btn-read:hover {
+      background: #dbbf82;
     }
 
-    .version-num {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #999;
+    .btn-print {
+      display: block;
+      width: 100%;
+      padding: 14px 24px;
+      background: transparent;
+      color: #a89070;
       font-family: system-ui, sans-serif;
-      margin-bottom: 4px;
-    }
-
-    .version-title {
-      font-size: 1.05rem;
-      color: #3a2a10;
-    }
-
-    .version-note {
       font-size: 0.85rem;
-      color: #888;
-      margin-top: 3px;
-      font-style: italic;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid #4a3f2f;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-print:hover {
+      border-color: #c8a96e;
+      color: #c8a96e;
     }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Still Water</h1>
-  <p class="subtitle">A Novel</p>
-
-  <h2>Versions</h2>
-  <div class="versions">
-    <a class="version-link" href="/ro/v1">
-      <div class="version-num">Version 1</div>
-      <div class="version-title">Revised Manuscript — Chapterized</div>
-    </a>
-    <a class="version-link" href="/ro/v2">
-      <div class="version-num">Version 2</div>
-      <div class="version-title">Still Water — Revised Draft 7</div>
-    </a>
-  </div>
+  <img class="cover" src="/static/LandKeeps.png" alt="What the Land Keeps cover" />
+  <a class="btn-read" href="/ro/read">Open Book</a>
+  <a class="btn-print" href="/ro/read?print=1" onclick="this.href='/ro/read'; setTimeout(()=>window.open('/ro/read','_print').print(),400); return false;">Print</a>
 </div>
 </body>
 </html>
