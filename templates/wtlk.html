@@ -3501,88 +3501,61 @@
 </div>
 
 <script>
+var chapters = Array.from(document.querySelectorAll(‘.chapter’));
+var prevBtn  = document.getElementById(‘bar-prev’);
+var nextBtn  = document.getElementById(‘bar-next’);
+var titleEl  = document.getElementById(‘bar-title’);
 
-var CHAPTERS = [
-  { idx: 0, id: "chapter-1", title: 'Old River Road', prev: "", next: "#chapter-2" },
-  { idx: 1, id: "chapter-2", title: 'Nine O’Clock', prev: "#chapter-1", next: "#chapter-3" },
-  { idx: 2, id: "chapter-3", title: 'The First Conversation', prev: "#chapter-2", next: "#chapter-4" },
-  { idx: 3, id: "chapter-4", title: 'What the Records Said', prev: "#chapter-3", next: "#chapter-5" },
-  { idx: 4, id: "chapter-5", title: 'The Car, The Yard', prev: "#chapter-4", next: "#chapter-6" },
-  { idx: 5, id: "chapter-6", title: 'Friday Night', prev: "#chapter-5", next: "#chapter-7" },
-  { idx: 6, id: "chapter-7", title: 'State Files Additional Evidence', prev: "#chapter-6", next: "#chapter-8" },
-  { idx: 7, id: "chapter-8", title: 'Dale’s Notebook', prev: "#chapter-7", next: "#chapter-9" },
-  { idx: 8, id: "chapter-9", title: 'Monday', prev: "#chapter-8", next: "#chapter-10" },
-  { idx: 9, id: "chapter-10", title: 'The Shoulder', prev: "#chapter-9", next: "#chapter-11" },
-  { idx: 10, id: "chapter-11", title: 'Dismissed Without Prejudice', prev: "#chapter-10", next: "#chapter-12" },
-  { idx: 11, id: "chapter-12", title: 'What the Land Keeps', prev: "#chapter-11", next: "" }
-];
+function getCurrentIdx() {
+  var scrollY = window.scrollY + 80;
+  var idx = -1;
+  for (var i = 0; i < chapters.length; i++) {
+    if (chapters[i].getBoundingClientRect().top + window.scrollY <= scrollY) {
+      idx = i;
+    }
+  }
+  return idx;
+}
 
-var currentIdx = -1;
+function updateBar() {
+  var idx = getCurrentIdx();
+  var label = chapters[idx] ? chapters[idx].querySelector(‘.ch-label’).textContent : ‘’;
+  var title = chapters[idx] ? chapters[idx].querySelector(‘h2’).textContent : ‘’;
+  titleEl.textContent = idx >= 0 ? (label + ‘  \u2014  ‘ + title) : ‘What the Land Keeps’;
 
-function updateBar(idx) {
-  if (idx === currentIdx) return;
-  currentIdx = idx;
-  var c = CHAPTERS[idx] || null;
-  var prevBtn = document.getElementById('bar-prev');
-  var nextBtn = document.getElementById('bar-next');
-  var titleEl = document.getElementById('bar-title');
-  if (c) {
-    titleEl.textContent = 'Ch. ' + (idx + 1) + '  —  ' + c.title;
-    prevBtn.href = c.prev || '#toc';
-    prevBtn.classList.toggle('disabled', !c.prev);
-    nextBtn.href = c.next || '#';
-    nextBtn.classList.toggle('disabled', !c.next);
+  if (idx > 0) {
+    prevBtn.href = ‘#’ + chapters[idx - 1].id;
+    prevBtn.classList.remove(‘disabled’);
   } else {
-    titleEl.textContent = 'What the Land Keeps';
-    prevBtn.classList.add('disabled');
-    nextBtn.classList.add('disabled');
+    prevBtn.href = ‘#toc’;
+    prevBtn.classList.add(‘disabled’);
+  }
+
+  if (idx >= 0 && idx < chapters.length - 1) {
+    nextBtn.href = ‘#’ + chapters[idx + 1].id;
+    nextBtn.classList.remove(‘disabled’);
+  } else {
+    nextBtn.href = ‘#’;
+    nextBtn.classList.add(‘disabled’);
   }
 }
 
 function printChapter() {
-  document.querySelectorAll('.chapter').forEach(function(el) {
-    el.classList.remove('printing');
-    el.classList.remove('print-all');
-  });
-  if (currentIdx >= 0) {
-    document.querySelectorAll('.chapter')[currentIdx].classList.add('printing');
-  }
+  var idx = getCurrentIdx();
+  chapters.forEach(function(el) { el.classList.remove(‘printing’, ‘print-all’); });
+  if (idx >= 0) chapters[idx].classList.add(‘printing’);
   window.print();
-  setTimeout(function() {
-    document.querySelectorAll('.chapter').forEach(function(el) { el.classList.remove('printing'); });
-  }, 2000);
+  setTimeout(function() { chapters.forEach(function(el) { el.classList.remove(‘printing’); }); }, 2000);
 }
 
 function printBook() {
-  document.querySelectorAll('.chapter').forEach(function(el) {
-    el.classList.remove('printing');
-    el.classList.add('print-all');
-  });
+  chapters.forEach(function(el) { el.classList.remove(‘printing’); el.classList.add(‘print-all’); });
   window.print();
-  setTimeout(function() {
-    document.querySelectorAll('.chapter').forEach(function(el) { el.classList.remove('print-all'); });
-  }, 2000);
+  setTimeout(function() { chapters.forEach(function(el) { el.classList.remove(‘print-all’); }); }, 2000);
 }
 
-// IntersectionObserver: track which chapter is most visible
-var observer = new IntersectionObserver(function(entries) {
-  entries.forEach(function(entry) {
-    if (entry.isIntersecting) {
-      var idx = parseInt(entry.target.getAttribute('data-idx'), 10);
-      updateBar(idx);
-    }
-  });
-}, { threshold: 0.05, rootMargin: '-60px 0px -60% 0px' });
-
-document.querySelectorAll('.chapter').forEach(function(el) {
-  observer.observe(el);
-});
-
-// Init bar to no chapter
-updateBar(-1);
-document.getElementById('bar-prev').classList.add('disabled');
-document.getElementById('bar-next').classList.add('disabled');
-
+window.addEventListener(‘scroll’, updateBar, { passive: true });
+updateBar();
 </script>
 
 </body>
