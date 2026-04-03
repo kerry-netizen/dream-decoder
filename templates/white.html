@@ -239,6 +239,32 @@
     }
     .play-btn:active { transform: scale(0.95); }
 
+    /* Tracklist */
+    .tracklist {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .track {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .track:hover { background: rgba(57,255,90,0.04); border-color: var(--dim-green); }
+    .track.active { border-color: var(--green); background: rgba(57,255,90,0.06); }
+    .track-num { font-size: 0.65rem; color: var(--muted); width: 16px; text-align: center; flex-shrink: 0; }
+    .track.active .track-num { color: var(--green); }
+    .track-title { flex: 1; font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text); }
+    .track.active .track-title { color: var(--green); text-shadow: 0 0 8px rgba(57,255,90,0.4); }
+    .track-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color 0.2s, color 0.2s; }
+    .track:hover .track-btn, .track.active .track-btn { border-color: var(--green); color: var(--green); }
+
     /* Divider */
     .divider {
       border: none;
@@ -306,6 +332,19 @@
   </div>
 
   <div class="panel" id="playerPanel">
+    <div class="tracklist">
+      <div class="track active" data-index="0">
+        <span class="track-num">1</span>
+        <span class="track-title">CAPTAIN WHITE</span>
+        <button class="track-btn">&#9654;</button>
+      </div>
+      <div class="track" data-index="1">
+        <span class="track-num">2</span>
+        <span class="track-title">BUTTER, BEEF, BLOOM</span>
+        <button class="track-btn">&#9654;</button>
+      </div>
+    </div>
+
     <div class="vu-bars" id="vuBars">
       <!-- bars injected by JS -->
     </div>
@@ -336,9 +375,14 @@
 
 </div>
 
-<audio id="audio" src="{{ url_for('static', filename='CaptainWhite.mp3') }}"></audio>
+<audio id="audio"></audio>
 
 <script>
+var TRACKS = [
+  { src: "{{ url_for('static', filename='CaptainWhite.mp3') }}",   title: "CAPTAIN WHITE" },
+  { src: "{{ url_for('static', filename='ButterBeefBloom.mp3') }}", title: "BUTTER, BEEF, BLOOM" }
+];
+
 var audio        = document.getElementById('audio');
 var playPauseBtn = document.getElementById('playPauseBtn');
 var rewindBtn    = document.getElementById('rewindBtn');
@@ -351,6 +395,11 @@ var statusText   = document.getElementById('statusText');
 var statusLine   = document.getElementById('statusLine');
 var playerPanel  = document.getElementById('playerPanel');
 var vuBars       = document.getElementById('vuBars');
+var trackEls     = document.querySelectorAll('.track');
+
+var current = 0;
+var playing = false;
+var rafId = null;
 
 // Build VU bars
 var bars = [];
@@ -361,9 +410,6 @@ for (var i = 0; i < 24; i++) {
   vuBars.appendChild(b);
   bars.push(b);
 }
-
-var playing = false;
-var rafId = null;
 
 function fmt(s) {
   s = Math.floor(s || 0);
@@ -377,14 +423,29 @@ function setPlaying(state) {
   statusLine.classList.toggle('playing-state', state);
   statusText.textContent = state ? 'TRANSMITTING' : 'STANDBY';
   if (state) animateBars(); else stopBars();
+  // update track buttons
+  trackEls.forEach(function(el, i) {
+    el.querySelector('.track-btn').innerHTML = (i === current && state) ? '&#9646;&#9646;' : '&#9654;';
+  });
 }
 
-// VU animation (faked, driven by time)
+function loadTrack(idx, autoplay) {
+  current = idx;
+  audio.src = TRACKS[idx].src;
+  progressFill.style.width = '0%';
+  timeElapsed.textContent = '0:00';
+  timeDuration.textContent = '0:00';
+  trackEls.forEach(function(el, i) {
+    el.classList.toggle('active', i === idx);
+    el.querySelector('.track-btn').innerHTML = '&#9654;';
+  });
+  if (autoplay) { audio.play(); } else { setPlaying(false); }
+}
+
 function animateBars() {
   function tick() {
     for (var i = 0; i < bars.length; i++) {
-      var h = 4 + Math.random() * 32;
-      bars[i].style.height = h + 'px';
+      bars[i].style.height = (4 + Math.random() * 32) + 'px';
     }
     rafId = requestAnimationFrame(tick);
   }
@@ -397,12 +458,21 @@ function stopBars() {
   bars.forEach(function(b) { b.style.height = '4px'; });
 }
 
+// Track clicks
+trackEls.forEach(function(el) {
+  el.addEventListener('click', function() {
+    var idx = parseInt(el.dataset.index);
+    if (idx === current) {
+      playing ? audio.pause() : audio.play();
+    } else {
+      loadTrack(idx, true);
+    }
+  });
+});
+
 playPauseBtn.addEventListener('click', function() {
-  if (playing) {
-    audio.pause();
-  } else {
-    audio.play();
-  }
+  if (!audio.src) { loadTrack(0, true); return; }
+  playing ? audio.pause() : audio.play();
 });
 
 rewindBtn.addEventListener('click', function() {
@@ -415,7 +485,10 @@ ffBtn.addEventListener('click', function() {
 
 audio.addEventListener('play',  function() { setPlaying(true); });
 audio.addEventListener('pause', function() { setPlaying(false); });
-audio.addEventListener('ended', function() { setPlaying(false); audio.currentTime = 0; });
+audio.addEventListener('ended', function() {
+  var next = (current + 1) % TRACKS.length;
+  loadTrack(next, true);
+});
 
 audio.addEventListener('timeupdate', function() {
   if (!audio.duration) return;
@@ -429,6 +502,9 @@ progressBar.addEventListener('click', function(e) {
   var rect = progressBar.getBoundingClientRect();
   audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
 });
+
+// Load first track on init
+loadTrack(0, false);
 </script>
 </body>
 </html>
