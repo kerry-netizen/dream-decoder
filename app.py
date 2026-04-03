@@ -1115,6 +1115,12 @@ def zuman():
     return render_template("zuman.html")
 
 
+@app.route("/white")
+def white():
+    """Captain White page."""
+    return render_template("white.html")
+
+
 @app.route("/ro")
 def ro():
     """What the Land Keeps landing page."""
