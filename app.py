@@ -1121,6 +1121,12 @@ def white():
     return render_template("white.html")
 
 
+@app.route("/zoo")
+def zoo():
+    """Meatbag Zoo page."""
+    return render_template("zoo.html")
+
+
 @app.route("/ro")
 def ro():
     """What the Land Keeps landing page."""

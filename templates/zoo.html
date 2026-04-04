@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meatbag Zoo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --concrete: #2a2a28;
+      --concrete-light: #3a3a36;
+      --rust:   #8b4513;
+      --rust-light: #b05a20;
+      --bar:    #1a1a18;
+      --bar-shine: #2e2e2a;
+      --yellow: #c8a020;
+      --text:   #d4c8a8;
+      --muted:  #6a6458;
+      --shadow: rgba(0,0,0,0.7);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background-color: var(--concrete);
+      background-image:
+        repeating-linear-gradient(0deg,   transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px),
+        repeating-linear-gradient(90deg,  transparent, transparent 3px, rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 4px);
+      color: var(--text);
+      font-family: 'Special Elite', 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 32px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── JAIL BARS overlay ── */
+    .bars-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 500;
+      display: flex;
+      gap: 0;
+    }
+    .bar-strip {
+      flex: 1;
+      position: relative;
+    }
+    /* Each bar strip has a vertical bar on its left edge */
+    .bar-strip::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 0;
+      width: 14px;
+      background: linear-gradient(90deg, #0d0d0b 0%, #1e1e1a 40%, #2a2a26 55%, #161614 100%);
+      box-shadow: 2px 0 6px rgba(0,0,0,0.5), inset -1px 0 2px rgba(255,255,255,0.04);
+    }
+    /* Horizontal cross-bar at top and bottom */
+    .bars-overlay::before,
+    .bars-overlay::after {
+      content: '';
+      position: fixed;
+      left: 0; right: 0;
+      height: 18px;
+      background: linear-gradient(180deg, #0d0d0b 0%, #1e1e1a 50%, #111110 100%);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+      z-index: 501;
+    }
+    .bars-overlay::before { top: 0; }
+    .bars-overlay::after  { bottom: 0; }
+
+    /* ── CELL content ── */
+    .cell {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* ── HEADER ── */
+    .cell-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .placard {
+      display: inline-block;
+      background: var(--yellow);
+      color: #1a1410;
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      padding: 4px 14px;
+      margin-bottom: 14px;
+      transform: rotate(-0.5deg);
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .cell-num {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+
+    /* ── TALLY MARKS ── */
+    .tally {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      opacity: 0.5;
+    }
+    .tally-group {
+      position: relative;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .tally-mark {
+      width: 2px;
+      height: 22px;
+      background: var(--text);
+      display: inline-block;
+      transform: rotate(6deg);
+    }
+    .tally-group .slash {
+      position: absolute;
+      width: 28px;
+      height: 2px;
+      background: var(--rust-light);
+      transform: rotate(-70deg) translateX(-1px);
+      left: -2px;
+      top: 10px;
+    }
+
+    /* ── MUGSHOT PANEL ── */
+    .mugshot-panel {
+      background: var(--concrete-light);
+      border: 2px solid #111;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.4);
+      padding: 24px 24px 20px;
+      margin-bottom: 0;
+      position: relative;
+    }
+
+    /* Rust stain corner */
+    .mugshot-panel::before {
+      content: '';
+      position: absolute;
+      top: -1px; right: 20px;
+      width: 40px; height: 6px;
+      background: linear-gradient(90deg, transparent, var(--rust), transparent);
+      opacity: 0.6;
+    }
+
+    /* ── TRACK LIST ── */
+    .tracklist {
+      margin-bottom: 20px;
+      border: 1px solid #111;
+    }
+    .track {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #1e1e1c;
+      border-bottom: 1px solid #111;
+      cursor: pointer;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .track:last-child { border-bottom: none; }
+    .track:hover  { background: #252521; }
+    .track.active { background: #2a2520; }
+    .track-num   { font-size: 0.65rem; color: var(--muted); width: 16px; text-align: center; flex-shrink: 0; }
+    .track.active .track-num { color: var(--yellow); }
+    .track-title { flex: 1; font-size: 0.78rem; letter-spacing: 0.07em; color: var(--text); }
+    .track.active .track-title { color: var(--yellow); }
+    .track-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid #333; background: transparent;
+      color: var(--muted); font-size: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: border-color 0.2s, color 0.2s;
+    }
+    .track:hover .track-btn, .track.active .track-btn { border-color: var(--yellow); color: var(--yellow); }
+
+    /* ── PROGRESS ── */
+    .progress-wrap { margin-bottom: 16px; }
+    .progress-bar {
+      width: 100%; height: 4px;
+      background: #111;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 8px;
+      border: 1px solid #333;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--yellow);
+      box-shadow: 0 0 4px rgba(200,160,32,0.4);
+      width: 0%;
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
+    .progress-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .ctrl-btn {
+      background: none; border: none;
+      color: var(--muted); font-size: 20px;
+      cursor: pointer; padding: 8px;
+      transition: color 0.2s;
+      font-family: inherit;
+    }
+    .ctrl-btn:hover { color: var(--text); }
+
+    .play-btn {
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      border: 2px solid var(--rust-light);
+      background: #1a1410;
+      color: var(--yellow);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+    .play-btn:hover  { border-color: var(--yellow); box-shadow: 0 0 16px rgba(200,160,32,0.3); }
+    .play-btn:active { transform: scale(0.95); }
+
+    /* ── STATUS / WARDEN LINE ── */
+    .warden-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      padding-top: 4px;
+    }
+    .status-light {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #333;
+      flex-shrink: 0;
+    }
+    .playing-state .status-light {
+      background: var(--yellow);
+      box-shadow: 0 0 6px var(--yellow);
+      animation: flicker 2s step-start infinite;
+    }
+    @keyframes flicker {
+      0%,90%,100% { opacity: 1; }
+      92%          { opacity: 0.3; }
+      95%          { opacity: 1; }
+      97%          { opacity: 0.2; }
+    }
+
+    /* ── BOTTOM GRAFFITI ── */
+    .graffiti {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      opacity: 0.5;
+      font-style: italic;
+      letter-spacing: 0.04em;
+    }
+    .graffiti span { color: var(--rust-light); }
+
+    audio { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Jail bars overlay -->
+  <div class="bars-overlay">
+    <div class="bar-strip"></div>
+    <div class="bar-strip"></div>
+    <div class="bar-strip"></div>
+    <div class="bar-strip"></div>
+    <div class="bar-strip"></div>
+    <div class="bar-strip"></div>
+    <div class="bar-strip"></div>
+    <div class="bar-strip"></div>
+  </div>
+
+  <div class="cell">
+
+    <div class="cell-header">
+      <div class="placard">&#9632; CELL BLOCK D &nbsp;&#8212;&nbsp; DREAMFERRET CORRECTIONAL &#9632;</div>
+      <h1>MEATBAG<br>ZOO</h1>
+      <div class="cell-num">INMATE NO. 00-7 &nbsp;|&nbsp; OFFENSE: EXCESSIVE BANGERS</div>
+    </div>
+
+    <!-- Tally marks (scratched into wall) -->
+    <div class="tally">
+      <div class="tally-group">
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+        <div class="slash"></div>
+      </div>
+      <div class="tally-group">
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+        <div class="slash"></div>
+      </div>
+      <div class="tally-group">
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+        <div class="tally-mark"></div>
+      </div>
+    </div>
+
+    <div class="mugshot-panel" id="playerPanel">
+
+      <div class="tracklist">
+        <div class="track active" data-index="0">
+          <span class="track-num">1</span>
+          <span class="track-title">MEATBAG ZOO</span>
+          <button class="track-btn">&#9654;</button>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-times">
+          <span id="timeElapsed">0:00</span>
+          <span id="timeDuration">0:00</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn" id="rewindBtn" title="Back 10s">&#8634;</button>
+        <button class="play-btn" id="playPauseBtn">&#9654;</button>
+        <button class="ctrl-btn" id="ffBtn" title="Forward 10s">&#8635;</button>
+      </div>
+
+      <div class="warden-line" id="wardenLine">
+        <div class="status-light"></div>
+        <span id="statusText">LIGHTS OUT</span>
+      </div>
+
+    </div>
+
+    <div class="graffiti">
+      <span>dream ferret</span> was here &nbsp;&#8212;&nbsp; day 1 of forever
+    </div>
+
+  </div>
+
+<audio id="audio" src="{{ url_for('static', filename='MeatbagZoo.mp3') }}"></audio>
+
+<script>
+var audio        = document.getElementById('audio');
+var playPauseBtn = document.getElementById('playPauseBtn');
+var rewindBtn    = document.getElementById('rewindBtn');
+var ffBtn        = document.getElementById('ffBtn');
+var progressBar  = document.getElementById('progressBar');
+var progressFill = document.getElementById('progressFill');
+var timeElapsed  = document.getElementById('timeElapsed');
+var timeDuration = document.getElementById('timeDuration');
+var statusText   = document.getElementById('statusText');
+var wardenLine   = document.getElementById('wardenLine');
+var playerPanel  = document.getElementById('playerPanel');
+var trackBtn     = document.querySelector('.track-btn');
+
+var playing = false;
+
+function fmt(s) {
+  s = Math.floor(s || 0);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+function setPlaying(state) {
+  playing = state;
+  playPauseBtn.innerHTML = state ? '&#9646;&#9646;' : '&#9654;';
+  trackBtn.innerHTML     = state ? '&#9646;&#9646;' : '&#9654;';
+  wardenLine.classList.toggle('playing-state', state);
+  statusText.textContent = state ? 'TRANSMITTING' : 'LIGHTS OUT';
+}
+
+document.querySelector('.track').addEventListener('click', function() {
+  playing ? audio.pause() : audio.play();
+});
+
+playPauseBtn.addEventListener('click', function() {
+  playing ? audio.pause() : audio.play();
+});
+
+rewindBtn.addEventListener('click', function() {
+  audio.currentTime = Math.max(0, audio.currentTime - 10);
+});
+
+ffBtn.addEventListener('click', function() {
+  audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
+});
+
+audio.addEventListener('play',  function() { setPlaying(true); });
+audio.addEventListener('pause', function() { setPlaying(false); });
+audio.addEventListener('ended', function() { setPlaying(false); audio.currentTime = 0; });
+
+audio.addEventListener('timeupdate', function() {
+  if (!audio.duration) return;
+  progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+  timeElapsed.textContent  = fmt(audio.currentTime);
+  timeDuration.textContent = fmt(audio.duration);
+});
+
+progressBar.addEventListener('click', function(e) {
+  if (!audio.duration) return;
+  var rect = progressBar.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+});
+</script>
+</body>
+</html>
