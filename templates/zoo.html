@@ -40,42 +40,6 @@
       position: relative;
     }
 
-    /* ── JAIL BARS overlay ── */
-    .bars-overlay {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 500;
-      display: flex;
-      gap: 0;
-    }
-    .bar-strip {
-      flex: 1;
-      position: relative;
-    }
-    /* Each bar strip has a vertical bar on its left edge */
-    .bar-strip::before {
-      content: '';
-      position: absolute;
-      top: 0; bottom: 0;
-      left: 0;
-      width: 14px;
-      background: linear-gradient(90deg, #0d0d0b 0%, #1e1e1a 40%, #2a2a26 55%, #161614 100%);
-      box-shadow: 2px 0 6px rgba(0,0,0,0.5), inset -1px 0 2px rgba(255,255,255,0.04);
-    }
-    /* Horizontal cross-bar at top and bottom */
-    .bars-overlay::before,
-    .bars-overlay::after {
-      content: '';
-      position: fixed;
-      left: 0; right: 0;
-      height: 18px;
-      background: linear-gradient(180deg, #0d0d0b 0%, #1e1e1a 50%, #111110 100%);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.6);
-      z-index: 501;
-    }
-    .bars-overlay::before { top: 0; }
-    .bars-overlay::after  { bottom: 0; }
 
     /* ── CELL content ── */
     .cell {
@@ -304,18 +268,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Jail bars overlay -->
-  <div class="bars-overlay">
-    <div class="bar-strip"></div>
-    <div class="bar-strip"></div>
-    <div class="bar-strip"></div>
-    <div class="bar-strip"></div>
-    <div class="bar-strip"></div>
-    <div class="bar-strip"></div>
-    <div class="bar-strip"></div>
-    <div class="bar-strip"></div>
-  </div>
 
   <div class="cell">
 
