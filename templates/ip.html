@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MPEP Reference — dreamferret.com/ip</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:             #0e0e13;
+      --panel:          #15151d;
+      --panel2:         #1a1a24;
+      --border:         #27273a;
+      --accent:         #5b6ef5;
+      --accent-hover:   #7080ff;
+      --text:           #d4d4e4;
+      --text-dim:       #6a6a88;
+      --hl-bg:          rgba(245,200,66,0.22);
+      --hl-active:      rgba(245,200,66,0.75);
+      --sidebar-w:      310px;
+      --header-h:       52px;
+      --search-h:       50px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Georgia, 'Times New Roman', serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ──────────────────────────────── */
+    .hdr {
+      height: var(--header-h);
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      flex-shrink: 0;
+      z-index: 200;
+    }
+    .menu-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      width: 36px; height: 36px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .menu-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    .hdr-brand {
+      font-family: system-ui, sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .hdr-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .hdr-chapter {
+      font-family: system-ui, sans-serif;
+      font-size: 0.83rem;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    /* ── LAYOUT ──────────────────────────────── */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-hdr {
+      padding: 13px 16px 11px;
+      border-bottom: 1px solid var(--border);
+      font-family: system-ui, sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .toc-scroll {
+      overflow-y: auto;
+      flex: 1;
+      padding: 6px 0 20px;
+    }
+    .toc-scroll::-webkit-scrollbar { width: 6px; }
+    .toc-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .toc-group-label {
+      padding: 14px 16px 4px;
+      font-family: system-ui, sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      opacity: 0.55;
+    }
+
+    .toc-item {
+      display: block;
+      padding: 8px 16px;
+      font-family: system-ui, sans-serif;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      line-height: 1.4;
+      user-select: none;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .toc-item:hover  { color: var(--text); background: rgba(255,255,255,0.025); }
+    .toc-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(91,110,245,0.07); }
+
+    /* ── MAIN ────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── SEARCH ──────────────────────────────── */
+    .search-bar {
+      height: var(--search-h);
+      background: var(--panel2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 12px;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      font-size: 0.88rem;
+      padding: 6px 11px;
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 0;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-dim); }
+
+    .srch-btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 6px 13px;
+      border-radius: 5px;
+      font-family: system-ui, sans-serif;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .srch-btn:hover   { background: var(--accent-hover); }
+    .srch-btn:disabled { background: var(--border); color: var(--text-dim); cursor: default; }
+
+    .srch-count {
+      font-family: system-ui, sans-serif;
+      font-size: 0.73rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      min-width: 56px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── READER ──────────────────────────────── */
+    .reader-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 36px 52px 80px;
+    }
+    .reader-wrap::-webkit-scrollbar { width: 8px; }
+    .reader-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* State screen */
+    .state-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      text-align: center;
+      gap: 10px;
+      color: var(--text-dim);
+      font-family: system-ui, sans-serif;
+    }
+    .state-screen .ico  { font-size: 2.8rem; }
+    .state-screen .msg  { font-size: 0.95rem; color: var(--text); }
+    .state-screen .sub  { font-size: 0.8rem; opacity: 0.6; }
+
+    /* Chapter content area */
+    #ch-content {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Restyle fetched USPTO content */
+    #ch-content h1,
+    #ch-content h2,
+    #ch-content h3,
+    #ch-content h4,
+    #ch-content h5 {
+      color: var(--text);
+      font-family: Georgia, serif;
+      margin: 1.7em 0 0.55em;
+      line-height: 1.3;
+    }
+    #ch-content h1 { font-size: 1.55rem; margin-top: 0; }
+    #ch-content h2 { font-size: 1.22rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+    #ch-content h3 { font-size: 1.05rem; }
+    #ch-content h4 { font-size: 0.97rem; }
+
+    #ch-content p {
+      margin: 0.75em 0;
+      line-height: 1.78;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    #ch-content ul,
+    #ch-content ol {
+      margin: 0.6em 0 0.6em 2.2em;
+      line-height: 1.7;
+    }
+    #ch-content li { margin: 0.25em 0; }
+
+    #ch-content table {
+      border-collapse: collapse;
+      margin: 1em 0;
+      font-size: 0.88rem;
+      display: block;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    #ch-content th,
+    #ch-content td {
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    #ch-content th { background: var(--panel2); }
+
+    #ch-content pre,
+    #ch-content code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.88em;
+      background: var(--panel2);
+      border-radius: 3px;
+    }
+    #ch-content pre { padding: 12px; overflow-x: auto; margin: 0.8em 0; }
+    #ch-content code { padding: 1px 5px; }
+
+    /* Disable all links */
+    #ch-content a {
+      color: inherit;
+      text-decoration: none;
+      pointer-events: none;
+      cursor: text;
+    }
+
+    /* Search highlights */
+    mark.hit {
+      background: var(--hl-bg);
+      color: inherit;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+    mark.hit.current {
+      background: var(--hl-active);
+      color: #111;
+    }
+
+    /* ── OVERLAY ─────────────────────────────── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 150;
+    }
+    .overlay.show { display: block; }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+
+    /* Mobile: sidebar off-canvas */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        z-index: 160;
+        transform: translateX(-100%);
+        transition: transform 0.24s ease;
+        width: min(var(--sidebar-w), 88vw);
+      }
+      .sidebar.open { transform: translateX(0); }
+
+      .reader-wrap { padding: 20px 16px 80px; }
+      .srch-btn:first-of-type { display: none; } /* hide "Find" label btn, Enter key works */
+    }
+
+    /* Hide menu button when sidebar always-visible (desktop) */
+    @media (min-width: 769px) {
+      .menu-btn { display: none; }
+    }
+
+    /* Portrait mobile */
+    @media (orientation: portrait) and (max-width: 768px) {
+      #ch-content p { font-size: 0.97rem; line-height: 1.74; }
+    }
+
+    /* Landscape mobile — maximize reading comfort */
+    @media (orientation: landscape) and (max-height: 520px) {
+      :root {
+        --header-h: 42px;
+        --search-h: 42px;
+      }
+      .reader-wrap { padding: 16px 24px 40px; }
+      #ch-content p { font-size: 1.08rem; line-height: 1.8; }
+      #ch-content h1 { font-size: 1.35rem; }
+      #ch-content h2 { font-size: 1.1rem; }
+      /* Sidebar takes less width in landscape so more reading space */
+      :root { --sidebar-w: 260px; }
+    }
+
+    /* Tablet landscape */
+    @media (orientation: landscape) and (min-height: 520px) and (max-width: 1100px) {
+      :root { --sidebar-w: 260px; }
+      #ch-content p { font-size: 1.03rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────────────── -->
+<div class="hdr">
+  <button class="menu-btn" id="menuBtn" aria-label="Table of Contents">&#9776;</button>
+  <div class="hdr-brand">MPEP&nbsp;9th&nbsp;Ed.&nbsp;Rev.&nbsp;01.2024</div>
+  <div class="hdr-divider"></div>
+  <div class="hdr-chapter" id="hdrChapter">Select a chapter</div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ToC ─────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-hdr">Table of Contents</div>
+    <div class="toc-scroll" id="tocScroll"><!-- populated by JS --></div>
+  </aside>
+
+  <!-- ── MAIN ────────────────────────────────── -->
+  <div class="main">
+
+    <div class="search-bar">
+      <input class="search-input" id="searchInput" type="text"
+             placeholder="Keyword search in chapter…" autocomplete="off" spellcheck="false" />
+      <button class="srch-btn" id="findBtn">Find</button>
+      <button class="srch-btn" id="nextBtn" disabled>Next</button>
+      <div class="srch-count" id="srchCount"></div>
+    </div>
+
+    <div class="reader-wrap" id="readerWrap">
+      <div class="state-screen" id="stateScreen">
+        <div class="ico">&#9878;</div>
+        <div class="msg">MPEP 9th Edition &mdash; Revision 01.2024</div>
+        <div class="sub">Select a chapter from the table of contents to begin reading.</div>
+      </div>
+      <div id="ch-content" style="display:none;"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* ── Chapter manifest ──────────────────────────────────────────── */
+var CHAPTERS = [
+  { id:'c100',  file:'mpep-0100.html', label:'100 \u2014 Secrecy, Access, National Security, and Foreign Filing' },
+  { id:'c200',  file:'mpep-0200.html', label:'200 \u2014 Types, Cross-Noting, and Status of Application' },
+  { id:'c300',  file:'mpep-0300.html', label:'300 \u2014 Ownership and Assignment' },
+  { id:'c400',  file:'mpep-0400.html', label:'400 \u2014 Representative of Applicant or Owner' },
+  { id:'c500',  file:'mpep-0500.html', label:'500 \u2014 Receipt and Handling of Mail and Papers' },
+  { id:'c600',  file:'mpep-0600.html', label:'600 \u2014 Parts, Form, and Content of Application' },
+  { id:'c700',  file:'mpep-0700.html', label:'700 \u2014 Examination of Applications' },
+  { id:'c800',  file:'mpep-0800.html', label:'800 \u2014 Restriction in Applications; Double Patenting' },
+  { id:'c900',  file:'mpep-0900.html', label:'900 \u2014 Prior Art, Classification, and Search' },
+  { id:'c1000', file:'mpep-1000.html', label:'1000 \u2014 Matters Decided by USPTO Officials' },
+  { id:'c1100', file:'mpep-1100.html', label:'1100 \u2014 Statutory Invention Registration; Pre-Grant Publication' },
+  { id:'c1200', file:'mpep-1200.html', label:'1200 \u2014 Appeal' },
+  { id:'c1300', file:'mpep-1300.html', label:'1300 \u2014 Allowance and Issue' },
+  { id:'c1400', file:'mpep-1400.html', label:'1400 \u2014 Correction of Patents' },
+  { id:'c1500', file:'mpep-1500.html', label:'1500 \u2014 Design Patents' },
+  { id:'c1600', file:'mpep-1600.html', label:'1600 \u2014 Plant Patents' },
+  { id:'c1700', file:'mpep-1700.html', label:'1700 \u2014 Miscellaneous' },
+  { id:'c1800', file:'mpep-1800.html', label:'1800 \u2014 Patent Cooperation Treaty' },
+  { id:'c1900', file:'mpep-1900.html', label:'1900 \u2014 Protest' },
+  { id:'c2000', file:'mpep-2000.html', label:'2000 \u2014 Duty of Disclosure' },
+  { id:'c2100', file:'mpep-2100.html', label:'2100 \u2014 Patentability' },
+  { id:'c2200', file:'mpep-2200.html', label:'2200 \u2014 Citation of Prior Art and Ex Parte Reexamination' },
+  { id:'c2300', file:'mpep-2300.html', label:'2300 \u2014 Interference and Derivation Proceedings' },
+  { id:'c2400', file:'mpep-2400.html', label:'2400 \u2014 Biotechnology' },
+  { id:'c2500', file:'mpep-2500.html', label:'2500 \u2014 Maintenance Fees' },
+  { id:'c2600', file:'mpep-2600.html', label:'2600 \u2014 Optional Inter Partes Reexamination' },
+  { id:'c2700', file:'mpep-2700.html', label:'2700 \u2014 Patent Terms and Extensions' },
+  { id:'c2800', file:'mpep-2800.html', label:'2800 \u2014 Supplemental Examination' },
+  { id:'c2900', file:'mpep-2900.html', label:'2900 \u2014 International Design Applications' }
+];
+
+var APPENDICES = [
+  { id:'appL',  file:'mpep-9015-appx-l.html',  label:'Appendix L \u2014 35 U.S.C. (Patent Laws)' },
+  { id:'appR',  file:'mpep-9020-appx-r.html',  label:'Appendix R \u2014 37 C.F.R. (Patent Rules)' },
+  { id:'appAI', file:'mpep-9025-appx-ai.html', label:'Appendix AI \u2014 Administrative Instructions' },
+  { id:'appT',  file:'mpep-9035-appx-t.html',  label:'Appendix T \u2014 PCT Minimum Documentation' }
+];
+
+var ALL = CHAPTERS.concat(APPENDICES);
+
+/* ── State ─────────────────────────────────────────────────────── */
+var activeId   = null;
+var cache      = {};       // sessionStorage-backed chapter cache
+var hits       = [];       // current search hit <mark> elements
+var hitIdx     = -1;
+var lastTerm   = '';
+
+/* ── DOM refs ──────────────────────────────────────────────────── */
+var sidebar      = document.getElementById('sidebar');
+var overlay      = document.getElementById('overlay');
+var menuBtn      = document.getElementById('menuBtn');
+var tocScroll    = document.getElementById('tocScroll');
+var hdrChapter   = document.getElementById('hdrChapter');
+var readerWrap   = document.getElementById('readerWrap');
+var stateScreen  = document.getElementById('stateScreen');
+var chContent    = document.getElementById('ch-content');
+var searchInput  = document.getElementById('searchInput');
+var findBtn      = document.getElementById('findBtn');
+var nextBtn      = document.getElementById('nextBtn');
+var srchCount    = document.getElementById('srchCount');
+
+/* ── Build ToC ─────────────────────────────────────────────────── */
+function buildToc() {
+  var html = '<div class="toc-group-label">Chapters</div>';
+  CHAPTERS.forEach(function (ch) {
+    html += '<div class="toc-item" data-id="' + ch.id + '">' + escHtml(ch.label) + '</div>';
+  });
+  html += '<div class="toc-group-label">Appendices</div>';
+  APPENDICES.forEach(function (ap) {
+    html += '<div class="toc-item" data-id="' + ap.id + '">' + escHtml(ap.label) + '</div>';
+  });
+  tocScroll.innerHTML = html;
+  tocScroll.querySelectorAll('.toc-item').forEach(function (el) {
+    el.addEventListener('click', function () {
+      loadChapter(el.dataset.id);
+      if (window.innerWidth < 769) closeSidebar();
+    });
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Sidebar toggle ────────────────────────────────────────────── */
+function openSidebar()  { sidebar.classList.add('open'); overlay.classList.add('show'); }
+function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+menuBtn.addEventListener('click', function () {
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+overlay.addEventListener('click', closeSidebar);
+
+/* ── Load chapter ──────────────────────────────────────────────── */
+function findEntry(id) {
+  return ALL.find(function (c) { return c.id === id; });
+}
+
+function loadChapter(id) {
+  var entry = findEntry(id);
+  if (!entry) return;
+
+  clearSearch();
+  setActive(id);
+  hdrChapter.textContent = entry.label;
+
+  // Check session cache first
+  var cacheKey = 'mpep_ch_' + id;
+  var cached = cache[id] || (function () {
+    try { return sessionStorage.getItem(cacheKey); } catch(e) { return null; }
+  })();
+
+  if (cached) {
+    cache[id] = cached;
+    renderContent(cached);
+    return;
+  }
+
+  showState('&#8987;', 'Loading ' + entry.label.split('\u2014')[0].trim() + '\u2026', 'Fetching from USPTO\u2026');
+
+  fetch('/ip/fetch?chapter=' + encodeURIComponent(entry.file))
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function (html) {
+      var processed = processHtml(html);
+      cache[id] = processed;
+      try { sessionStorage.setItem(cacheKey, processed); } catch(e) {}
+      renderContent(processed);
+    })
+    .catch(function () {
+      showState('&#9888;', 'Could not load chapter.', 'Check your connection and try again.');
+    });
+}
+
+/* Strip and adapt fetched USPTO HTML */
+function processHtml(rawHtml) {
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(rawHtml, 'text/html');
+
+  // Remove chrome elements from fetched page
+  ['script','style','nav','header','footer',
+   '.mpep-nav','.breadcrumb','.breadcrumbs','.nav-bar',
+   '#header','#footer','#navigation','#nav','.skip-link'].forEach(function (sel) {
+    doc.querySelectorAll(sel).forEach(function (el) { el.remove(); });
+  });
+
+  // Try to isolate main content
+  var content =
+    doc.querySelector('#mpep-content')   ||
+    doc.querySelector('.mpep-section')   ||
+    doc.querySelector('#content-section')||
+    doc.querySelector('main')            ||
+    doc.querySelector('#content')        ||
+    doc.querySelector('.Section')        ||
+    doc.body;
+
+  // Disable all links
+  content.querySelectorAll('a').forEach(function (a) {
+    a.removeAttribute('href');
+    a.removeAttribute('onclick');
+    a.removeAttribute('target');
+  });
+
+  // Remove any remaining nav / aside elements
+  content.querySelectorAll('aside, nav').forEach(function (el) { el.remove(); });
+
+  return content.innerHTML;
+}
+
+/* ── Render helpers ────────────────────────────────────────────── */
+function renderContent(html) {
+  stateScreen.style.display = 'none';
+  chContent.style.display   = 'block';
+  chContent.innerHTML = html;
+  readerWrap.scrollTop = 0;
+}
+
+function showState(ico, msg, sub) {
+  chContent.style.display  = 'none';
+  stateScreen.style.display = 'flex';
+  stateScreen.innerHTML =
+    '<div class="ico">' + ico + '</div>' +
+    '<div class="msg">' + escHtml(msg) + '</div>' +
+    (sub ? '<div class="sub">' + escHtml(sub) + '</div>' : '');
+}
+
+function setActive(id) {
+  activeId = id;
+  tocScroll.querySelectorAll('.toc-item').forEach(function (el) {
+    el.classList.toggle('active', el.dataset.id === id);
+  });
+  // Scroll active item into view within the sidebar
+  var active = tocScroll.querySelector('.toc-item.active');
+  if (active) active.scrollIntoView({ block: 'nearest' });
+}
+
+/* ── Search ────────────────────────────────────────────────────── */
+function clearSearch() {
+  // Unwrap existing marks
+  chContent.querySelectorAll('mark.hit').forEach(function (m) {
+    var p = m.parentNode;
+    p.replaceChild(document.createTextNode(m.textContent), m);
+    p.normalize();
+  });
+  hits = []; hitIdx = -1; lastTerm = '';
+  srchCount.textContent = '';
+  nextBtn.disabled = true;
+}
+
+function doFind() {
+  clearSearch();
+  var term = searchInput.value.trim();
+  if (!term || chContent.style.display === 'none') return;
+  lastTerm = term;
+
+  var re = new RegExp(escapeRe(term), 'gi');
+
+  // Collect text nodes under chContent
+  var walker = document.createTreeWalker(chContent, NodeFilter.SHOW_TEXT, null, false);
+  var textNodes = [];
+  var node;
+  while ((node = walker.nextNode())) { textNodes.push(node); }
+
+  textNodes.forEach(function (tn) {
+    var val = tn.nodeValue;
+    if (!re.test(val)) { re.lastIndex = 0; return; }
+    re.lastIndex = 0;
+
+    var frag = document.createDocumentFragment();
+    var last = 0, m;
+    while ((m = re.exec(val)) !== null) {
+      if (m.index > last) frag.appendChild(document.createTextNode(val.slice(last, m.index)));
+      var mark = document.createElement('mark');
+      mark.className = 'hit';
+      mark.textContent = m[0];
+      frag.appendChild(mark);
+      last = m.index + m[0].length;
+    }
+    if (last < val.length) frag.appendChild(document.createTextNode(val.slice(last)));
+    tn.parentNode.replaceChild(frag, tn);
+  });
+
+  hits = Array.from(chContent.querySelectorAll('mark.hit'));
+
+  if (!hits.length) {
+    srchCount.textContent = 'Not found';
+    nextBtn.disabled = true;
+    return;
+  }
+
+  hitIdx = 0;
+  nextBtn.disabled = false;
+  scrollToHit();
+  updateCount();
+}
+
+function doNext() {
+  if (!hits.length) return;
+  hitIdx = (hitIdx + 1) % hits.length;
+  scrollToHit();
+  updateCount();
+}
+
+function scrollToHit() {
+  hits.forEach(function (m) { m.classList.remove('current'); });
+  var cur = hits[hitIdx];
+  cur.classList.add('current');
+  cur.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function updateCount() {
+  srchCount.textContent = (hitIdx + 1) + '\u202f/\u202f' + hits.length;
+}
+
+function escapeRe(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+findBtn.addEventListener('click', doFind);
+nextBtn.addEventListener('click', doNext);
+searchInput.addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter') return;
+  if (lastTerm === searchInput.value.trim() && hits.length) doNext();
+  else doFind();
+});
+
+/* ── Init ──────────────────────────────────────────────────────── */
+buildToc();
+
+})();
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@ AI-powered dream journaling with user authentication and cross-dream thread anal
 import json
 import os
 import re
+import requests
 from datetime import datetime
 from typing import List, Dict, Any
 
@@ -1125,6 +1126,49 @@ def white():
 def zoo():
     """Meatbag Zoo page."""
     return render_template("zoo.html")
+
+
+@app.route("/ip")
+def ip():
+    """MPEP reference tool."""
+    return render_template("ip.html")
+
+
+# Allowed USPTO MPEP file basenames (allowlist to prevent SSRF)
+_MPEP_FILES = {
+    'mpep-0100.html', 'mpep-0200.html', 'mpep-0300.html', 'mpep-0400.html',
+    'mpep-0500.html', 'mpep-0600.html', 'mpep-0700.html', 'mpep-0800.html',
+    'mpep-0900.html', 'mpep-1000.html', 'mpep-1100.html', 'mpep-1200.html',
+    'mpep-1300.html', 'mpep-1400.html', 'mpep-1500.html', 'mpep-1600.html',
+    'mpep-1700.html', 'mpep-1800.html', 'mpep-1900.html', 'mpep-2000.html',
+    'mpep-2100.html', 'mpep-2200.html', 'mpep-2300.html', 'mpep-2400.html',
+    'mpep-2500.html', 'mpep-2600.html', 'mpep-2700.html', 'mpep-2800.html',
+    'mpep-2900.html',
+    'mpep-9015-appx-l.html', 'mpep-9020-appx-r.html',
+    'mpep-9025-appx-ai.html', 'mpep-9035-appx-t.html',
+}
+_USPTO_BASE = 'https://www.uspto.gov/web/offices/pac/mpep/'
+
+
+@app.route("/ip/fetch")
+def ip_fetch():
+    """Proxy a single MPEP chapter HTML from USPTO to avoid CORS."""
+    chapter = request.args.get('chapter', '').strip()
+    if not chapter or chapter not in _MPEP_FILES:
+        return ('Not found', 404)
+    url = _USPTO_BASE + chapter
+    try:
+        resp = requests.get(url, timeout=20, headers={
+            'User-Agent': 'Mozilla/5.0 (compatible; MPEP-Reader/1.0)'
+        })
+        resp.raise_for_status()
+        return Response(
+            resp.content,
+            status=200,
+            content_type='text/html; charset=utf-8'
+        )
+    except Exception:
+        return ('Upstream fetch failed', 502)
 
 
 @app.route("/ro")
