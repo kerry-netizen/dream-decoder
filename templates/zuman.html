@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zuman</title>
+  <title>Zuman - Volume 1: Friction</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -33,11 +33,34 @@
       font-weight: 700;
       letter-spacing: 0.12em;
       color: #c8b8ff;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+    }
+
+    .volume {
+      font-size: 16px;
+      font-weight: 600;
+      color: #7a5df9;
+      letter-spacing: 0.1em;
+      margin-bottom: 2px;
+    }
+
+    .album-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #a990ff;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .byline {
+      font-size: 13px;
+      color: #6a6a8a;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
     }
 
     .subtitle {
-      font-size: 13px;
+      font-size: 12px;
       color: #45455a;
       letter-spacing: 0.08em;
     }
@@ -268,7 +291,10 @@
 
   <div class="header">
     <h1>ZUMAN</h1>
-    <p class="subtitle">dream ferret</p>
+    <p class="volume">Volume 1</p>
+    <p class="album-title">Friction</p>
+    <p class="byline">By Murzon & Nova</p>
+    <p class="subtitle">GlitchMob in Motion</p>
   </div>
 
   <div class="tracklist">
@@ -276,73 +302,50 @@
       <span class="track-num">1</span>
       <div class="track-info">
         <div class="track-title">Zuman</div>
-        <div class="track-version">Murzon version</div>
       </div>
-      <button class="track-btn" aria-label="Play">▶</button>
+      <button class="track-btn" aria-label="Play">&#9654;</button>
     </div>
     <div class="track" data-index="1">
       <span class="track-num">2</span>
       <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Diana version</div>
+        <div class="track-title">Passing Strange</div>
       </div>
-      <button class="track-btn" aria-label="Play">▶</button>
+      <button class="track-btn" aria-label="Play">&#9654;</button>
     </div>
     <div class="track" data-index="2">
       <span class="track-num">3</span>
       <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Gerald version</div>
+        <div class="track-title">Porchlight On</div>
       </div>
-      <button class="track-btn" aria-label="Play">▶</button>
+      <button class="track-btn" aria-label="Play">&#9654;</button>
     </div>
     <div class="track" data-index="3">
       <span class="track-num">4</span>
       <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Brad version</div>
+        <div class="track-title">Meatbag Zoo</div>
       </div>
-      <button class="track-btn" aria-label="Play">▶</button>
+      <button class="track-btn" aria-label="Play">&#9654;</button>
     </div>
     <div class="track" data-index="4">
       <span class="track-num">5</span>
       <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Ted version</div>
+        <div class="track-title">Before the Sparks Catch</div>
       </div>
-      <button class="track-btn" aria-label="Play">▶</button>
+      <button class="track-btn" aria-label="Play">&#9654;</button>
     </div>
     <div class="track" data-index="5">
       <span class="track-num">6</span>
       <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Brian version</div>
+        <div class="track-title">Meatbag Deluxe</div>
       </div>
-      <button class="track-btn" aria-label="Play">▶</button>
+      <button class="track-btn" aria-label="Play">&#9654;</button>
     </div>
     <div class="track" data-index="6">
       <span class="track-num">7</span>
       <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Gerald Spoken version</div>
+        <div class="track-title">Reflection</div>
       </div>
-      <button class="track-btn" aria-label="Play">▶</button>
-    </div>
-    <div class="track" data-index="7">
-      <span class="track-num">8</span>
-      <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Kerry Spoken version</div>
-      </div>
-      <button class="track-btn" aria-label="Play">▶</button>
-    </div>
-    <div class="track" data-index="8">
-      <span class="track-num">9</span>
-      <div class="track-info">
-        <div class="track-title">Zuman</div>
-        <div class="track-version">Kerry Standup version</div>
-      </div>
-      <button class="track-btn" aria-label="Play">▶</button>
+      <button class="track-btn" aria-label="Play">&#9654;</button>
     </div>
   </div>
 
@@ -357,15 +360,15 @@
   </div>
 
   <div class="controls">
-    <button class="ctrl-btn" id="prevBtn" title="Previous">⏮</button>
-    <button class="play-btn" id="playPauseBtn">▶</button>
-    <button class="ctrl-btn" id="nextBtn" title="Next">⏭</button>
+    <button class="ctrl-btn" id="prevBtn" title="Previous">&#9198;</button>
+    <button class="play-btn" id="playPauseBtn">&#9654;</button>
+    <button class="ctrl-btn" id="nextBtn" title="Next">&#9197;</button>
   </div>
 
   <div class="bottom-controls">
-    <button class="play-all-btn" id="playAllBtn">▶ Play All</button>
+    <button class="play-all-btn" id="playAllBtn">&#9654; Play All</button>
     <button class="repeat-btn" id="repeatBtn">
-      <span>🔁</span>
+      <span>&#128257;</span>
       <span class="repeat-label">REPEAT</span>
     </button>
   </div>
@@ -375,15 +378,13 @@
 
 <script>
 const TRACKS = [
-  { src: "{{ url_for('static', filename='Zuman.mp3') }}", title: "Zuman", version: "Murzon version" },
-  { src: "{{ url_for('static', filename='Zuman2.mp3') }}", title: "Zuman", version: "Diana version" },
-  { src: "{{ url_for('static', filename='Zuman3.mp3') }}", title: "Zuman", version: "Gerald version" },
-  { src: "{{ url_for('static', filename='Zuman4.mp3') }}", title: "Zuman", version: "Brad version" },
-  { src: "{{ url_for('static', filename='Zuman5.mp3') }}", title: "Zuman", version: "Ted version" },
-  { src: "{{ url_for('static', filename='Zuman6.mp3') }}", title: "Zuman", version: "Brian version" },
-  { src: "{{ url_for('static', filename='Zuman7.mp3') }}", title: "Zuman", version: "Gerald Spoken version" },
-  { src: "{{ url_for('static', filename='Zuman8.mp3') }}", title: "Zuman", version: "Kerry Spoken version" },
-  { src: "{{ url_for('static', filename='Zuman9.mp3') }}", title: "Zuman", version: "Kerry Standup version" }
+  { src: "{{ url_for('static', filename='Zuman.mp3') }}", title: "Zuman" },
+  { src: "{{ url_for('static', filename='PassingStrange.mp3') }}", title: "Passing Strange" },
+  { src: "{{ url_for('static', filename='Porchlight.mp3') }}", title: "Porchlight On" },
+  { src: "{{ url_for('static', filename='MeatbagZoo.mp3') }}", title: "Meatbag Zoo" },
+  { src: "{{ url_for('static', filename='BeforeTheSparksCatch.mp3') }}", title: "Before the Sparks Catch" },
+  { src: "{{ url_for('static', filename='MeatbagDeluxe.mp3') }}", title: "Meatbag Deluxe" },
+  { src: "{{ url_for('static', filename='Reflection.mp3') }}", title: "Reflection" }
 ];
 
 const audio        = document.getElementById('audio');
@@ -415,7 +416,7 @@ function loadTrack(idx, autoplay) {
   trackEls.forEach((el, i) => {
     el.classList.toggle('active', i === idx);
     const btn = el.querySelector('.track-btn');
-    btn.textContent = (i === idx && playing) ? '⏸' : '▶';
+    btn.innerHTML = (i === idx && playing) ? '&#9208;' : '&#9654;';
   });
   progressFill.style.width = '0%';
   timeElapsed.textContent = '0:00';
@@ -423,11 +424,11 @@ function loadTrack(idx, autoplay) {
   if (autoplay) {
     audio.play();
     playing = true;
-    playPauseBtn.textContent = '⏸';
-    trackEls[idx].querySelector('.track-btn').textContent = '⏸';
+    playPauseBtn.innerHTML = '&#9208;';
+    trackEls[idx].querySelector('.track-btn').innerHTML = '&#9208;';
   } else {
     playing = false;
-    playPauseBtn.textContent = '▶';
+    playPauseBtn.innerHTML = '&#9654;';
   }
 }
 
@@ -439,13 +440,13 @@ function togglePlay() {
   if (playing) {
     audio.pause();
     playing = false;
-    playPauseBtn.textContent = '▶';
-    trackEls[current].querySelector('.track-btn').textContent = '▶';
+    playPauseBtn.innerHTML = '&#9654;';
+    trackEls[current].querySelector('.track-btn').innerHTML = '&#9654;';
   } else {
     audio.play();
     playing = true;
-    playPauseBtn.textContent = '⏸';
-    trackEls[current].querySelector('.track-btn').textContent = '⏸';
+    playPauseBtn.innerHTML = '&#9208;';
+    trackEls[current].querySelector('.track-btn').innerHTML = '&#9208;';
   }
 }
 
@@ -457,7 +458,7 @@ trackEls.forEach(el => {
       togglePlay();
     } else {
       loadTrack(idx, true);
-      playAll = false; // manual pick — disable queue mode until Play All again
+      playAll = false;
     }
   });
 });
@@ -508,7 +509,6 @@ audio.addEventListener('ended', () => {
     } else if (!isLast && playAll) {
       loadTrack(current + 1, true);
     } else {
-      // single track repeat
       audio.currentTime = 0;
       audio.play();
     }
@@ -516,8 +516,8 @@ audio.addEventListener('ended', () => {
     loadTrack(current + 1, true);
   } else {
     playing = false;
-    playPauseBtn.textContent = '▶';
-    trackEls[current].querySelector('.track-btn').textContent = '▶';
+    playPauseBtn.innerHTML = '&#9654;';
+    trackEls[current].querySelector('.track-btn').innerHTML = '&#9654;';
   }
 });
 </script>
