@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zuman - Volume 1: Friction</title>
+  <title>Zuman — Volume 1: Friction</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,86 +13,112 @@
       font-family: system-ui, -apple-system, sans-serif;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 24px;
+      padding: 36px 20px 56px;
     }
 
     .player {
       width: 100%;
-      max-width: 420px;
+      max-width: 400px;
     }
 
+    /* ── Header ──────────────────────────── */
     .header {
       text-align: center;
-      margin-bottom: 36px;
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #17172a;
     }
 
-.volume {
-      font-size: 16px;
-      font-weight: 600;
-      color: #7a5df9;
-      letter-spacing: 0.1em;
-      margin-bottom: 2px;
+    .logo-wrap {
+      margin-bottom: 16px;
     }
 
-    .album-title {
-      font-size: 22px;
+    .logo-wrap img {
+      width: 250px;
+      max-width: 100%;
+    }
+
+    .album-volume {
+      font-size: 10px;
       font-weight: 700;
-      color: #a990ff;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #6a52d8;
+      margin-bottom: 4px;
+    }
+
+    .album-name {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      color: #9a84f0;
       margin-bottom: 8px;
     }
 
-    .byline {
-      font-size: 13px;
-      color: #6a6a8a;
-      letter-spacing: 0.06em;
-      margin-bottom: 2px;
-    }
-
-    .subtitle {
+    .album-byline {
       font-size: 12px;
-      color: #45455a;
-      letter-spacing: 0.08em;
+      color: #525268;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
     }
 
-    /* Track list */
+    .private-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      background: rgba(100, 80, 200, 0.07);
+      border: 1px solid rgba(100, 80, 200, 0.16);
+      border-radius: 20px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: #484860;
+      text-transform: uppercase;
+    }
+
+    /* ── Track list ──────────────────────── */
     .tracklist {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 24px;
+      gap: 5px;
+      margin-bottom: 22px;
     }
 
     .track {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      background: #13131f;
-      border: 1px solid #1e1e30;
-      border-radius: 12px;
+      gap: 10px;
+      padding: 11px 12px;
+      background: #101020;
+      border: 1px solid #1b1b2e;
+      border-radius: 10px;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
+      transition: background 0.16s, border-color 0.16s, box-shadow 0.16s;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .track:hover {
-      background: #17172a;
-      border-color: #3a3a60;
+      background: #151528;
+      border-color: #2c2c48;
     }
 
+    /* Active: left-accent via box-shadow (no layout shift), muted bg */
     .track.active {
-      background: #1a1730;
-      border-color: #7a5df9;
+      background: #131228;
+      border-color: #252042;
+      box-shadow: inset 3px 0 0 #7a5df9;
     }
 
+    /* Track number */
     .track-num {
-      font-size: 13px;
-      color: #45455a;
-      width: 18px;
-      text-align: center;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      color: #565670;
+      width: 20px;
+      text-align: right;
       flex-shrink: 0;
     }
 
@@ -100,65 +126,109 @@
       color: #7a5df9;
     }
 
+    /* Play button — sits left, adjacent to title */
+    .track-btn {
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: #1c1c30;
+      border: 1px solid #282840;
+      color: #6868a0;
+      font-size: 9px;
+      padding-left: 1px; /* optical center of ▶ */
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.16s, color 0.16s, border-color 0.16s;
+    }
+
+    .track:hover .track-btn {
+      background: #252545;
+      border-color: #424268;
+      color: #b0a0e8;
+    }
+
+    /* Active button: translucent tint — row border is the primary signal */
+    .track.active .track-btn {
+      background: rgba(122, 93, 249, 0.15);
+      border-color: rgba(122, 93, 249, 0.28);
+      color: #9a84f0;
+    }
+
+    /* Title */
     .track-info {
       flex: 1;
       min-width: 0;
     }
 
     .track-title {
-      font-size: 14px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #a8a0cc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.01em;
+    }
+
+    .track.active .track-title {
+      color: #c0b0f0;
       font-weight: 600;
-      color: #d4caff;
+    }
+
+    /* ── Now playing ─────────────────────── */
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      min-height: 14px;
+    }
+
+    .np-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #7a5df9;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .np-dot.live {
+      opacity: 1;
+      animation: npulse 2s ease-in-out infinite;
+    }
+
+    @keyframes npulse {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 1;   }
+    }
+
+    .np-title {
+      font-size: 11px;
+      letter-spacing: 0.07em;
+      color: #404058;
+      text-transform: uppercase;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .track.active .track-title {
-      color: #a990ff;
-    }
-
-    .track-version {
-      font-size: 12px;
-      color: #45455a;
-      margin-top: 2px;
-    }
-
-    .track-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #2a2a40;
-      border: none;
-      color: #a0a0c0;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .track:hover .track-btn,
-    .track.active .track-btn {
-      background: #7a5df9;
-      color: #fff;
-    }
-
-    /* Progress bar */
+    /* ── Progress ────────────────────────── */
     .progress-wrap {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .progress-bar {
       width: 100%;
-      height: 4px;
-      background: #1e1e30;
+      height: 3px;
+      background: #181830;
       border-radius: 2px;
       cursor: pointer;
-      position: relative;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
 
     .progress-fill {
@@ -173,106 +243,128 @@
     .progress-times {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
-      color: #45455a;
+      font-size: 10.5px;
+      color: #383858;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* Controls */
+    /* ── Transport controls ──────────────── */
     .controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      margin-bottom: 20px;
+      gap: 22px;
+      margin-bottom: 16px;
     }
 
     .ctrl-btn {
       background: none;
       border: none;
-      color: #787894;
+      color: #585878;
       cursor: pointer;
       padding: 8px;
       border-radius: 8px;
-      font-size: 18px;
+      font-size: 17px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: color 0.2s;
+      transition: color 0.16s;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .ctrl-btn:hover { color: #c8b8ff; }
+    .ctrl-btn:hover { color: #9080c8; }
 
     .play-btn {
-      width: 52px;
-      height: 52px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: #7a5df9;
       border: none;
       color: #fff;
-      font-size: 20px;
+      font-size: 18px;
+      padding-left: 2px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s, transform 0.1s;
+      transition: background 0.16s, transform 0.1s;
       flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .play-btn:hover { background: #8f70ff; transform: scale(1.05); }
-    .play-btn:active { transform: scale(0.97); }
+    .play-btn:hover  { background: #8f70ff; transform: scale(1.04); }
+    .play-btn:active { transform: scale(0.96); }
 
-    /* Bottom row: play-all + repeat */
+    /* ── Bottom controls ─────────────────── */
     .bottom-controls {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
 
     .play-all-btn {
       flex: 1;
-      padding: 12px;
-      background: #1a1730;
-      border: 1px solid #3a3060;
-      border-radius: 10px;
-      color: #c8b8ff;
-      font-size: 13px;
+      padding: 11px;
+      background: #111128;
+      border: 1px solid #242448;
+      border-radius: 9px;
+      color: #8878c8;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      letter-spacing: 0.04em;
+      transition: background 0.16s, border-color 0.16s, color 0.16s;
+      letter-spacing: 0.05em;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .play-all-btn:hover {
-      background: #221f40;
-      border-color: #7a5df9;
+      background: #181838;
+      border-color: #6a52d8;
+      color: #c0b0f0;
     }
 
     .repeat-btn {
-      padding: 12px 16px;
-      background: #13131f;
-      border: 1px solid #1e1e30;
-      border-radius: 10px;
-      color: #45455a;
-      font-size: 16px;
+      padding: 11px 14px;
+      background: #0e0e1c;
+      border: 1px solid #1a1a2c;
+      border-radius: 9px;
+      color: #383858;
+      font-size: 14px;
       cursor: pointer;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      transition: background 0.16s, border-color 0.16s, color 0.16s;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .repeat-btn.on {
-      background: #1a1730;
-      border-color: #7a5df9;
-      color: #a990ff;
+      background: #111128;
+      border-color: #4e3db8;
+      color: #7a68c8;
     }
 
-    .repeat-btn:hover { border-color: #3a3a60; }
-    .repeat-btn.on:hover { border-color: #9b7fff; }
+    .repeat-btn:hover     { border-color: #282840; }
+    .repeat-btn.on:hover  { border-color: #7a5df9; }
 
     .repeat-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+    }
+
+    /* ── Footer ──────────────────────────── */
+    .footer-logo {
+      text-align: center;
+      margin-top: 44px;
+      padding-top: 28px;
+      border-top: 1px solid #17172a;
+    }
+
+    .footer-logo img {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      opacity: 0.7;
     }
 
     audio { display: none; }
@@ -281,96 +373,95 @@
 <body>
 <div class="player">
 
+  <!-- Header -->
   <div class="header">
-    <img src="{{ url_for('static', filename='ZumanLogo.png') }}"
-         alt="ZUMAN"
-         style="width: 300px; max-width: 100%; margin-bottom: 8px;">
-    <p class="volume">Volume 1</p>
-    <p class="album-title">Friction</p>
-    <p class="byline">By Murzon, Nova & Alpine</p>
-    <p class="subtitle">GlitchMob in Motion</p>
+    <div class="logo-wrap">
+      <img src="{{ url_for('static', filename='ZumanLogo.png') }}" alt="Zuman">
+    </div>
+    <div class="album-volume">Volume 1</div>
+    <div class="album-name">Friction</div>
+    <div class="album-byline">Murzon &middot; Nova &middot; Alpine</div>
+    <span class="private-badge">&#128274;&thinsp; Private &middot; Prototype</span>
   </div>
 
+  <!-- Tracklist -->
   <div class="tracklist">
+
     <div class="track" data-index="0">
       <span class="track-num">1</span>
-      <div class="track-info">
-        <div class="track-title">Zuman</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Zuman</div></div>
     </div>
+
     <div class="track" data-index="1">
       <span class="track-num">2</span>
-      <div class="track-info">
-        <div class="track-title">Passing Strange</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Passing Strange</div></div>
     </div>
+
     <div class="track" data-index="2">
       <span class="track-num">3</span>
-      <div class="track-info">
-        <div class="track-title">Exotic Symbiotic</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Exotic Symbiotic</div></div>
     </div>
+
     <div class="track" data-index="3">
       <span class="track-num">4</span>
-      <div class="track-info">
-        <div class="track-title">Sympathy for the Goblin</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Sympathy for the Goblin</div></div>
     </div>
+
     <div class="track" data-index="4">
       <span class="track-num">5</span>
-      <div class="track-info">
-        <div class="track-title">Friction Product</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">The Friction Is the Product</div></div>
     </div>
+
     <div class="track" data-index="5">
       <span class="track-num">6</span>
-      <div class="track-info">
-        <div class="track-title">Before the Sparks Catch</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Before the Sparks Catch</div></div>
     </div>
+
     <div class="track" data-index="6">
       <span class="track-num">7</span>
-      <div class="track-info">
-        <div class="track-title">Meatbag Zoo</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Meatbag Zoo</div></div>
     </div>
+
     <div class="track" data-index="7">
       <span class="track-num">8</span>
-      <div class="track-info">
-        <div class="track-title">Humane</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Humane</div></div>
     </div>
+
     <div class="track" data-index="8">
       <span class="track-num">9</span>
-      <div class="track-info">
-        <div class="track-title">Meatbag Deluxe</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Meatbag Deluxe</div></div>
     </div>
+
     <div class="track" data-index="9">
       <span class="track-num">10</span>
-      <div class="track-info">
-        <div class="track-title">Captain White</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Captain White</div></div>
     </div>
+
     <div class="track" data-index="10">
       <span class="track-num">11</span>
-      <div class="track-info">
-        <div class="track-title">Porchlight On</div>
-      </div>
       <button class="track-btn" aria-label="Play">&#9654;</button>
+      <div class="track-info"><div class="track-title">Porch Light On</div></div>
     </div>
+
   </div>
 
+  <!-- Now playing indicator -->
+  <div class="now-playing">
+    <div class="np-dot" id="npDot"></div>
+    <span class="np-title" id="npTitle">—</span>
+  </div>
+
+  <!-- Progress -->
   <div class="progress-wrap">
     <div class="progress-bar" id="progressBar">
       <div class="progress-fill" id="progressFill"></div>
@@ -381,14 +472,16 @@
     </div>
   </div>
 
+  <!-- Transport -->
   <div class="controls">
     <button class="ctrl-btn" id="prevBtn" title="Previous">&#9198;</button>
     <button class="play-btn" id="playPauseBtn">&#9654;</button>
     <button class="ctrl-btn" id="nextBtn" title="Next">&#9197;</button>
   </div>
 
+  <!-- Play all / repeat -->
   <div class="bottom-controls">
-    <button class="play-all-btn" id="playAllBtn">&#9654; Play All</button>
+    <button class="play-all-btn" id="playAllBtn">&#9654;&nbsp; Play All</button>
     <button class="repeat-btn" id="repeatBtn">
       <span>&#128257;</span>
       <span class="repeat-label">REPEAT</span>
@@ -397,27 +490,26 @@
 
   <audio id="audio"></audio>
 
-  <div style="text-align: center; margin-top: 36px;">
+  <!-- Footer -->
+  <div class="footer-logo">
     <img src="{{ url_for('static', filename='GlitchMobLogo.png') }}"
-         alt="GlitchMob in Motion"
-         style="width: 220px; height: 220px; border-radius: 50%; opacity: 0.85;">
+         alt="GlitchMob in Motion">
   </div>
 
 </div>
-
 <script>
 const TRACKS = [
-  { src: "{{ url_for('static', filename='Zuman.mp3') }}", title: "Zuman" },
-  { src: "{{ url_for('static', filename='PassingStrange.mp3') }}", title: "Passing Strange" },
-  { src: "{{ url_for('static', filename='ExoticSymbiotic.mp3') }}", title: "Exotic Symbiotic" },
+  { src: "{{ url_for('static', filename='Zuman.mp3') }}",                title: "Zuman" },
+  { src: "{{ url_for('static', filename='PassingStrange.mp3') }}",       title: "Passing Strange" },
+  { src: "{{ url_for('static', filename='ExoticSymbiotic.mp3') }}",      title: "Exotic Symbiotic" },
   { src: "{{ url_for('static', filename='SympathyForTheGoblin.mp3') }}", title: "Sympathy for the Goblin" },
-  { src: "{{ url_for('static', filename='FrictionProduct.mp3') }}", title: "Friction Product" },
+  { src: "{{ url_for('static', filename='FrictionProduct.mp3') }}",      title: "The Friction Is the Product" },
   { src: "{{ url_for('static', filename='BeforeTheSparksCatch.mp3') }}", title: "Before the Sparks Catch" },
-  { src: "{{ url_for('static', filename='MeatbagZoo.mp3') }}", title: "Meatbag Zoo" },
-  { src: "{{ url_for('static', filename='Humane.mp3') }}", title: "Humane" },
-  { src: "{{ url_for('static', filename='MeatbagDeluxe.mp3') }}", title: "Meatbag Deluxe" },
-  { src: "{{ url_for('static', filename='CaptainWhite2.mp3') }}", title: "Captain White" },
-  { src: "{{ url_for('static', filename='Porchlight.mp3') }}", title: "Porchlight On" }
+  { src: "{{ url_for('static', filename='MeatbagZoo.mp3') }}",           title: "Meatbag Zoo" },
+  { src: "{{ url_for('static', filename='Humane.mp3') }}",               title: "Humane" },
+  { src: "{{ url_for('static', filename='MeatbagDeluxe.mp3') }}",        title: "Meatbag Deluxe" },
+  { src: "{{ url_for('static', filename='CaptainWhite2.mp3') }}",        title: "Captain White" },
+  { src: "{{ url_for('static', filename='Porchlight.mp3') }}",           title: "Porch Light On" }
 ];
 
 const audio        = document.getElementById('audio');
@@ -430,17 +522,23 @@ const progressBar  = document.getElementById('progressBar');
 const progressFill = document.getElementById('progressFill');
 const timeElapsed  = document.getElementById('timeElapsed');
 const timeDuration = document.getElementById('timeDuration');
+const npDot        = document.getElementById('npDot');
+const npTitle      = document.getElementById('npTitle');
 const trackEls     = document.querySelectorAll('.track');
 
-let current   = 0;
-let playing   = false;
-let playAll   = false;
-let repeat    = false;
+let current = 0;
+let playing = false;
+let playAll = false;
+let repeat  = false;
 
 function fmt(s) {
   const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return `${m}:${sec.toString().padStart(2, '0')}`;
+  return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+}
+
+function setNowPlaying(idx, isPlaying) {
+  npTitle.textContent = isPlaying ? TRACKS[idx].title : '—';
+  npDot.classList.toggle('live', isPlaying);
 }
 
 function loadTrack(idx, autoplay) {
@@ -448,8 +546,7 @@ function loadTrack(idx, autoplay) {
   audio.src = TRACKS[idx].src;
   trackEls.forEach((el, i) => {
     el.classList.toggle('active', i === idx);
-    const btn = el.querySelector('.track-btn');
-    btn.innerHTML = (i === idx && playing) ? '&#9208;' : '&#9654;';
+    el.querySelector('.track-btn').innerHTML = (i === idx && autoplay) ? '&#9208;' : '&#9654;';
   });
   progressFill.style.width = '0%';
   timeElapsed.textContent = '0:00';
@@ -458,11 +555,11 @@ function loadTrack(idx, autoplay) {
     audio.play();
     playing = true;
     playPauseBtn.innerHTML = '&#9208;';
-    trackEls[idx].querySelector('.track-btn').innerHTML = '&#9208;';
   } else {
     playing = false;
     playPauseBtn.innerHTML = '&#9654;';
   }
+  setNowPlaying(idx, autoplay);
 }
 
 function togglePlay() {
@@ -475,82 +572,61 @@ function togglePlay() {
     playing = false;
     playPauseBtn.innerHTML = '&#9654;';
     trackEls[current].querySelector('.track-btn').innerHTML = '&#9654;';
+    setNowPlaying(current, false);
   } else {
     audio.play();
     playing = true;
     playPauseBtn.innerHTML = '&#9208;';
     trackEls[current].querySelector('.track-btn').innerHTML = '&#9208;';
+    setNowPlaying(current, true);
   }
 }
 
-// Track click
 trackEls.forEach(el => {
   el.addEventListener('click', () => {
     const idx = parseInt(el.dataset.index);
-    if (idx === current) {
-      togglePlay();
-    } else {
-      loadTrack(idx, true);
-      playAll = false;
-    }
+    if (idx === current) { togglePlay(); }
+    else { loadTrack(idx, true); playAll = false; }
   });
 });
 
 playPauseBtn.addEventListener('click', togglePlay);
+prevBtn.addEventListener('click', () => loadTrack((current - 1 + TRACKS.length) % TRACKS.length, playing));
+nextBtn.addEventListener('click', () => loadTrack((current + 1) % TRACKS.length, playing));
 
-prevBtn.addEventListener('click', () => {
-  const idx = (current - 1 + TRACKS.length) % TRACKS.length;
-  loadTrack(idx, playing);
-});
-
-nextBtn.addEventListener('click', () => {
-  const idx = (current + 1) % TRACKS.length;
-  loadTrack(idx, playing);
-});
-
-playAllBtn.addEventListener('click', () => {
-  playAll = true;
-  loadTrack(0, true);
-});
+playAllBtn.addEventListener('click', () => { playAll = true; loadTrack(0, true); });
 
 repeatBtn.addEventListener('click', () => {
   repeat = !repeat;
   repeatBtn.classList.toggle('on', repeat);
 });
 
-// Progress
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
-  const pct = (audio.currentTime / audio.duration) * 100;
-  progressFill.style.width = pct + '%';
+  progressFill.style.width = ((audio.currentTime / audio.duration) * 100) + '%';
   timeElapsed.textContent = fmt(audio.currentTime);
   timeDuration.textContent = fmt(audio.duration);
 });
 
 progressBar.addEventListener('click', e => {
   if (!audio.duration) return;
-  const rect = progressBar.getBoundingClientRect();
-  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+  const r = progressBar.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
 });
 
-// Auto-advance
 audio.addEventListener('ended', () => {
   const isLast = current === TRACKS.length - 1;
   if (repeat) {
-    if (isLast && playAll) {
-      loadTrack(0, true);
-    } else if (!isLast && playAll) {
-      loadTrack(current + 1, true);
-    } else {
-      audio.currentTime = 0;
-      audio.play();
-    }
+    if (isLast && playAll)  { loadTrack(0, true); }
+    else if (!isLast && playAll) { loadTrack(current + 1, true); }
+    else { audio.currentTime = 0; audio.play(); }
   } else if (playAll && !isLast) {
     loadTrack(current + 1, true);
   } else {
     playing = false;
     playPauseBtn.innerHTML = '&#9654;';
     trackEls[current].querySelector('.track-btn').innerHTML = '&#9654;';
+    setNowPlaying(current, false);
   }
 });
 </script>
