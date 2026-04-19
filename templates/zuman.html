@@ -28,15 +28,7 @@
       margin-bottom: 36px;
     }
 
-    h1 {
-      font-size: 48px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      color: #c8b8ff;
-      margin-bottom: 4px;
-    }
-
-    .volume {
+.volume {
       font-size: 16px;
       font-weight: 600;
       color: #7a5df9;
@@ -290,7 +282,9 @@
 <div class="player">
 
   <div class="header">
-    <h1>ZUMAN</h1>
+    <img src="{{ url_for('static', filename='ZumanLogo.png') }}"
+         alt="ZUMAN"
+         style="width: 300px; max-width: 100%; margin-bottom: 8px;">
     <p class="volume">Volume 1</p>
     <p class="album-title">Friction</p>
     <p class="byline">By Murzon & Nova</p>
