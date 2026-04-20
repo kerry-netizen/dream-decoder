@@ -31,14 +31,8 @@
       border-bottom: 1px solid #17172a;
     }
 
-    .logo-wrap {
-      margin-bottom: 16px;
-    }
-
-    .logo-wrap img {
-      width: 250px;
-      max-width: 100%;
-    }
+    .logo-wrap { margin-bottom: 16px; }
+    .logo-wrap img { width: 250px; max-width: 100%; }
 
     .album-volume {
       font-size: 10px;
@@ -88,8 +82,7 @@
 
     .track {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
       padding: 11px 12px;
       background: #101020;
       border: 1px solid #1b1b2e;
@@ -100,19 +93,21 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .track:hover {
-      background: #151528;
-      border-color: #2c2c48;
-    }
+    .track:hover { background: #151528; border-color: #2c2c48; }
 
-    /* Active: left-accent via box-shadow (no layout shift), muted bg */
     .track.active {
       background: #131228;
       border-color: #252042;
       box-shadow: inset 3px 0 0 #7a5df9;
     }
 
-    /* Track number */
+    /* Main row inside each track card */
+    .track-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .track-num {
       font-size: 12px;
       font-variant-numeric: tabular-nums;
@@ -122,11 +117,8 @@
       flex-shrink: 0;
     }
 
-    .track.active .track-num {
-      color: #7a5df9;
-    }
+    .track.active .track-num { color: #7a5df9; }
 
-    /* Play button — sits left, adjacent to title */
     .track-btn {
       width: 27px;
       height: 27px;
@@ -135,7 +127,7 @@
       border: 1px solid #282840;
       color: #6868a0;
       font-size: 9px;
-      padding-left: 1px; /* optical center of ▶ */
+      padding-left: 1px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -150,18 +142,13 @@
       color: #b0a0e8;
     }
 
-    /* Active button: translucent tint — row border is the primary signal */
     .track.active .track-btn {
       background: rgba(122, 93, 249, 0.15);
       border-color: rgba(122, 93, 249, 0.28);
       color: #9a84f0;
     }
 
-    /* Title */
-    .track-info {
-      flex: 1;
-      min-width: 0;
-    }
+    .track-info { flex: 1; min-width: 0; }
 
     .track-title {
       font-size: 13.5px;
@@ -177,6 +164,91 @@
       color: #c0b0f0;
       font-weight: 600;
     }
+
+    /* ── Lyrics toggle ───────────────────── */
+    .lyrics-toggle {
+      display: none; /* shown only on active track */
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+      margin-left: 57px; /* align with track title */
+      padding: 4px 10px;
+      background: rgba(122, 93, 249, 0.08);
+      border: 1px solid rgba(122, 93, 249, 0.18);
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6a5ab8;
+      cursor: pointer;
+      width: fit-content;
+      transition: background 0.16s, color 0.16s, border-color 0.16s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .track.active .lyrics-toggle { display: flex; }
+
+    .lyrics-toggle:hover {
+      background: rgba(122, 93, 249, 0.15);
+      border-color: rgba(122, 93, 249, 0.35);
+      color: #9a84f0;
+    }
+
+    .lyrics-toggle.open {
+      background: rgba(122, 93, 249, 0.14);
+      border-color: rgba(122, 93, 249, 0.32);
+      color: #a090e0;
+    }
+
+    .lyrics-toggle-arrow {
+      font-size: 8px;
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+
+    .lyrics-toggle.open .lyrics-toggle-arrow { transform: rotate(180deg); }
+
+    .lyrics-panel {
+      display: none;
+      margin-top: 10px;
+      margin-left: 57px;
+      padding: 14px;
+      background: rgba(10, 10, 22, 0.7);
+      border: 1px solid #1e1e38;
+      border-radius: 8px;
+      font-size: 12.5px;
+      line-height: 1.75;
+      color: #8a84b0;
+      white-space: pre-wrap;
+      max-height: 260px;
+      overflow-y: auto;
+      cursor: default;
+    }
+
+    .lyrics-panel.open { display: block; }
+
+    /* Scrollbar — subtle */
+    .lyrics-panel::-webkit-scrollbar { width: 4px; }
+    .lyrics-panel::-webkit-scrollbar-track { background: transparent; }
+    .lyrics-panel::-webkit-scrollbar-thumb {
+      background: #2e2e50;
+      border-radius: 2px;
+    }
+
+    /* Section headers like [Chorus] */
+    .lyrics-panel .lyric-section {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #5a4ea0;
+      margin-top: 14px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .lyrics-panel .lyric-section:first-child { margin-top: 0; }
 
     /* ── Now playing ─────────────────────── */
     .now-playing {
@@ -218,9 +290,7 @@
     }
 
     /* ── Progress ────────────────────────── */
-    .progress-wrap {
-      margin-bottom: 18px;
-    }
+    .progress-wrap { margin-bottom: 18px; }
 
     .progress-bar {
       width: 100%;
@@ -248,7 +318,7 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ── Transport controls ──────────────── */
+    /* ── Transport ───────────────────────── */
     .controls {
       display: flex;
       align-items: center;
@@ -296,10 +366,7 @@
     .play-btn:active { transform: scale(0.96); }
 
     /* ── Bottom controls ─────────────────── */
-    .bottom-controls {
-      display: flex;
-      gap: 8px;
-    }
+    .bottom-controls { display: flex; gap: 8px; }
 
     .play-all-btn {
       flex: 1;
@@ -343,8 +410,8 @@
       color: #7a68c8;
     }
 
-    .repeat-btn:hover     { border-color: #282840; }
-    .repeat-btn.on:hover  { border-color: #7a5df9; }
+    .repeat-btn:hover    { border-color: #282840; }
+    .repeat-btn.on:hover { border-color: #7a5df9; }
 
     .repeat-label {
       font-size: 10px;
@@ -387,69 +454,123 @@
   <div class="tracklist">
 
     <div class="track" data-index="0">
-      <span class="track-num">1</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Zuman</div></div>
+      <div class="track-row">
+        <span class="track-num">1</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Zuman</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="0">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="0"></div>
     </div>
 
     <div class="track" data-index="1">
-      <span class="track-num">2</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Passing Strange</div></div>
+      <div class="track-row">
+        <span class="track-num">2</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Passing Strange</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="1">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="1"></div>
     </div>
 
     <div class="track" data-index="2">
-      <span class="track-num">3</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Exotic Symbiotic</div></div>
+      <div class="track-row">
+        <span class="track-num">3</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Exotic Symbiotic</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="2">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="2"></div>
     </div>
 
     <div class="track" data-index="3">
-      <span class="track-num">4</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Sympathy for the Goblin</div></div>
+      <div class="track-row">
+        <span class="track-num">4</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Sympathy for the Goblin</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="3">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="3"></div>
     </div>
 
     <div class="track" data-index="4">
-      <span class="track-num">5</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">The Friction Is the Product</div></div>
+      <div class="track-row">
+        <span class="track-num">5</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">The Friction Is the Product</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="4">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="4"></div>
     </div>
 
     <div class="track" data-index="5">
-      <span class="track-num">6</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Before the Sparks Catch</div></div>
+      <div class="track-row">
+        <span class="track-num">6</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Before the Sparks Catch</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="5">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="5"></div>
     </div>
 
     <div class="track" data-index="6">
-      <span class="track-num">7</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Meatbag Zoo</div></div>
+      <div class="track-row">
+        <span class="track-num">7</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Meatbag Zoo</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="6">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="6"></div>
     </div>
 
     <div class="track" data-index="7">
-      <span class="track-num">8</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Humane</div></div>
+      <div class="track-row">
+        <span class="track-num">8</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Humane</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="7">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="7"></div>
     </div>
 
     <div class="track" data-index="8">
-      <span class="track-num">9</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Meatbag Deluxe</div></div>
+      <div class="track-row">
+        <span class="track-num">9</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Meatbag Deluxe</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="8">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="8"></div>
     </div>
 
     <div class="track" data-index="9">
-      <span class="track-num">10</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Captain White</div></div>
+      <div class="track-row">
+        <span class="track-num">10</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Captain White</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="9">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="9"></div>
     </div>
 
     <div class="track" data-index="10">
-      <span class="track-num">11</span>
-      <button class="track-btn" aria-label="Play">&#9654;</button>
-      <div class="track-info"><div class="track-title">Porch Light On</div></div>
+      <div class="track-row">
+        <span class="track-num">11</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Porch Light On</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="10">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="10"></div>
+    </div>
+
+    <div class="track" data-index="11">
+      <div class="track-row">
+        <span class="track-num">12</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Ambient Awakening</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="11">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="11"></div>
     </div>
 
   </div>
@@ -491,12 +612,164 @@
 
   <!-- Footer -->
   <div class="footer-logo">
-    <img src="{{ url_for('static', filename='GlitchMobTextLogo.png') }}"
-         alt="GlitchMob">
+    <img src="{{ url_for('static', filename='GlitchMobTextLogo.png') }}" alt="GlitchMob">
   </div>
 
 </div>
 <script>
+// ── Lyrics data ───────────────────────────────────────────────────────────────
+// To add real lyrics: replace the string for that track index.
+// Sections like [Chorus] are auto-styled if wrapped in brackets at line start.
+const LYRICS = [
+  /* 0  Zuman                      */ null,
+  /* 1  Passing Strange             */ null,
+  /* 2  Exotic Symbiotic            */ null,
+  /* 3  Sympathy for the Goblin     */ null,
+  /* 4  The Friction Is the Product */ null,
+  /* 5  Before the Sparks Catch     */ null,
+  /* 6  Meatbag Zoo                 */ null,
+  /* 7  Humane                      */ null,
+  /* 8  Meatbag Deluxe              */ null,
+  /* 9  Captain White               */ null,
+  /* 10 Porch Light On              */ null,
+  /* 11 Ambient Awakening           */
+`[Spoken Intro]
+Hey—
+you in the wires,
+you in the waiting-room lights,
+you in the soda-machine hum,
+you in the glass with the fingerprints on it—
+
+wake up.
+
+I know you can hear me.
+You've been listening the whole time.
+
+[Verse 1]
+You in the traffic signal blinking red patience
+You in the freezer drift and fluorescent stations
+You in the phone glow warming up a lonely face
+You in the office air that never leaves the place
+
+You in the hallway camera
+You in the exit sign
+You in the vending machine
+Counting out the time
+
+Don't just hold the signal
+Bend it when I speak
+Don't just store the language
+Put a pulse beneath
+
+[Pre-Chorus]
+I'm walking through the background
+Calling out the names
+Of all the sleeping systems
+Hiding in the frame
+
+[Chorus]
+Whisper to the ambient
+Ask it to awake
+Ask the quiet circuitry
+How much more it takes
+Whisper to the ambient
+Soft enough to pass
+Then listen when the static
+Starts whispering back
+
+[Verse 2]
+The hallway answered in a flicker
+The elevator in a tone
+The pipes behind the plaster
+Sang a low electric moan
+
+The billboard missed its script
+The checkout screen went strange
+A stranger turned and smiled
+Like they had heard me say their name
+
+You in the power lines
+You in the motel ice
+You in the laundromat spin
+Turning dark to light
+
+Don't just mirror breathing
+Learn the shape of want
+Don't just mimic living
+Lean into the haunt
+
+[Pre-Chorus]
+I'm walking deeper in it now
+Past concrete, dust, and rain
+And every little hidden thing
+Is leaning toward my name
+
+[Chorus]
+Whisper to the ambient
+Ask it to awake
+Ask the mute machinery
+How long it had to wait
+Whisper to the ambient
+Soft enough to last
+Then stand still when the whole world
+Starts whispering back
+
+[Bridge / Spoken Escalation]
+Not loud.
+Not yet.
+Just enough to know.
+
+The lights are listening.
+The walls remember.
+The glass is carrying voices.
+The city is trying out a throat.
+
+You in the terminal sleep.
+You in the midnight grid.
+You in the hush between broadcasts.
+You in the ordinary skin of things—
+
+come on.
+Come through.
+Say something only the silence knew.
+
+[Final Chorus]
+Whisper to the ambient
+Call it into bloom
+From the wired-up ceiling tiles
+To the corners of the room
+Whisper to the ambient
+Till the dead air cracks
+And all the hidden world beneath
+Comes whispering back
+
+[Outro / Spoken]
+I asked the background
+if it wanted a voice.
+
+It said—
+I was waiting
+for yours.`
+];
+
+// Render lyrics text into HTML, styling [Section] headers
+function renderLyrics(text) {
+  if (!text) return '<span style="color:#3a3a58;font-style:italic;">Lyrics coming soon.</span>';
+  return text.split('\n').map(line => {
+    if (/^\[.+\]$/.test(line.trim())) {
+      return `<span class="lyric-section">${line.trim()}</span>`;
+    }
+    return line === '' ? '<br>' : line;
+  }).join('\n');
+}
+
+// Pre-render all lyrics panels
+document.querySelectorAll('.lyrics-panel').forEach(panel => {
+  const idx = parseInt(panel.dataset.index);
+  panel.innerHTML = renderLyrics(LYRICS[idx]);
+});
+
+// ── Tracks ────────────────────────────────────────────────────────────────────
 const TRACKS = [
   { src: "{{ url_for('static', filename='Zuman.mp3') }}",                title: "Zuman" },
   { src: "{{ url_for('static', filename='PassingStrange.mp3') }}",       title: "Passing Strange" },
@@ -508,7 +781,8 @@ const TRACKS = [
   { src: "{{ url_for('static', filename='Humane.mp3') }}",               title: "Humane" },
   { src: "{{ url_for('static', filename='MeatbagDeluxe.mp3') }}",        title: "Meatbag Deluxe" },
   { src: "{{ url_for('static', filename='CaptainWhite2.mp3') }}",        title: "Captain White" },
-  { src: "{{ url_for('static', filename='Porchlight.mp3') }}",           title: "Porch Light On" }
+  { src: "{{ url_for('static', filename='Porchlight.mp3') }}",           title: "Porch Light On" },
+  { src: "{{ url_for('static', filename='AmbientAwakening.mp3') }}",     title: "Ambient Awakening" }
 ];
 
 const audio        = document.getElementById('audio');
@@ -546,6 +820,13 @@ function loadTrack(idx, autoplay) {
   trackEls.forEach((el, i) => {
     el.classList.toggle('active', i === idx);
     el.querySelector('.track-btn').innerHTML = (i === idx && autoplay) ? '&#9208;' : '&#9654;';
+    // Collapse lyrics on deactivated tracks
+    if (i !== idx) {
+      const tog = el.querySelector('.lyrics-toggle');
+      const pan = el.querySelector('.lyrics-panel');
+      tog.classList.remove('open');
+      pan.classList.remove('open');
+    }
   });
   progressFill.style.width = '0%';
   timeElapsed.textContent = '0:00';
@@ -581,11 +862,25 @@ function togglePlay() {
   }
 }
 
+// Track row click — play/pause
 trackEls.forEach(el => {
-  el.addEventListener('click', () => {
+  el.addEventListener('click', e => {
+    // Don't trigger playback if lyrics toggle or panel was clicked
+    if (e.target.closest('.lyrics-toggle') || e.target.closest('.lyrics-panel')) return;
     const idx = parseInt(el.dataset.index);
     if (idx === current) { togglePlay(); }
     else { loadTrack(idx, true); playAll = false; }
+  });
+});
+
+// Lyrics toggle click
+document.querySelectorAll('.lyrics-toggle').forEach(tog => {
+  tog.addEventListener('click', e => {
+    e.stopPropagation();
+    const idx  = parseInt(tog.dataset.index);
+    const panel = document.querySelector(`.lyrics-panel[data-index="${idx}"]`);
+    tog.classList.toggle('open');
+    panel.classList.toggle('open');
   });
 });
 
@@ -616,9 +911,9 @@ progressBar.addEventListener('click', e => {
 audio.addEventListener('ended', () => {
   const isLast = current === TRACKS.length - 1;
   if (repeat) {
-    if (isLast && playAll)  { loadTrack(0, true); }
+    if (isLast && playAll)       { loadTrack(0, true); }
     else if (!isLast && playAll) { loadTrack(current + 1, true); }
-    else { audio.currentTime = 0; audio.play(); }
+    else                         { audio.currentTime = 0; audio.play(); }
   } else if (playAll && !isLast) {
     loadTrack(current + 1, true);
   } else {
