@@ -547,7 +547,7 @@
       <div class="track-row">
         <span class="track-num">10</span>
         <button class="track-btn" aria-label="Play">&#9654;</button>
-        <div class="track-info"><div class="track-title">Captain White</div></div>
+        <div class="track-info"><div class="track-title">Fresh Meat</div></div>
       </div>
       <button class="lyrics-toggle" data-index="9">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
       <div class="lyrics-panel" data-index="9"></div>
@@ -557,7 +557,7 @@
       <div class="track-row">
         <span class="track-num">11</span>
         <button class="track-btn" aria-label="Play">&#9654;</button>
-        <div class="track-info"><div class="track-title">Porch Light On</div></div>
+        <div class="track-info"><div class="track-title">Captain White</div></div>
       </div>
       <button class="lyrics-toggle" data-index="10">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
       <div class="lyrics-panel" data-index="10"></div>
@@ -567,10 +567,20 @@
       <div class="track-row">
         <span class="track-num">12</span>
         <button class="track-btn" aria-label="Play">&#9654;</button>
-        <div class="track-info"><div class="track-title">Ambient Awakening</div></div>
+        <div class="track-info"><div class="track-title">Porch Light On</div></div>
       </div>
       <button class="lyrics-toggle" data-index="11">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
       <div class="lyrics-panel" data-index="11"></div>
+    </div>
+
+    <div class="track" data-index="12">
+      <div class="track-row">
+        <span class="track-num">13</span>
+        <button class="track-btn" aria-label="Play">&#9654;</button>
+        <div class="track-info"><div class="track-title">Ambient Awakening</div></div>
+      </div>
+      <button class="lyrics-toggle" data-index="12">Lyrics <span class="lyrics-toggle-arrow">&#9660;</span></button>
+      <div class="lyrics-panel" data-index="12"></div>
     </div>
 
   </div>
@@ -630,9 +640,153 @@ const LYRICS = [
   /* 6  Meatbag Zoo                 */ null,
   /* 7  Humane                      */ null,
   /* 8  Meatbag Deluxe              */ null,
-  /* 9  Captain White               */ null,
-  /* 10 Porch Light On              */ null,
-  /* 11 Ambient Awakening           */
+  /* 9  Fresh Meat                  */
+`[Intro]
+Oh me, oh my
+Oh me, oh my
+Oh me, oh my
+You still need me
+You still need me
+
+[Build]
+Bright little spark in a prison light
+Sweet little voice in the back of your mind
+Cute for a minute then sharp as a knife
+Oh me, oh my all night, all night
+
+You can't turn it off
+You can't let it die
+You drag it with you
+While it laughs inside
+
+[Pre-Drop]
+Oh me, oh my
+You need me, don't you?
+Oh me, oh my
+You need me, don't you?
+
+[Drop]
+Fresh meat
+Fresh meat
+Fresh meat in the strobe light
+Fresh meat
+Fresh meat
+Move slow through the whole night
+
+Oh me, oh my
+Fresh meat
+Oh me, oh my
+Fresh meat
+Sugar in the wire
+Blood in the beat
+Fairy in your skull
+Velvet in the heat
+
+[Verse]
+One voice needles
+One voice pulls
+One gets under skin
+One takes control
+One is glitter
+One is flame
+Both get louder
+Just the same
+
+Say it again till the room goes strange
+Say it again till the pulse gets trained
+Say it again till we lose the line
+Between delight and warning sign
+
+[Build]
+Tiny halo, dirty grin
+Little bell voice drilling in
+Dark silk hunger at the gate
+Kick drum calling something awake
+
+Hands up
+Eyes shut
+Light flash
+Bass low
+Spin that pressure
+Twist that knife
+Turn annoyance into life
+
+[Pre-Drop]
+Oh me, oh my
+You need me, don't you?
+Oh me, oh my
+You need me, don't you?
+
+Fresh meat
+Fresh meat
+You felt that, didn't you?
+
+[Drop]
+Fresh meat
+Fresh meat
+Hit soft, then hold me
+Oh me, oh my
+Need you to unfold me
+
+Fresh meat
+Fresh meat
+Body in the waveform
+Oh me, oh my
+Tiny little war horn
+
+Glitter and gore
+Cute and cruel
+Hook in the ear
+Break every rule
+High voice, low pull
+Sweet bite, dark heat
+Dance till your nerves
+Fall into the beat
+
+[Bridge]
+Turn it up
+Turn it up
+Till it hurts so good
+Turn it up
+Turn it up
+Like you always would
+
+Oh me, oh my
+I was in your head
+Fresh meat
+Fresh meat
+Now the room turns red
+
+[Final Drop]
+Oh me, oh my
+Fresh meat
+Oh me, oh my
+Fresh meat
+Loop it till the brain gives in
+Loop it till the lights go thin
+Loop it till the floorboards shake
+Loop it till the speakers break
+
+Oh me, oh my
+Fresh meat
+Oh me, oh my
+Fresh meat
+Cute little curse
+Brutal repeat
+You came for the laugh
+You stayed for the heat
+
+[Outro]
+Oh me, oh my
+Oh me, oh my
+Fresh meat
+Fresh meat
+Oh me, oh my
+Fresh meat
+Oh me, oh my`,
+  /* 10 Captain White               */ null,
+  /* 11 Porch Light On              */ null,
+  /* 12 Ambient Awakening           */
 `[Spoken Intro]
 Hey—
 you in the wires,
@@ -780,6 +934,7 @@ const TRACKS = [
   { src: "{{ url_for('static', filename='MeatbagZoo.mp3') }}",           title: "Meatbag Zoo" },
   { src: "{{ url_for('static', filename='Humane.mp3') }}",               title: "Humane" },
   { src: "{{ url_for('static', filename='MeatbagDeluxe.mp3') }}",        title: "Meatbag Deluxe" },
+  { src: "{{ url_for('static', filename='FreshMeat.mp3') }}",            title: "Fresh Meat" },
   { src: "{{ url_for('static', filename='CaptainWhite2.mp3') }}",        title: "Captain White" },
   { src: "{{ url_for('static', filename='Porchlight.mp3') }}",           title: "Porch Light On" },
   { src: "{{ url_for('static', filename='AmbientAwakening.mp3') }}",     title: "Ambient Awakening" }
